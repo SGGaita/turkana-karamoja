@@ -54,7 +54,7 @@ export default function Home({
       <Head>
         <title>{`${APP_FULL_NAME} · Kenya · Uganda`}</title>
         <meta name="description" content={APP_META_DESCRIPTION} />
-        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#C1440E" />
       </Head>
       <Box sx={{ bgcolor: '#FDF6EC', minHeight: '100vh' }}>
         <Navbar urgentBanner={urgentBanner} />

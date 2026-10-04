@@ -30,7 +30,8 @@ const nextConfig = {
 
 const withPWA = require('@ducanh2912/next-pwa').default({
   dest: 'public',
-  disable: process.env.NODE_ENV === 'development',
+  // PWA is off in `next dev` unless NEXT_PUBLIC_PWA_DEV=true (set it in .env.local to test install/offline locally).
+  disable: process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_PWA_DEV !== 'true',
   register: true,
   workboxOptions: {
     importScripts: ['/push-handler.js'],

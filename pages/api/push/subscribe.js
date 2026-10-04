@@ -1,22 +1,4 @@
-import fs from 'fs';
-import path from 'path';
-
-const DATA_DIR = path.join(process.cwd(), 'data');
-const FILE = path.join(DATA_DIR, 'push-subscriptions.json');
-
-function readSubs() {
-  try {
-    if (!fs.existsSync(FILE)) return [];
-    return JSON.parse(fs.readFileSync(FILE, 'utf8'));
-  } catch {
-    return [];
-  }
-}
-
-function writeSubs(subs) {
-  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-  fs.writeFileSync(FILE, JSON.stringify(subs, null, 2));
-}
+import { isValidSubscription, saveSubscription } from '../../../lib/push-store';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -25,16 +7,15 @@ export default async function handler(req, res) {
   }
 
   const sub = req.body;
-  if (!sub?.endpoint) {
+  if (!isValidSubscription(sub)) {
     return res.status(400).json({ error: 'Invalid subscription' });
   }
 
-  const subs = readSubs();
-  const exists = subs.some((s) => s.endpoint === sub.endpoint);
-  if (!exists) {
-    subs.push(sub);
-    writeSubs(subs);
+  try {
+    const result = await saveSubscription(sub, String(req.headers['user-agent'] || '').slice(0, 255));
+    return res.status(201).json({ ok: true, count: result.count });
+  } catch (err) {
+    console.error('[push/subscribe]', err.message);
+    return res.status(502).json({ error: 'Could not save subscription' });
   }
-
-  return res.status(201).json({ ok: true, count: subs.length });
 }

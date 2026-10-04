@@ -110,7 +110,6 @@ export default function DashboardShell({
       <Head>
         <title>{`${title} | ${APP_PAGE_TITLE_SUFFIX}`}</title>
         <meta name="description" content="Kenya · Uganda · Cross-Border Climate Intelligence Platform" />
-        <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#3D2B1F" />
       </Head>
 

@@ -15,7 +15,6 @@ export default function Layout({ children, title = APP_FULL_NAME, description })
         <meta property="og:title" content={`${title} | ${APP_PAGE_TITLE_SUFFIX}`} />
         <meta property="og:description" content={metaDescription} />
         <meta property="og:type" content="article" />
-        <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#C1440E" />
       </Head>
       <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: '#FDF6EC' }}>

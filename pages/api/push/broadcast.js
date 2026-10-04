@@ -1,22 +1,17 @@
-import fs from 'fs';
-import path from 'path';
+import crypto from 'crypto';
 import webpush from 'web-push';
+import { listSubscriptions, pruneSubscriptions } from '../../../lib/push-store';
 
-const DATA_DIR = path.join(process.cwd(), 'data');
-const FILE = path.join(DATA_DIR, 'push-subscriptions.json');
+// Give Vercel enough time to fan out to many subscribers.
+export const config = { maxDuration: 60 };
 
-function readSubs() {
-  try {
-    if (!fs.existsSync(FILE)) return [];
-    return JSON.parse(fs.readFileSync(FILE, 'utf8'));
-  } catch {
-    return [];
-  }
-}
+const BATCH_SIZE = 100;
 
-function writeSubs(subs) {
-  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-  fs.writeFileSync(FILE, JSON.stringify(subs, null, 2));
+function secretMatches(given, expected) {
+  if (!given || !expected) return false;
+  const a = Buffer.from(String(given));
+  const b = Buffer.from(String(expected));
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
 export default async function handler(req, res) {
@@ -25,8 +20,7 @@ export default async function handler(req, res) {
     return res.status(405).end();
   }
 
-  const secret = process.env.PUSH_BROADCAST_SECRET;
-  if (!secret || req.headers['x-push-secret'] !== secret) {
+  if (!secretMatches(req.headers['x-push-secret'], process.env.PUSH_BROADCAST_SECRET)) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
@@ -40,31 +34,47 @@ export default async function handler(req, res) {
 
   webpush.setVapidDetails(subject, publicKey, privateKey);
 
-  const { title = 'New climate alert', body = 'A new advisory has been published.', url = '/early-warnings' } = req.body || {};
+  const {
+    title = 'New climate alert',
+    body = 'A new advisory has been published.',
+    url = '/early-warnings',
+  } = req.body || {};
   const payload = JSON.stringify({ title, body, url });
 
-  const subs = readSubs();
-  const results = await Promise.allSettled(
-    subs.map((sub) =>
-      webpush.sendNotification(sub, payload).catch(async (err) => {
-        if (err.statusCode === 410 || err.statusCode === 404) {
-          return { expired: sub.endpoint };
-        }
-        throw err;
-      })
-    )
-  );
-
-  const expired = results
-    .filter((r) => r.status === 'fulfilled' && r.value?.expired)
-    .map((r) => r.value.expired);
-
-  if (expired.length) {
-    const remaining = subs.filter((s) => !expired.includes(s.endpoint));
-    writeSubs(remaining);
+  let subs;
+  try {
+    subs = await listSubscriptions();
+  } catch (err) {
+    console.error('[push/broadcast] could not load subscriptions:', err.message);
+    return res.status(502).json({ error: 'Could not load subscriptions from WordPress' });
   }
 
-  const sent = results.filter((r) => r.status === 'fulfilled' && !r.value?.expired).length;
+  let sent = 0;
+  let failed = 0;
+  const expired = [];
 
-  return res.status(200).json({ ok: true, sent, total: subs.length });
+  for (let i = 0; i < subs.length; i += BATCH_SIZE) {
+    const batch = subs.slice(i, i + BATCH_SIZE);
+    const results = await Promise.allSettled(
+      batch.map((sub) => webpush.sendNotification(sub, payload, { TTL: 60 * 60 * 24 }))
+    );
+    results.forEach((r, idx) => {
+      if (r.status === 'fulfilled') {
+        sent += 1;
+      } else if (r.reason?.statusCode === 404 || r.reason?.statusCode === 410) {
+        expired.push(batch[idx].endpoint);
+      } else {
+        failed += 1;
+        console.warn('[push/broadcast] send failed:', r.reason?.statusCode, r.reason?.body || r.reason?.message);
+      }
+    });
+  }
+
+  if (expired.length) {
+    await pruneSubscriptions(expired).catch((err) =>
+      console.warn('[push/broadcast] prune failed:', err.message)
+    );
+  }
+
+  return res.status(200).json({ ok: true, sent, failed, expired: expired.length, total: subs.length });
 }

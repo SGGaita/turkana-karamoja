@@ -3,10 +3,12 @@ import { Box, Button, Snackbar, Alert } from '@mui/material';
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import NotificationsOffIcon from '@mui/icons-material/NotificationsOff';
 import BlockIcon from '@mui/icons-material/Block';
+import LockOpenIcon from '@mui/icons-material/LockOpen';
 import {
   isPushSupported,
   getNotificationPermission,
   getExistingSubscription,
+  needsIosHomeScreenInstall,
   subscribeToPush,
   unsubscribeFromPush,
 } from '../lib/push-client';
@@ -14,11 +16,15 @@ import {
 function permissionMessage(code) {
   switch (code) {
     case 'PERMISSION_BLOCKED':
-      return 'Notifications are blocked for this site. Click the lock icon in your browser address bar, allow notifications, then try again.';
+      return 'Notifications are blocked for this site. Desktop: click the icon left of the address bar → Site settings → Notifications → Allow, then reload. Android Chrome: ⋮ → Settings → Site settings → Notifications → allow this site.';
     case 'PERMISSION_DENIED':
       return 'Please click Allow when your browser asks to send notifications.';
     case 'INSECURE':
-      return 'Notifications only work on HTTPS or localhost. Open the site via http://localhost:3000 instead of an IP address.';
+      return 'Notifications need a secure connection. This page was opened over plain http (e.g. an IP address), so the browser blocks them automatically. Use the https:// site, or http://localhost:3000 when developing.';
+    case 'IOS_INSTALL':
+      return 'On iPhone/iPad, tap Share → Add to Home Screen, open Karamoja from your Home Screen, then turn on alerts there.';
+    case 'UNSUPPORTED':
+      return 'This browser does not support push notifications. Try Chrome, Edge or Firefox.';
     default:
       return 'Could not enable notifications.';
   }
@@ -56,12 +62,16 @@ export default function PushSubscribeButton({ compact = false }) {
       setMsg({ type: 'warning', text: 'Push notifications are not configured yet.' });
       return;
     }
+    if (needsIosHomeScreenInstall()) {
+      setMsg({ type: 'info', text: permissionMessage('IOS_INSTALL') });
+      return;
+    }
     if (typeof window !== 'undefined' && !window.isSecureContext) {
       setMsg({ type: 'warning', text: permissionMessage('INSECURE') });
       return;
     }
     if (!isPushSupported()) {
-      setMsg({ type: 'warning', text: 'Push is not supported in this browser.' });
+      setMsg({ type: 'warning', text: permissionMessage('UNSUPPORTED') });
       return;
     }
 
@@ -115,14 +125,17 @@ export default function PushSubscribeButton({ compact = false }) {
     return <Box aria-hidden sx={PLACEHOLDER_SX(compact)} />;
   }
 
+  const insecure = permission === 'insecure';
   const blocked = permission === 'denied';
   const label = loading
     ? 'Please wait…'
     : subscribed
       ? 'Alerts enabled'
-      : blocked
-        ? 'Notifications blocked'
-        : 'Get alert notifications';
+      : insecure
+        ? 'Alerts need HTTPS'
+        : blocked
+          ? 'Notifications blocked'
+          : 'Get alert notifications';
 
   return (
     <>
@@ -132,9 +145,11 @@ export default function PushSubscribeButton({ compact = false }) {
         startIcon={
           subscribed
             ? <NotificationsActiveIcon />
-            : blocked
-              ? <BlockIcon />
-              : <NotificationsOffIcon />
+            : insecure
+              ? <LockOpenIcon />
+              : blocked
+                ? <BlockIcon />
+                : <NotificationsOffIcon />
         }
         onClick={handleClick}
         disabled={loading}
@@ -154,7 +169,7 @@ export default function PushSubscribeButton({ compact = false }) {
       </Button>
       <Snackbar
         open={Boolean(msg)}
-        autoHideDuration={blocked ? 10000 : 6000}
+        autoHideDuration={blocked || insecure ? 12000 : 6000}
         onClose={() => setMsg(null)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
