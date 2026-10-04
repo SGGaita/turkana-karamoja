@@ -1,7 +1,7 @@
 import { Box, Typography, Breadcrumbs } from '@mui/material';
 import Link from 'next/link';
 
-export default function PageHero({ title, subtitle, image, breadcrumbs = [] }) {
+export default function PageHero({ title, subtitle, image, breadcrumbs = [], contentMaxWidth = 1200 }) {
   return (
     <Box
       sx={{
@@ -45,7 +45,7 @@ export default function PageHero({ title, subtitle, image, breadcrumbs = [] }) {
         sx={{
           position: 'relative',
           zIndex: 1,
-          maxWidth: 1200,
+          maxWidth: contentMaxWidth,
           mx: 'auto',
           width: '100%',
           px: { xs: 2, md: 4 },

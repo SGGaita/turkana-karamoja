@@ -24,7 +24,7 @@ export default function AlertBanner({ banner }) {
   return (
     <Box
       component={Link}
-      href="/early-warnings"
+      href={banner.href || '/early-warnings'}
       sx={{
         display: 'flex',
         alignItems: 'center',
@@ -70,9 +70,3 @@ export default function AlertBanner({ banner }) {
     </Box>
   );
 }
-
-export const defaultUrgentBanner = {
-  level: 'RED',
-  title: 'Flood watch near rivers',
-  desc: 'Heavy rain is expected. If you live close to Turkwel River or low ground, move family and animals to safer, higher ground.',
-};

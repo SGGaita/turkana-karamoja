@@ -5,7 +5,7 @@ import Link from 'next/link';
 const portals = [
   { icon: '🌦️', bg: 'linear-gradient(135deg,#E0EFF8,#C8E0F0)', title: 'Meteorological Authorities', desc: 'KMD & UMA publish official forecasts, climate outlooks and seasonal updates.', href: '/organizations' },
   { icon: '🚨', bg: 'linear-gradient(135deg,#FFE8E8,#FFCECE)', title: 'Disaster Management', desc: 'NDMA, OPM, and county disaster units issue emergency alerts and response updates.', href: '/organizations' },
-  { icon: '🏛️', bg: 'linear-gradient(135deg,#E8F5E0,#CCEABD)', title: 'County / Regional Government', desc: 'Turkana County Gov and Karamoja Sub-Region share policy documents and M&E.', href: '/organizations' },
+  { icon: '🏛️', bg: 'linear-gradient(135deg,#E8F5E0,#CCEABD)', title: 'County / Regional Government', desc: 'Turkana, North Pokot, Moroto, Amudat and Napak authorities share policy documents and M&E.', href: '/organizations' },
   { icon: '🤝', bg: 'linear-gradient(135deg,#F5E8FF,#E8CCFF)', title: 'NGOs, UN & Partners', desc: 'Registered humanitarian organisations share 4Ws, needs assessments and coordination docs.', href: '/organizations' },
 ];
 

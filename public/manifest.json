@@ -1,7 +1,7 @@
 {
-  "name": "Turkana–Karamoja Climate Hub",
-  "short_name": "TK Climate",
-  "description": "Cross-border climate intelligence and early warning platform for Turkana and Karamoja",
+  "name": "Karamoja Climate Change Knowledge and Information",
+  "short_name": "Karamoja",
+  "description": "Climate change knowledge and information platform for Kenya and Uganda",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FDF6EC",

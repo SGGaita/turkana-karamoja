@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "Frontend (Next.js)",
+			"path": "."
+		},
+		{
+			"name": "Backend (WordPress)",
+			"path": "C:\\xampp\\htdocs\\karamoja-cluster-fe"
+		}
+	],
+	"settings": {}
+}

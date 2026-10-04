@@ -10,21 +10,26 @@ import {
   List,
   ListItem,
   ListItemText,
+  Divider,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useSiteHeader } from '../contexts/SiteHeaderContext';
 import AlertBanner from './AlertBanner';
 import LanguageSelector from './LanguageSelector';
+import PushSubscribeButton from './PushSubscribeButton';
+import { resolveTopbarLink } from '../lib/topbar-links';
 
 export default function Navbar({ urgentBanner = null }) {
-  const { branding, topbar, navLinks, cta } = useSiteHeader();
+  const { branding, topbar, navLinks } = useSiteHeader();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'), { noSsr: true });
   const router = useRouter();
 
   return (
@@ -38,47 +43,36 @@ export default function Navbar({ urgentBanner = null }) {
       >
       <Box
         sx={{
-          bgcolor: '#3D2B1F',
-          color: '#F0D9B0',
+          bgcolor: '#FFFFFF',
+          color: '#3D2B1F',
           px: { xs: 2, md: 4 },
           py: '6px',
           display: { xs: 'none', sm: 'flex' },
-          justifyContent: 'space-between',
+          justifyContent: 'flex-end',
           alignItems: 'center',
           fontFamily: '"Montserrat", sans-serif',
-          fontSize: '0.7rem',
+          fontSize: '0.75rem',
           letterSpacing: '0.04em',
+          borderBottom: '1px solid #E8E0D5',
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Box
-            component="span"
-            sx={{
-              width: 7,
-              height: 7,
-              bgcolor: '#2E8B57',
-              borderRadius: '50%',
-              display: 'inline-block',
-              animation: 'pulse 1.8s infinite',
-              '@keyframes pulse': {
-                '0%, 100%': { opacity: 1 },
-                '50%': { opacity: 0.3 },
-              },
-            }}
-          />
-          {topbar.statusText}
-        </Box>
         <Box sx={{ display: 'flex', gap: 3, alignItems: 'center' }}>
           <LanguageSelector />
           {topbar.links.map((link) => {
-            const internal = link.href.startsWith('/');
+            const href = resolveTopbarLink(link.label, link.href);
+            const internal = href.startsWith('/');
             const Comp = internal ? Link : 'a';
             return (
               <Box
                 key={link.label}
                 component={Comp}
-                href={link.href}
-                sx={{ color: '#D4A96A', textDecoration: 'none', fontSize: '0.7rem' }}
+                href={href}
+                sx={{
+                  color: '#3D2B1F',
+                  textDecoration: 'none',
+                  fontSize: '0.75rem',
+                  '&:hover': { color: '#C1440E' },
+                }}
               >
                 {link.label}
               </Box>
@@ -91,12 +85,12 @@ export default function Navbar({ urgentBanner = null }) {
         position="static"
         elevation={0}
         sx={{
-          bgcolor: 'rgba(61, 43, 31, 0.97)',
-          backdropFilter: 'blur(8px)',
+          bgcolor: '#FFFFFF',
+          boxShadow: '0 2px 10px rgba(61,43,31,0.08)',
           borderBottom: urgentBanner ? 'none' : '2px solid #C1440E',
         }}
       >
-        <Toolbar sx={{ px: { xs: 2, md: 4 }, py: 0.5, minHeight: '64px !important' }}>
+        <Toolbar sx={{ px: { xs: 2, md: 4 }, py: 1, minHeight: { xs: '64px !important', md: '96px !important' } }}>
           <Box
             component={Link}
             href="/"
@@ -111,23 +105,28 @@ export default function Navbar({ urgentBanner = null }) {
             {branding.logoUrl && (
               <Box
                 sx={{
-                  width: 42,
-                  height: 42,
-                  borderRadius: 2,
-                  overflow: 'hidden',
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                  height: { xs: 56, md: 76 },
+                  display: 'flex',
+                  alignItems: 'center',
                 }}
               >
-                <Image src={branding.logoUrl} alt="" width={42} height={42} style={{ objectFit: 'contain' }} unoptimized />
+                <Image
+                  src={branding.logoUrl}
+                  alt=""
+                  width={300}
+                  height={76}
+                  style={{ width: 'auto', height: '100%', objectFit: 'contain' }}
+                  unoptimized
+                />
               </Box>
             )}
-            <Box>
+            <Box sx={{ display: { xs: 'none', md: 'block' } }}>
               <Typography
                 sx={{
                   fontFamily: '"Montserrat", sans-serif',
                   fontWeight: 700,
-                  fontSize: { xs: '0.9rem', md: '1.05rem' },
-                  color: 'white',
+                  fontSize: '1.05rem',
+                  color: '#3D2B1F',
                   lineHeight: 1.2,
                 }}
               >
@@ -136,9 +135,12 @@ export default function Navbar({ urgentBanner = null }) {
               <Typography
                 sx={{
                   fontSize: '0.6rem',
-                  color: '#D4A96A',
-                  letterSpacing: '0.08em',
+                  color: '#8B6A4A',
+                  letterSpacing: '0.06em',
                   textTransform: 'uppercase',
+                  lineHeight: 1.35,
+                  maxWidth: { xs: 200, md: 280 },
+                  whiteSpace: 'normal',
                 }}
               >
                 {branding.tagline}
@@ -158,36 +160,31 @@ export default function Navbar({ urgentBanner = null }) {
                     component={Link}
                     href={link.href}
                     sx={{
-                      color: isActive ? 'white' : '#D4A96A',
-                      fontSize: '0.78rem',
+                      color: isActive ? '#C1440E' : '#3D2B1F',
+                      fontSize: '0.85rem',
                       fontWeight: isActive ? 700 : 500,
                       px: 1.2,
                       py: 0.8,
                       borderBottom: isActive ? '2px solid #C1440E' : '2px solid transparent',
                       borderRadius: 0,
-                      '&:hover': { color: 'white', bgcolor: 'rgba(255,255,255,0.08)' },
+                      '&:hover': { color: '#C1440E', bgcolor: 'rgba(193,68,14,0.06)' },
                     }}
                   >
                     {link.label}
                   </Button>
                 );
               })}
-              <Button
-                component={Link}
-                href={cta.href}
-                variant="contained"
-                size="small"
-                sx={{ ml: 1, bgcolor: '#C1440E', '&:hover': { bgcolor: '#E8622A' }, fontSize: '0.75rem' }}
-              >
-                {cta.label}
-              </Button>
             </Box>
           )}
 
           {isMobile && (
-            <Button onClick={() => setDrawerOpen(true)} sx={{ color: '#D4A96A', minWidth: 'auto', px: 1 }} aria-label="open menu">
-              Menu
-            </Button>
+            <IconButton
+              onClick={() => setDrawerOpen(true)}
+              sx={{ color: '#3D2B1F' }}
+              aria-label="Open menu"
+            >
+              <MenuIcon />
+            </IconButton>
           )}
         </Toolbar>
       </AppBar>
@@ -195,24 +192,78 @@ export default function Navbar({ urgentBanner = null }) {
       <AlertBanner banner={urgentBanner} />
       </Box>
 
-      <Drawer anchor="right" open={drawerOpen} onClose={() => setDrawerOpen(false)}>
-        <Box sx={{ width: 260, bgcolor: '#3D2B1F', minHeight: '100vh', pt: 2 }}>
+      <Drawer
+        anchor="right"
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        ModalProps={{ keepMounted: true }}
+        sx={{ display: { xs: 'block', md: 'none' } }}
+      >
+        <Box sx={{ width: 260, bgcolor: '#FFFFFF', minHeight: '100vh' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
+            <IconButton onClick={() => setDrawerOpen(false)} aria-label="Close menu" sx={{ color: '#3D2B1F' }}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
           <List>
-            {navLinks.map((link) => (
-              <ListItem
-                key={link.label}
-                component={Link}
-                href={link.href}
-                onClick={() => setDrawerOpen(false)}
-                sx={{ color: '#F0D9B0', '&:hover': { bgcolor: 'rgba(255,255,255,0.08)' }, textDecoration: 'none' }}
-              >
-                <ListItemText primary={link.label} primaryTypographyProps={{ fontSize: '0.9rem' }} />
-              </ListItem>
-            ))}
-            <ListItem component={Link} href={cta.href} onClick={() => setDrawerOpen(false)} sx={{ color: '#C1440E' }}>
-              <ListItemText primary={cta.label} />
-            </ListItem>
+            {navLinks.map((link) => {
+              const isActive = router.pathname === link.href;
+              return (
+                <ListItem
+                  key={link.label}
+                  component={Link}
+                  href={link.href}
+                  onClick={() => setDrawerOpen(false)}
+                  sx={{
+                    color: isActive ? '#C1440E' : '#3D2B1F',
+                    fontWeight: isActive ? 700 : 400,
+                    borderLeft: isActive ? '3px solid #C1440E' : '3px solid transparent',
+                    '&:hover': { bgcolor: 'rgba(193,68,14,0.06)', color: '#C1440E' },
+                    textDecoration: 'none',
+                  }}
+                >
+                  <ListItemText primary={link.label} primaryTypographyProps={{ fontSize: '1rem' }} />
+                </ListItem>
+              );
+            })}
           </List>
+
+          <Divider sx={{ borderColor: '#E8E0D5', my: 1 }} />
+
+          <List>
+            {topbar.links.map((link) => {
+              const href = resolveTopbarLink(link.label, link.href);
+              const internal = href.startsWith('/');
+              const isActive = internal && router.pathname === href.split('#')[0];
+              const Comp = internal ? Link : 'a';
+              return (
+                <ListItem
+                  key={link.label}
+                  component={Comp}
+                  href={href}
+                  {...(!internal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                  onClick={() => setDrawerOpen(false)}
+                  sx={{
+                    color: isActive ? '#C1440E' : '#3D2B1F',
+                    fontWeight: isActive ? 700 : 400,
+                    borderLeft: isActive ? '3px solid #C1440E' : '3px solid transparent',
+                    '&:hover': { bgcolor: 'rgba(193,68,14,0.06)', color: '#C1440E' },
+                    textDecoration: 'none',
+                  }}
+                >
+                  <ListItemText primary={link.label} primaryTypographyProps={{ fontSize: '0.9rem' }} />
+                </ListItem>
+              );
+            })}
+          </List>
+
+          <Box sx={{ px: 2, py: 1.5 }}>
+            <PushSubscribeButton compact />
+          </Box>
+
+          <Box sx={{ px: 2, py: 1.5, borderTop: '1px solid #E8E0D5' }}>
+            <LanguageSelector variant="drawer" />
+          </Box>
         </Box>
       </Drawer>
     </>

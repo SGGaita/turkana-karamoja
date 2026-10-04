@@ -44,15 +44,25 @@ Standard **Posts** + **Tags** → news / bulletins (`/wp/v2/posts`).
 | `valid_until` | Text | Display string OK |
 
 ### `tk_report`
-| Field | Type |
-|-------|------|
-| `tag` | Text |
-| `partner_orgs` | Text (comma-separated) |
-| `file_url` | URL |
-| `file_size` | Text |
-| `publication_date` | Date |
-| `is_new` | True/false |
-| `is_updated` | True/false |
+| Field | Type | Notes |
+|-------|------|-------|
+| `tag` | Text | Primary/first category — kept for backward compatibility |
+| `categories` | Repeater or Text array | Full multi-select category list from the Submit Report form |
+| `description` | Textarea | **Required for the description to save at all.** The frontend always sends this; without a matching ACF field here, ACF-to-REST-API silently drops it and the report shows no description anywhere. |
+| `keywords` | Repeater or Text array | |
+| `report_files` | Repeater | Multi-language file attachments |
+| `organization_id` | Text/Number | Stamped server-side from the authenticated user, not client input |
+| `partner_orgs` | Text (comma-separated) | |
+| `file_url` | URL | |
+| `file_size` | Text | |
+| `publication_date` | Date | |
+| `is_new` | True/false | |
+| `is_updated` | True/false | |
+
+Also confirm the `tk_report` custom post type itself was registered (via Custom Post Type UI or
+code) with **both "Editor" and "Excerpt" support enabled** — the plugin's own fallback
+registration includes both, but if `tk_report` was registered separately on this site without
+"Excerpt" checked, `post_excerpt` (a secondary fallback for the description) won't save either.
 
 ### `tk_initiative`
 | Field | Type |

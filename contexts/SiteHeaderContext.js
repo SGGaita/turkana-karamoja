@@ -1,8 +1,5 @@
-import { createContext, useContext } from 'react';
-import { fallbackSiteHeader } from '../lib/fallback-data';
-
-export const SiteHeaderContext = createContext(fallbackSiteHeader);
+import { useLocalizedSiteHeader } from './LanguageContext';
 
 export function useSiteHeader() {
-  return useContext(SiteHeaderContext);
+  return useLocalizedSiteHeader();
 }

@@ -1,88 +1,106 @@
 import Head from 'next/head';
+import { APP_FULL_NAME, APP_META_DESCRIPTION } from '../lib/branding';
 import Box from '@mui/material/Box';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
-import { defaultUrgentBanner } from '../components/AlertBanner';
 import { toStripAlert } from '../lib/wp-mappers';
-import ForecastStrip from '../components/ForecastStrip';
 import ClimateHubSection from '../components/ClimateHubSection';
 import MapSection from '../components/MapSection';
 import WarningsStrip from '../components/WarningsStrip';
 import InitiativesSection from '../components/InitiativesSection';
-import CommunitySection from '../components/CommunitySection';
-import NewsSection from '../components/NewsSection';
+import GetInvolvedSection from '../components/GetInvolvedSection';
 import Footer from '../components/Footer';
 import {
   getAlerts,
+  getMapAdvisories,
   getHero,
-  getInitiatives,
-  getProgrammes,
-  getNewsPosts,
+  getCommunityInitiatives,
 } from '../lib/wordpress';
+import { toMapAdvisoryMarker } from '../lib/wp-mappers';
+import { useLocalizedHomeSections } from '../contexts/LanguageContext';
+
+function HomeMapSection({ mapAdvisories, apiStale }) {
+  const homeSections = useLocalizedHomeSections();
+  const mapCopy = homeSections.map || {};
+  return (
+    <MapSection
+      mapAdvisories={mapAdvisories}
+      apiStale={apiStale}
+      eyebrow={mapCopy.eyebrow}
+      title={mapCopy.title}
+      subtitle={mapCopy.subtitle}
+    />
+  );
+}
 
 export default function Home({
   alerts,
-  hero,
+  mapAdvisories,
   initiatives,
-  programmes,
-  news,
   apiStale,
 }) {
-  const urgentBanner = alerts.length
+  const topAlert = (alerts || []).find((a) => a.level === 'RED' || a.level === 'ORANGE') || null;
+  const urgentBanner = topAlert
     ? {
-        level: alerts[0].level,
-        title: alerts[0].title,
-        desc: toStripAlert(alerts[0]).desc,
+        level: topAlert.level,
+        title: topAlert.title,
+        desc: toStripAlert(topAlert).desc,
+        href: toStripAlert(topAlert).href,
       }
-    : defaultUrgentBanner;
+    : null;
 
   return (
     <>
       <Head>
-        <title>Turkana–Karamoja Climate Hub · Kenya · Uganda</title>
-        <meta name="description" content="Cross-border climate intelligence platform serving 2.4 million people in Turkana and Karamoja" />
+        <title>{`${APP_FULL_NAME} · Kenya · Uganda`}</title>
+        <meta name="description" content={APP_META_DESCRIPTION} />
         <link rel="manifest" href="/manifest.json" />
       </Head>
       <Box sx={{ bgcolor: '#FDF6EC', minHeight: '100vh' }}>
         <Navbar urgentBanner={urgentBanner} />
-        <Hero hero={hero} />
-        <ForecastStrip />
+        <Hero />
         <ClimateHubSection />
-        <MapSection />
-        <WarningsStrip alerts={alerts} apiStale={apiStale} />
+        <HomeMapSection mapAdvisories={mapAdvisories} apiStale={apiStale} />
+        {alerts?.length > 0 && <WarningsStrip alerts={alerts} apiStale={apiStale} />}
         <InitiativesSection initiatives={initiatives} />
-        <CommunitySection programmes={programmes} />
-        <NewsSection news={news} />
+        <GetInvolvedSection />
         <Footer />
       </Box>
     </>
   );
 }
 
+
 export async function getStaticProps() {
-  const [alertsRes, heroRes, initiativesRes, programmesRes, newsRes] = await Promise.all([
+  const [alertsRes, mapAdvisoriesRes, heroEnRes, heroSwRes, initiativesRes] = await Promise.all([
     getAlerts(),
-    getHero(),
-    getInitiatives(),
-    getProgrammes(),
-    getNewsPosts(),
+    getMapAdvisories(),
+    getHero('en'),
+    getHero('sw'),
+    getCommunityInitiatives(),
   ]);
 
   const apiStale =
     alertsRes.apiStale ||
-    heroRes.apiStale ||
-    initiativesRes.apiStale ||
-    programmesRes.apiStale ||
-    newsRes.apiStale;
+    mapAdvisoriesRes.apiStale ||
+    heroEnRes.apiStale ||
+    heroSwRes.apiStale ||
+    initiativesRes.apiStale;
+
+  const mapAdvisories = (mapAdvisoriesRes.data || [])
+    .map((alert, index) => toMapAdvisoryMarker(alert, index))
+    .filter(Boolean);
 
   return {
     props: {
       alerts: alertsRes.data,
-      hero: heroRes.data,
+      mapAdvisories,
       initiatives: initiativesRes.data,
-      programmes: programmesRes.data,
-      news: newsRes.data,
       apiStale,
+      heroByLocale: {
+        en: heroEnRes.data,
+        sw: heroSwRes.data,
+      },
     },
     revalidate: 120,
   };

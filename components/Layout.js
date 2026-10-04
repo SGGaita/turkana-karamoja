@@ -3,13 +3,18 @@ import Navbar from './Navbar';
 import Footer from './Footer';
 import OfflineIndicator from './OfflineIndicator';
 import { Box } from '@mui/material';
+import { APP_FULL_NAME, APP_PAGE_TITLE_SUFFIX, APP_META_DESCRIPTION } from '../lib/branding';
 
-export default function Layout({ children, title = 'Turkana–Karamoja Climate Hub' }) {
+export default function Layout({ children, title = APP_FULL_NAME, description }) {
+  const metaDescription = description || APP_META_DESCRIPTION;
   return (
     <>
       <Head>
-        <title>{`${title} | TK Climate Hub`}</title>
-        <meta name="description" content="Kenya · Uganda · Cross-Border Climate Intelligence Platform" />
+        <title>{`${title} | ${APP_PAGE_TITLE_SUFFIX}`}</title>
+        <meta name="description" content={metaDescription} />
+        <meta property="og:title" content={`${title} | ${APP_PAGE_TITLE_SUFFIX}`} />
+        <meta property="og:description" content={metaDescription} />
+        <meta property="og:type" content="article" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#C1440E" />
       </Head>

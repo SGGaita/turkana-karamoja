@@ -3,17 +3,14 @@ import { Box, Button, Menu, MenuItem, Typography } from '@mui/material';
 import LanguageIcon from '@mui/icons-material/Language';
 import CheckIcon from '@mui/icons-material/Check';
 
-const languages = [
-  { code: 'en', name: 'English', nativeName: 'English' },
-  { code: 'sw', name: 'Swahili', nativeName: 'Kiswahili' },
-  { code: 'tu', name: 'Turkana', nativeName: 'Ng\'aturkana' },
-  { code: 'pk', name: 'Pokot', nativeName: 'Pokoot' },
-  { code: 'ng', name: 'Ngakaramojong', nativeName: 'Nga\'Karamojong' },
-];
+import { HUB_LANGUAGES } from '../lib/languages';
+import { useLanguage, SUPPORTED_LOCALES } from '../contexts/LanguageContext';
 
-export default function LanguageSelector() {
+const languages = HUB_LANGUAGES;
+
+export default function LanguageSelector({ variant = 'default' }) {
+  const { locale, setLocale } = useLanguage();
   const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedLanguage, setSelectedLanguage] = useState('en');
   const open = Boolean(anchorEl);
 
   const handleClick = (event) => {
@@ -25,26 +22,33 @@ export default function LanguageSelector() {
   };
 
   const handleLanguageSelect = (langCode) => {
-    setSelectedLanguage(langCode);
     handleClose();
-    // TODO: Implement actual language switching logic
-    console.log('Language selected:', langCode);
+    if (SUPPORTED_LOCALES.includes(langCode)) {
+      setLocale(langCode);
+    }
   };
 
-  const currentLanguage = languages.find(lang => lang.code === selectedLanguage);
+  const currentLanguage = languages.find((lang) => lang.code === locale) || languages[0];
+  const isDrawer = variant === 'drawer';
 
   return (
     <Box>
       <Button
         onClick={handleClick}
         startIcon={<LanguageIcon />}
+        fullWidth={isDrawer}
         sx={{
-          color: '#9A9A9A',
-          fontSize: '0.75rem',
+          color: isDrawer ? '#3D2B1F' : '#9A9A9A',
+          fontSize: isDrawer ? '0.9rem' : '0.75rem',
           textTransform: 'none',
-          '&:hover': { color: '#D4A96A', bgcolor: 'transparent' },
+          justifyContent: isDrawer ? 'flex-start' : 'center',
+          '&:hover': {
+            color: isDrawer ? '#C1440E' : '#D4A96A',
+            bgcolor: isDrawer ? 'rgba(193,68,14,0.06)' : 'transparent',
+          },
           minWidth: 'auto',
-          px: 1,
+          px: isDrawer ? 1.5 : 1,
+          py: isDrawer ? 1 : undefined,
         }}
       >
         {currentLanguage?.nativeName}
@@ -68,38 +72,38 @@ export default function LanguageSelector() {
             Select Language
           </Typography>
         </Box>
-        {languages.map((lang) => (
-          <MenuItem
-            key={lang.code}
-            onClick={() => handleLanguageSelect(lang.code)}
-            selected={lang.code === selectedLanguage}
-            sx={{
-              py: 1.5,
-              px: 2,
-              '&:hover': { bgcolor: '#FDF6EC' },
-              '&.Mui-selected': { bgcolor: '#FFF0EC', '&:hover': { bgcolor: '#FFE8E0' } },
-            }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-              <Box>
-                <Typography sx={{ fontSize: '0.88rem', fontWeight: 600, color: '#3D2B1F', mb: 0.2 }}>
-                  {lang.nativeName}
-                </Typography>
-                <Typography sx={{ fontSize: '0.7rem', color: '#9A9A9A' }}>
-                  {lang.name}
-                </Typography>
+        {languages.map((lang) => {
+          const isSupported = SUPPORTED_LOCALES.includes(lang.code);
+          return (
+            <MenuItem
+              key={lang.code}
+              onClick={() => handleLanguageSelect(lang.code)}
+              selected={lang.code === locale}
+              disabled={!isSupported}
+              sx={{
+                py: 1.5,
+                px: 2,
+                '&:hover': { bgcolor: '#FDF6EC' },
+                '&.Mui-selected': { bgcolor: '#FFF0EC', '&:hover': { bgcolor: '#FFE8E0' } },
+                '&.Mui-disabled': { opacity: 0.55 },
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                <Box>
+                  <Typography sx={{ fontSize: '0.88rem', fontWeight: 600, color: '#3D2B1F', mb: 0.2 }}>
+                    {lang.nativeName}
+                  </Typography>
+                  <Typography sx={{ fontSize: '0.7rem', color: '#9A9A9A' }}>
+                    {lang.name}
+                  </Typography>
+                </Box>
+                {lang.code === locale && (
+                  <CheckIcon sx={{ fontSize: 18, color: '#C1440E', ml: 2 }} />
+                )}
               </Box>
-              {lang.code === selectedLanguage && (
-                <CheckIcon sx={{ fontSize: 18, color: '#C1440E', ml: 2 }} />
-              )}
-            </Box>
-          </MenuItem>
-        ))}
-        <Box sx={{ px: 2, py: 1.5, borderTop: '1px solid #E8E0D5', bgcolor: '#FDF6EC' }}>
-          <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A', lineHeight: 1.5 }}>
-            Translation feature coming soon. Currently showing English content.
-          </Typography>
-        </Box>
+            </MenuItem>
+          );
+        })}
       </Menu>
     </Box>
   );
