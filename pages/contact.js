@@ -3,6 +3,7 @@ import Layout from '../components/Layout';
 import PageHero from '../components/PageHero';
 import StaleContentBanner from '../components/StaleContentBanner';
 import ContactForm from '../components/ContactForm';
+import TollFreeLines from '../components/TollFreeLines';
 import { RegionalOffices, KeyContacts, SocialLinks } from '../components/ContactDirectory';
 import { getContactPage } from '../lib/wordpress';
 import { APP_NAME } from '../lib/branding';
@@ -93,6 +94,7 @@ export default function Contact({ page, apiStale }) {
                 </Typography>
               ))}
             </Box>
+            <TollFreeLines variant="dark" />
             <Typography sx={{ mt: 3, fontSize: '0.82rem', color: '#9A9A9A', lineHeight: 1.6 }}>
               For life-threatening emergencies, contact your local disaster management office or the
               national emergency hotline — do not rely on this web form alone.

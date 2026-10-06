@@ -11,36 +11,75 @@ if (!defined('ABSPATH')) {
 
 require_once __DIR__ . '/turkana-hub-i18n.php';
 
-define('TK_HUB_CORS_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000');
+/*
+ * Allowed frontend origins (comma-separated, no trailing slash).
+ * Override per environment in wp-config.php, e.g.
+ *   define('TK_HUB_CORS_ORIGINS', 'https://karamoja-cluster-hub.vercel.app,https://yourdomain.org');
+ */
+if (!defined('TK_HUB_CORS_ORIGINS')) {
+    define('TK_HUB_CORS_ORIGINS', implode(',', [
+        'https://karamoja-cluster-hub.vercel.app',
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
+    ]));
+}
+// Also allow Vercel preview deployments of this project (karamoja-cluster-hub-*.vercel.app).
+if (!defined('TK_HUB_CORS_ORIGIN_PATTERN')) {
+    define('TK_HUB_CORS_ORIGIN_PATTERN', '#^https://karamoja-cluster-hub(-[a-z0-9-]+)?\.vercel\.app$#i');
+}
 define('TK_HUB_NEXT_URL', 'http://localhost:3000');
 define('TK_HUB_PUSH_SECRET', 'dba3cec14588fca3ac040833e6727c602e7841a1dd5aa89c5b48b8f92450d37b');
 
-/* ---------- CORS for Next.js dev ---------- */
-add_action('init', function () {
-    $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
-    $allowed = array_map('trim', explode(',', TK_HUB_CORS_ORIGINS));
-    if ($origin && in_array($origin, $allowed, true)) {
-        header('Access-Control-Allow-Origin: ' . $origin);
-        header('Access-Control-Allow-Credentials: true');
-        header('Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE');
-        header('Access-Control-Allow-Headers: Authorization, Content-Type, X-WP-Nonce');
+/* ---------- CORS for the Next.js frontend (all routes, incl. /wp-json/tk/v1/*) ---------- */
+function tk_hub_cors_allowed_origin() {
+    $origin = isset($_SERVER['HTTP_ORIGIN']) ? rtrim($_SERVER['HTTP_ORIGIN'], '/') : '';
+    if ($origin === '') {
+        return '';
     }
-    if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    $allowed = array_filter(array_map(function ($o) { return rtrim(trim($o), '/'); }, explode(',', TK_HUB_CORS_ORIGINS)));
+    if (in_array($origin, $allowed, true)) {
+        return $origin;
+    }
+    if (TK_HUB_CORS_ORIGIN_PATTERN && preg_match(TK_HUB_CORS_ORIGIN_PATTERN, $origin)) {
+        return $origin;
+    }
+    return '';
+}
+
+function tk_hub_send_cors_headers() {
+    $origin = tk_hub_cors_allowed_origin();
+    if ($origin === '' || headers_sent()) {
+        return false;
+    }
+    header('Access-Control-Allow-Origin: ' . $origin);
+    header('Access-Control-Allow-Credentials: true');
+    header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
+    header('Access-Control-Allow-Headers: Authorization, Content-Type, X-WP-Nonce, X-Requested-With, Accept, Accept-Language');
+    header('Access-Control-Expose-Headers: X-WP-Total, X-WP-TotalPages, Link');
+    header('Access-Control-Max-Age: 600');
+    header('Vary: Origin', false);
+    return true;
+}
+
+// Runs as early as possible so preflight (OPTIONS) requests are answered before anything else.
+add_action('init', function () {
+    tk_hub_send_cors_headers();
+    $is_preflight = isset($_SERVER['REQUEST_METHOD'], $_SERVER['HTTP_ORIGIN'], $_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD'])
+        && $_SERVER['REQUEST_METHOD'] === 'OPTIONS';
+    if ($is_preflight) {
         status_header(204);
         exit;
     }
 }, 1);
 
-add_filter('rest_pre_serve_request', function ($value) {
-    $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
-    $allowed = array_map('trim', explode(',', TK_HUB_CORS_ORIGINS));
-    if ($origin && in_array($origin, $allowed, true)) {
-        header('Access-Control-Allow-Origin: ' . $origin);
-        header('Access-Control-Allow-Credentials: true');
-        header('Access-Control-Allow-Headers: Authorization, Content-Type, X-WP-Nonce');
-    }
-    return $value;
-});
+// Replace WordPress core's REST CORS headers with our allow-list (core echoes any origin).
+add_action('rest_api_init', function () {
+    remove_filter('rest_pre_serve_request', 'rest_send_cors_headers');
+    add_filter('rest_pre_serve_request', function ($value) {
+        tk_hub_send_cors_headers();
+        return $value;
+    });
+}, 15);
 
 /* ---------- Custom post types ---------- */
 add_action('init', function () {

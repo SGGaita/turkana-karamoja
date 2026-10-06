@@ -4,6 +4,7 @@ import Layout from '../components/Layout';
 import PageHero from '../components/PageHero';
 import StaleContentBanner from '../components/StaleContentBanner';
 import CommunityInitiativeCard from '../components/CommunityInitiativeCard';
+import TollFreeLines from '../components/TollFreeLines';
 import { getProgrammes, getCommunityInitiatives, getCommunityPage } from '../lib/wordpress';
 import { groupCommunityByCountryRegion } from '../lib/regions';
 
@@ -59,6 +60,8 @@ export default function Community({ programmes, communityInitiatives, communityP
 
       <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, md: 4 }, py: { xs: 4, md: 6 } }}>
         <StaleContentBanner show={apiStale} />
+
+        <TollFreeLines sx={{ mb: 5 }} />
 
         {(clusterWide.length > 0 || groupedOutreach.length > 0) && (
           <Box sx={{ mb: 5 }}>
