@@ -21,6 +21,8 @@ function permissionMessage(code) {
       return 'Please click Allow when your browser asks to send notifications.';
     case 'INSECURE':
       return 'Notifications need a secure connection. This page was opened over plain http (e.g. an IP address), so the browser blocks them automatically. Use the https:// site, or http://localhost:3000 when developing.';
+    case 'SW_TIMEOUT':
+      return 'The app\'s background service could not start. Reload the page and try again.';
     case 'IOS_INSTALL':
       return 'On iPhone/iPad, tap Share → Add to Home Screen, open Karamoja from your Home Screen, then turn on alerts there.';
     case 'UNSUPPORTED':
