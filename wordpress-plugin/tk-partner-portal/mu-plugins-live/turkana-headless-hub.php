@@ -828,7 +828,7 @@ function tk_hub_default_header() {
             ['label' => 'Early Warnings', 'href' => '/early-warnings'],
             ['label' => 'Community', 'href' => '/community'],
             ['label' => 'Reports', 'href' => '/reports'],
-            ['label' => 'Organizations', 'href' => '/organizations'],
+            ['label' => 'Contact Us', 'href' => '/contact'],
             ['label' => 'Partners & Stakeholders', 'href' => '/partners-stakeholders'],
         ],
         'cta' => [
