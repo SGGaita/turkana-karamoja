@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
+import dynamic from 'next/dynamic';
 import {
   Box, Typography, Button, Alert, Chip, Snackbar, Dialog, DialogTitle,
   DialogContent, DialogActions, TextField, ToggleButtonGroup, ToggleButton,
@@ -10,10 +11,20 @@ import CampaignOutlinedIcon from '@mui/icons-material/CampaignOutlined';
 import Layout from '../components/Layout';
 import PageHero from '../components/PageHero';
 import DashboardShell from '../components/DashboardShell';
-import PartnerSubmissionsPanel from '../components/PartnerSubmissionsPanel';
-import AdvisorySubmissionForm from '../components/AdvisorySubmissionForm';
-import ReportSubmissionForm from '../components/ReportSubmissionForm';
-import OrgRegistrationForm from '../components/OrgRegistrationForm';
+// Signed-in-only panels/forms are split into their own chunks so the public sign-in view
+// downloads far less JavaScript.
+const PartnerSubmissionsPanel = dynamic(() => import('../components/PartnerSubmissionsPanel'), { loading: () => <FormLoading /> });
+const AdvisorySubmissionForm = dynamic(() => import('../components/AdvisorySubmissionForm'), { loading: () => <FormLoading /> });
+const ReportSubmissionForm = dynamic(() => import('../components/ReportSubmissionForm'), { loading: () => <FormLoading /> });
+const OrgRegistrationForm = dynamic(() => import('../components/OrgRegistrationForm'), { loading: () => <FormLoading /> });
+
+function FormLoading() {
+  return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+      <CircularProgress size={28} sx={{ color: '#C1440E' }} />
+    </Box>
+  );
+}
 import { getJwtToken, getOrganizationStatus, getWpBaseUrl } from '../lib/wordpress';
 import {
   saveOrgSession, loadOrgSession, clearOrgSession, isOrgApproved,

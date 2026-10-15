@@ -20,10 +20,12 @@ import {
   applyReportDownloadStats, uniqueLabels,
 } from '../lib/report-utils';
 
-export default function Reports() {
-  const [reports, setReports] = useState([]);
+export default function Reports({ initialReports = null }) {
+  // Reports are pre-rendered (ISR) so the page shows instantly; the client only shows a
+  // spinner when the build-time fetch failed and there is nothing to show yet.
+  const [reports, setReports] = useState(initialReports || []);
   const [apiStale, setApiStale] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialReports);
   const [loadError, setLoadError] = useState('');
 
   const [search, setSearch] = useState('');
@@ -37,23 +39,27 @@ export default function Reports() {
   const [viewMode, setViewMode] = useState('list');
   const [preview, setPreview] = useState(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async ({ background = false } = {}) => {
+    if (!background) setLoading(true);
     setLoadError('');
     try {
       const { data, apiStale: stale } = await getReports();
+      // A background refresh that only got fallback data must not replace live reports.
+      if (background && stale) return;
       setReports(data || []);
       setApiStale(stale);
     } catch (err) {
-      setLoadError(err.message || 'Could not load reports.');
+      if (!background) setLoadError(err.message || 'Could not load reports.');
     } finally {
-      setLoading(false);
+      if (!background) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    // Pre-rendered data is shown immediately; refresh quietly in the background so newly
+    // approved reports appear without waiting for the next revalidation.
+    load({ background: Boolean(initialReports) });
+  }, [load, initialReports]);
 
   const handleDownloadTracked = useCallback((reportId, stats) => {
     setReports((prev) => prev.map((item) => (
@@ -273,7 +279,7 @@ export default function Reports() {
             ) : loadError ? (
               <Box sx={{ bgcolor: 'white', border: '1px solid #E8E0D5', borderRadius: 2, p: 5, textAlign: 'center' }}>
                 <Typography sx={{ color: '#B91C1C', fontSize: '0.9rem', mb: 2 }}>{loadError}</Typography>
-                <Button size="small" onClick={load} startIcon={<RefreshIcon />} sx={{ color: '#C1440E', textTransform: 'none' }}>Try again</Button>
+                <Button size="small" onClick={() => load()} startIcon={<RefreshIcon />} sx={{ color: '#C1440E', textTransform: 'none' }}>Try again</Button>
               </Box>
             ) : filtered.length === 0 ? (
               <Box sx={{ bgcolor: 'white', border: '1px solid #E8E0D5', borderRadius: 2, p: 5, textAlign: 'center' }}>
@@ -336,4 +342,15 @@ export default function Reports() {
       />
     </Layout>
   );
+}
+
+export async function getStaticProps() {
+  const { data, apiStale } = await getReports();
+  return {
+    props: {
+      // null => client fetches on mount (CMS was unreachable at build/revalidate time).
+      initialReports: apiStale ? null : (data || []),
+    },
+    revalidate: apiStale ? 60 : 300,
+  };
 }
