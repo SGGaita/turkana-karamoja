@@ -15,6 +15,7 @@ import {
   getMapAdvisories,
   getHero,
   getCommunityInitiatives,
+  getHomeSections,
 } from '../lib/wordpress';
 import { toMapAdvisoryMarker } from '../lib/wp-mappers';
 import { useLocalizedHomeSections } from '../contexts/LanguageContext';
@@ -72,12 +73,14 @@ export default function Home({
 
 
 export async function getStaticProps() {
-  const [alertsRes, mapAdvisoriesRes, heroEnRes, heroSwRes, initiativesRes] = await Promise.all([
+  const [alertsRes, mapAdvisoriesRes, heroEnRes, heroSwRes, initiativesRes, homeEnRes, homeSwRes] = await Promise.all([
     getAlerts(),
     getMapAdvisories(),
     getHero('en'),
     getHero('sw'),
     getCommunityInitiatives(),
+    getHomeSections('en'),
+    getHomeSections('sw'),
   ]);
 
   const apiStale =
@@ -100,6 +103,12 @@ export async function getStaticProps() {
       heroByLocale: {
         en: heroEnRes.data,
         sw: heroSwRes.data,
+      },
+      // Only pass CMS copy when it actually loaded, so a failed build-time fetch
+      // doesn't pin fallback text over the client-side refresh.
+      homeSectionsByLocale: {
+        ...(homeEnRes.apiStale ? {} : { en: homeEnRes.data }),
+        ...(homeSwRes.apiStale ? {} : { sw: homeSwRes.data }),
       },
     },
     revalidate: 120,
