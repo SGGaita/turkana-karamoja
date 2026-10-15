@@ -72,9 +72,11 @@ const withPWA = require('@ducanh2912/next-pwa').default({
         },
       },
       {
+        // NetworkFirst (not StaleWhileRevalidate) so visitors get the latest deploy straight
+        // away; the cached page is only used when offline or the network is slow.
         urlPattern: ({ request }) => request.destination === 'document',
-        handler: 'StaleWhileRevalidate',
-        options: { cacheName: 'pages-cache' },
+        handler: 'NetworkFirst',
+        options: { cacheName: 'pages-cache', networkTimeoutSeconds: 5 },
       },
     ],
   },

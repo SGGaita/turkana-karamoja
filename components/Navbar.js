@@ -17,7 +17,7 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import Link from 'next/link';
-import Image from 'next/image';
+import BrandLogo from './BrandLogo';
 import { useRouter } from 'next/router';
 import { useSiteHeader } from '../contexts/SiteHeaderContext';
 import AlertBanner from './AlertBanner';
@@ -102,24 +102,15 @@ export default function Navbar({ urgentBanner = null }) {
               textDecoration: 'none',
             }}
           >
-            {branding.logoUrl && (
-              <Box
-                sx={{
-                  height: { xs: 56, md: 76 },
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-              >
-                <Image
-                  src={branding.logoUrl}
-                  alt=""
-                  width={300}
-                  height={76}
-                  style={{ width: 'auto', height: '100%', objectFit: 'contain' }}
-                  unoptimized
-                />
-              </Box>
-            )}
+            <Box
+              sx={{
+                height: { xs: 56, md: 76 },
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <BrandLogo src={branding.logoUrl} alt={branding.title} priority />
+            </Box>
             <Box sx={{ display: { xs: 'none', md: 'block' } }}>
               <Typography
                 sx={{

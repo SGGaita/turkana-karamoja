@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { fallbackSiteHeader, fallbackHomeSections } from '../lib/fallback-data';
-import { getHomeSections } from '../lib/wordpress';
+import { getHomeSections, getSiteHeader } from '../lib/wordpress';
 
 export const LANG_COOKIE = 'tk_hub_lang';
 export const SUPPORTED_LOCALES = ['en', 'sw', 'tu', 'pk', 'ng'];
@@ -17,49 +17,78 @@ function writeLangCookie(locale) {
   document.cookie = `${LANG_COOKIE}=${encodeURIComponent(locale)};path=/;max-age=${60 * 60 * 24 * 365};SameSite=Lax`;
 }
 
-// Home sections (footer, about, get-involved copy) fetched from the CMS in the background.
-// Cached in memory for the session and in localStorage across visits so navigation never
-// waits on the CMS; the bundled fallback content renders until the CMS answers.
-const HOME_SECTIONS_CACHE_KEY = 'tk_hub_home_sections_v1';
+// Shared CMS content (site header: logo/menu/topbar; home sections: footer/about copy) is
+// fetched in the background — never blocking navigation. Cached in memory for the session
+// and in localStorage across visits; bundled fallback content renders until the CMS answers.
+const CMS_CACHE_MAX_AGE_MS = 1000 * 60 * 30;
 const HOME_SECTION_LOCALES = ['en', 'sw'];
-const HOME_SECTIONS_MAX_AGE_MS = 1000 * 60 * 30;
-const homeSectionsMemory = {};
-const homeSectionsInflight = {};
 
-function readCachedHomeSections() {
-  try {
-    const raw = window.localStorage.getItem(HOME_SECTIONS_CACHE_KEY);
-    return raw ? JSON.parse(raw) : {};
-  } catch {
-    return {};
-  }
+function createCmsLoader(storageKey, fetcher) {
+  const memory = {};
+  const inflight = {};
+
+  const readStore = () => {
+    try {
+      const raw = window.localStorage.getItem(storageKey);
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  };
+
+  const writeStore = (locale, data) => {
+    try {
+      const all = readStore();
+      all[locale] = { data, at: Date.now() };
+      window.localStorage.setItem(storageKey, JSON.stringify(all));
+    } catch {
+      /* storage unavailable — memory cache still works */
+    }
+  };
+
+  const fetchFresh = (locale) => {
+    if (!inflight[locale]) {
+      inflight[locale] = fetcher(locale)
+        .then(({ data, apiStale }) => {
+          if (!data || apiStale) return null;
+          memory[locale] = data;
+          writeStore(locale, data);
+          return data;
+        })
+        .catch(() => null)
+        .finally(() => { delete inflight[locale]; });
+    }
+    return inflight[locale];
+  };
+
+  return {
+    memory,
+    /** Returns cached data now (or null) and calls onFresh later if the CMS returns newer data. */
+    get(locale, onFresh) {
+      const stored = readStore()[locale];
+      if (stored?.data && !memory[locale]) memory[locale] = stored.data;
+      const isFresh = stored && Date.now() - stored.at < CMS_CACHE_MAX_AGE_MS;
+      if (!isFresh) fetchFresh(locale).then((data) => data && onFresh(data));
+      return memory[locale] || null;
+    },
+  };
 }
 
-function writeCachedHomeSections(locale, data) {
-  try {
-    const all = readCachedHomeSections();
-    all[locale] = { data, at: Date.now() };
-    window.localStorage.setItem(HOME_SECTIONS_CACHE_KEY, JSON.stringify(all));
-  } catch {
-    /* storage unavailable — memory cache still works */
-  }
-}
+const siteHeaderLoader = createCmsLoader('tk_hub_site_header_v1', getSiteHeader);
+const homeSectionsLoader = createCmsLoader('tk_hub_home_sections_v1', getHomeSections);
 
-function loadHomeSections(locale) {
-  if (homeSectionsInflight[locale]) return homeSectionsInflight[locale];
-  homeSectionsInflight[locale] = getHomeSections(locale)
-    .then(({ data, apiStale }) => {
-      if (data && !apiStale) {
-        homeSectionsMemory[locale] = data;
-        writeCachedHomeSections(locale, data);
-      }
-      return apiStale ? null : data;
-    })
-    .catch(() => null)
-    .finally(() => {
-      delete homeSectionsInflight[locale];
+function useCmsContent(loader, locale, enabled) {
+  const [byLocale, setByLocale] = useState(() => ({ ...loader.memory }));
+  useEffect(() => {
+    if (!enabled) return undefined;
+    let cancelled = false;
+    const cached = loader.get(locale, (fresh) => {
+      if (!cancelled) setByLocale((prev) => ({ ...prev, [locale]: fresh }));
     });
-  return homeSectionsInflight[locale];
+    if (cached) setByLocale((prev) => (prev[locale] === cached ? prev : { ...prev, [locale]: cached }));
+    return () => { cancelled = true; };
+  }, [loader, locale, enabled]);
+  return byLocale;
 }
 
 const LanguageContext = createContext({
@@ -78,33 +107,21 @@ export function LanguageProvider({
 }) {
   const [locale, setLocaleState] = useState('en');
   const [mounted, setMounted] = useState(false);
-  const [clientHomeSections, setClientHomeSections] = useState(() => ({ ...homeSectionsMemory }));
 
   useEffect(() => {
     setLocaleState(readLangCookie());
     setMounted(true);
   }, []);
 
-  // When the page didn't supply home sections via getStaticProps, fill them in from
-  // cache immediately and refresh from the CMS in the background (never blocking render).
-  // Only en/sw home copy is managed in the CMS (same as before); other locales use en.
-  const activeLocale = mounted && HOME_SECTION_LOCALES.includes(locale) ? locale : 'en';
-  useEffect(() => {
-    if (!mounted || homeSectionsByLocale?.[activeLocale]) return undefined;
-    let cancelled = false;
-    const cached = readCachedHomeSections()[activeLocale];
-    if (cached?.data && !homeSectionsMemory[activeLocale]) {
-      homeSectionsMemory[activeLocale] = cached.data;
-      setClientHomeSections((prev) => ({ ...prev, [activeLocale]: cached.data }));
-    }
-    const fresh = cached && Date.now() - cached.at < HOME_SECTIONS_MAX_AGE_MS;
-    if (!fresh) {
-      loadHomeSections(activeLocale).then((data) => {
-        if (!cancelled && data) setClientHomeSections((prev) => ({ ...prev, [activeLocale]: data }));
-      });
-    }
-    return () => { cancelled = true; };
-  }, [mounted, activeLocale, homeSectionsByLocale]);
+  const activeLocale = mounted ? locale : 'en';
+  // Only en/sw home copy is managed in the CMS; other locales use en (as before).
+  const homeLocale = HOME_SECTION_LOCALES.includes(activeLocale) ? activeLocale : 'en';
+  const clientSiteHeader = useCmsContent(
+    siteHeaderLoader, activeLocale, mounted && !siteHeaderByLocale?.[activeLocale],
+  );
+  const clientHomeSections = useCmsContent(
+    homeSectionsLoader, homeLocale, mounted && !homeSectionsByLocale?.[homeLocale],
+  );
 
   const setLocale = useCallback((nextLocale) => {
     if (!SUPPORTED_LOCALES.includes(nextLocale)) return;
@@ -116,7 +133,11 @@ export function LanguageProvider({
     () => ({
       locale: mounted ? locale : 'en',
       setLocale,
-      siteHeaderByLocale: siteHeaderByLocale || { en: fallbackSiteHeader, sw: fallbackSiteHeader },
+      siteHeaderByLocale: {
+        en: fallbackSiteHeader,
+        ...clientSiteHeader,
+        ...(siteHeaderByLocale || {}),
+      },
       homeSectionsByLocale: {
         en: fallbackHomeSections,
         ...clientHomeSections,
@@ -124,7 +145,7 @@ export function LanguageProvider({
       },
       heroByLocale,
     }),
-    [mounted, locale, setLocale, siteHeaderByLocale, homeSectionsByLocale, clientHomeSections, heroByLocale]
+    [mounted, locale, setLocale, siteHeaderByLocale, homeSectionsByLocale, clientSiteHeader, clientHomeSections, heroByLocale]
   );
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
