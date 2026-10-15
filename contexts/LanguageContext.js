@@ -1,6 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { fallbackSiteHeader, fallbackHomeSections } from '../lib/fallback-data';
 import { getHomeSections, getSiteHeader } from '../lib/wordpress';
+import { mapSiteHeader } from '../lib/wp-mappers';
+import siteHeaderSnapshot from '../lib/site-header.snapshot.json';
 
 export const LANG_COOKIE = 'tk_hub_lang';
 export const SUPPORTED_LOCALES = ['en', 'sw', 'tu', 'pk', 'ng'];
@@ -91,6 +93,14 @@ function useCmsContent(loader, locale, enabled) {
   return byLocale;
 }
 
+// CMS site header captured at build time (scripts/fetch-site-header.js), so the real CMS
+// menu/logo are in the HTML from the first paint. Background refresh keeps it current.
+const SNAPSHOT_SITE_HEADER = Object.fromEntries(
+  Object.entries(siteHeaderSnapshot?.locales || {})
+    .map(([loc, raw]) => [loc, mapSiteHeader(raw, loc)])
+    .filter(([, mapped]) => mapped && mapped.navLinks?.length),
+);
+
 const LanguageContext = createContext({
   locale: 'en',
   setLocale: () => {},
@@ -135,6 +145,7 @@ export function LanguageProvider({
       setLocale,
       siteHeaderByLocale: {
         en: fallbackSiteHeader,
+        ...SNAPSHOT_SITE_HEADER,
         ...clientSiteHeader,
         ...(siteHeaderByLocale || {}),
       },
