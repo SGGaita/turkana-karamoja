@@ -1,16 +1,17 @@
-import App from 'next/app';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import theme from '../theme';
-import { LanguageProvider, SUPPORTED_LOCALES } from '../contexts/LanguageContext';
-import { getSiteHeader, getHomeSections } from '../lib/wordpress';
-import { fallbackSiteHeader, fallbackHomeSections } from '../lib/fallback-data';
+import { LanguageProvider } from '../contexts/LanguageContext';
 
-export default function MyApp({ Component, pageProps, siteHeaderByLocale, homeSectionsByLocale }) {
+// NOTE: no getInitialProps here on purpose. A getInitialProps on _app runs on EVERY
+// client-side navigation and blocks the route change until it resolves — with a slow CMS
+// that made every menu click take ~20 s. It also disables static optimisation for all pages.
+// Shared CMS content (home sections / footer) is now loaded lazily in LanguageProvider,
+// or passed in via a page's getStaticProps (see pages/index.js).
+export default function MyApp({ Component, pageProps }) {
   return (
     <LanguageProvider
-      siteHeaderByLocale={siteHeaderByLocale}
-      homeSectionsByLocale={homeSectionsByLocale}
+      homeSectionsByLocale={pageProps.homeSectionsByLocale || null}
       heroByLocale={pageProps.heroByLocale || null}
     >
       <ThemeProvider theme={theme}>
@@ -20,28 +21,3 @@ export default function MyApp({ Component, pageProps, siteHeaderByLocale, homeSe
     </LanguageProvider>
   );
 }
-
-MyApp.getInitialProps = async (appContext) => {
-  const appProps = await App.getInitialProps(appContext);
-  const headerResults = await Promise.all(
-    SUPPORTED_LOCALES.map((locale) => getSiteHeader(locale))
-  );
-  const [homeEn, homeSw] = await Promise.all([
-    getHomeSections('en'),
-    getHomeSections('sw'),
-  ]);
-
-  const siteHeaderByLocale = SUPPORTED_LOCALES.reduce((acc, locale, index) => {
-    acc[locale] = headerResults[index]?.data || fallbackSiteHeader;
-    return acc;
-  }, {});
-
-  return {
-    ...appProps,
-    siteHeaderByLocale,
-    homeSectionsByLocale: {
-      en: homeEn.data || fallbackHomeSections,
-      sw: homeSw.data || fallbackHomeSections,
-    },
-  };
-};
