@@ -72,6 +72,16 @@ export default function OrgRegistrationForm({ defaultEmail = '', onRegistered, o
 
     try {
       const result = await registerOrganization({ ...form, type: orgType });
+      // Remember what we registered so the pending screen can show the name/reference even
+      // though signed-out status lookups no longer return them.
+      saveOrgSession({
+        id: result.id,
+        reference: result.reference,
+        name: result.existing ? undefined : form.name,
+        status: result.status || 'pending',
+        approved: false,
+        contactEmail: form.contactEmail,
+      });
       onNotify?.(result.message || `Registration received. Reference: ${result.reference}`);
       onRegistered?.(form.contactEmail);
     } catch (err) {

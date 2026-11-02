@@ -117,14 +117,18 @@ export default function Dashboard() {
       return;
     }
     try {
-      const status = await getOrganizationStatus(email);
+      const status = await getOrganizationStatus(email, sessionStorage.getItem(TOKEN_KEY));
       if (status.registered) {
+        // Signed-out lookups only return { registered, status }; keep the id/name/reference we
+        // already know for this email (from registration or an earlier signed-in lookup).
+        const cached = loadOrgSession();
+        const known = cached?.contactEmail === email ? cached : {};
         const record = {
-          id: status.id,
-          reference: status.reference,
-          name: status.name,
+          id: status.id ?? known.id,
+          reference: status.reference ?? known.reference,
+          name: status.name ?? known.name,
           status: status.status,
-          approved: status.approved,
+          approved: status.approved ?? status.status === 'approved',
           contactEmail: email,
         };
         setOrgRecord(record);
