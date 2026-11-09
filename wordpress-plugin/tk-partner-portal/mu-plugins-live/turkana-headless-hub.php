@@ -27,8 +27,13 @@ if (!defined('TK_HUB_CORS_ORIGINS')) {
 if (!defined('TK_HUB_CORS_ORIGIN_PATTERN')) {
     define('TK_HUB_CORS_ORIGIN_PATTERN', '#^https://karamoja-cluster-hub(-[a-z0-9-]+)?\.vercel\.app$#i');
 }
-define('TK_HUB_NEXT_URL', 'http://localhost:3000');
-define('TK_HUB_PUSH_SECRET', 'dba3cec14588fca3ac040833e6727c602e7841a1dd5aa89c5b48b8f92450d37b');
+// Set these in wp-config.php (audit v3 N-3, N-13). No secrets in source.
+if (!defined('TK_HUB_NEXT_URL')) {
+    define('TK_HUB_NEXT_URL', getenv('TK_HUB_NEXT_URL') ?: 'http://localhost:3000');
+}
+if (!defined('TK_HUB_PUSH_SECRET')) {
+    define('TK_HUB_PUSH_SECRET', getenv('TK_HUB_PUSH_SECRET') ?: '');
+}
 
 /* ---------- CORS for the Next.js frontend (all routes, incl. /wp-json/tk/v1/*) ---------- */
 function tk_hub_cors_allowed_origin() {
