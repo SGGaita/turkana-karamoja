@@ -3,8 +3,6 @@ import Link from 'next/link';
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import QuestionAnswerOutlinedIcon from '@mui/icons-material/QuestionAnswerOutlined';
 import PublicOutlinedIcon from '@mui/icons-material/PublicOutlined';
-import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
-import CodeOutlinedIcon from '@mui/icons-material/CodeOutlined';
 import Layout from '../../components/Layout';
 import PageHero from '../../components/PageHero';
 import { helpNav } from '../../lib/docs/nav';
@@ -14,16 +12,12 @@ const iconMap = {
   home: MenuBookOutlinedIcon,
   question: QuestionAnswerOutlinedIcon,
   public: PublicOutlinedIcon,
-  admin: AdminPanelSettingsOutlinedIcon,
-  code: CodeOutlinedIcon,
 };
 
 const cardColors = {
   hub: '#2E7BB4',
   faq: '#2E8B57',
   'user-guide': '#C1440E',
-  'admin-guide': '#E87010',
-  technical: '#3D2B1F',
 };
 
 export default function HelpHub() {
@@ -33,16 +27,15 @@ export default function HelpHub() {
     <Layout title="Help Center">
       <PageHero
         title="Help & Documentation Center"
-        subtitle={`User guides, admin documentation, technical reference, and FAQs for ${APP_FULL_NAME}`}
+        subtitle={`User guide and frequently asked questions for ${APP_FULL_NAME}`}
         image="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1400&q=70"
         breadcrumbs={['Help']}
       />
 
       <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, md: 4 }, py: { xs: 4, md: 6 } }}>
         <Typography sx={{ fontSize: '1rem', color: '#5A5A5A', lineHeight: 1.75, mb: 5, maxWidth: 800 }}>
-          Welcome to the {APP_NAME} documentation center. Whether you are a community member browsing
-          early warnings, an administrator managing content in WordPress, or a developer integrating
-          with our APIs — find the guide you need below.
+          Welcome to the {APP_NAME} help center. Find out how to read early warnings, browse reports and
+          community services, and how partner organisations register and submit content.
         </Typography>
 
         <Grid container spacing={3}>
@@ -99,7 +92,6 @@ export default function HelpHub() {
             <li><Link href="/early-warnings" style={{ color: '#C1440E' }}>View active early warnings</Link></li>
             <li><Link href="/partners-stakeholders" style={{ color: '#C1440E' }}>Partner portal — login or register</Link></li>
             <li><Link href="/contact" style={{ color: '#C1440E' }}>Contact the coordination team</Link></li>
-            <li><Link href="/help/technical#api-reference" style={{ color: '#C1440E' }}>API reference for developers</Link></li>
           </Box>
         </Box>
 

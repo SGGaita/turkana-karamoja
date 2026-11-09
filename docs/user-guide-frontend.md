@@ -1,4 +1,4 @@
-# Karamoja Climate Change Knowledge and Information — Frontend User Guide
+# Karamoja Climate Change Knowledge and Information — User Guide
 
 A guide for public users, community members, and partner organisations using the Karamoja platform.
 
@@ -42,7 +42,7 @@ The main navigation bar provides access to all public sections of Karamoja:
 | Partners & Stakeholders | `/partners-stakeholders` | Partner portal for registered organisations |
 | Organizations | `/organizations` | Directory of verified partner organisations |
 
-> **Note:** The top bar (above the main navigation) includes language selection, Login/Register, API Access, and Help links.
+> **Note:** The top bar (above the main navigation) includes language selection, Login/Register and Help links.
 
 ---
 
@@ -130,7 +130,7 @@ The language selector in the top bar shows available languages; full switching w
 
 ## Partner Portal (Organisations)
 
-If you represent a humanitarian, government, or research organisation, visit **Partners & Stakeholders** to register and submit advisories or reports. See the [Backend & Admin Guide](./user-guide-backend.md) for the full registration and submission workflow.
+If you represent a humanitarian, government, or research organisation, visit **Partners & Stakeholders** to register and submit advisories or reports.
 
 ### Getting Started as a Partner
 
@@ -143,5 +143,3 @@ If you represent a humanitarian, government, or research organisation, visit **P
 
 ## Related Documentation
 
-- [Backend & Admin Guide](./user-guide-backend.md) — WordPress administration and content publishing
-- [Technical Documentation](./technical-documentation.md) — Architecture, API reference, and deployment

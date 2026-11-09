@@ -37,8 +37,7 @@ export default function HelpFaq() {
         <Box sx={{ mb: 5 }}>
           <Typography sx={{ fontSize: '1rem', color: '#5A5A5A', lineHeight: 1.75, mb: 3 }}>
             Browse frequently asked questions organized by category. For detailed walkthroughs, see the{' '}
-            <Link href="/help/user-guide" style={{ color: '#C1440E' }}>Frontend User Guide</Link> or{' '}
-            <Link href="/help/admin-guide" style={{ color: '#C1440E' }}>Backend & Admin Guide</Link>.
+            <Link href="/help/user-guide" style={{ color: '#C1440E' }}>User Guide</Link>.
           </Typography>
         </Box>
 
@@ -129,10 +128,10 @@ export default function HelpFaq() {
 
           <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
             <Button component={Link} href="/help/user-guide" variant="outlined" sx={{ borderColor: '#C1440E', color: '#C1440E' }}>
-              Frontend User Guide
+              User Guide
             </Button>
-            <Button component={Link} href="/help/technical" variant="outlined" sx={{ borderColor: '#3D2B1F', color: '#3D2B1F' }}>
-              Technical Documentation
+            <Button component={Link} href="/contact" variant="outlined" sx={{ borderColor: '#3D2B1F', color: '#3D2B1F' }}>
+              Contact the coordination team
             </Button>
           </Box>
         </Box>

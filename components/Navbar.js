@@ -23,7 +23,7 @@ import { useSiteHeader } from '../contexts/SiteHeaderContext';
 import AlertBanner from './AlertBanner';
 import LanguageSelector from './LanguageSelector';
 import PushSubscribeButton from './PushSubscribeButton';
-import { resolveTopbarLink } from '../lib/topbar-links';
+import { resolveTopbarLink, isRetiredLink } from '../lib/topbar-links';
 
 export default function Navbar({ urgentBanner = null }) {
   const { branding, topbar, navLinks } = useSiteHeader();
@@ -58,7 +58,7 @@ export default function Navbar({ urgentBanner = null }) {
       >
         <Box sx={{ display: 'flex', gap: 3, alignItems: 'center' }}>
           <LanguageSelector />
-          {topbar.links.map((link) => {
+          {topbar.links.filter((link) => !isRetiredLink(link)).map((link) => {
             const href = resolveTopbarLink(link.label, link.href);
             const internal = href.startsWith('/');
             const Comp = internal ? Link : 'a';
@@ -222,7 +222,7 @@ export default function Navbar({ urgentBanner = null }) {
           <Divider sx={{ borderColor: '#E8E0D5', my: 1 }} />
 
           <List>
-            {topbar.links.map((link) => {
+            {topbar.links.filter((link) => !isRetiredLink(link)).map((link) => {
               const href = resolveTopbarLink(link.label, link.href);
               const internal = href.startsWith('/');
               const isActive = internal && router.pathname === href.split('#')[0];
