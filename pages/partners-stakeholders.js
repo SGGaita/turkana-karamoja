@@ -26,6 +26,7 @@ function FormLoading() {
   );
 }
 import { getJwtToken, getOrganizationStatus, getWpBaseUrl } from '../lib/wordpress';
+import { coreAuthAvailable, coreLogin, changePassword, passwordHint } from '../lib/partner-auth';
 import {
   saveOrgSession, loadOrgSession, clearOrgSession, isOrgApproved,
   TOKEN_KEY, USER_EMAIL_KEY,
@@ -40,7 +41,7 @@ const STAT_CARDS = [
 
 const emptyStats = { total: 0, pending: 0, approved: 0, rejected: 0, withdrawn: 0, advisories: 0, reports: 0 };
 
-function OrgHeaderCard({ org, onSectionChange }) {
+function OrgHeaderCard({ org, onSectionChange, onChangePassword }) {
   return (
     <Box
       sx={{
@@ -69,6 +70,11 @@ function OrgHeaderCard({ org, onSectionChange }) {
             sx={{ bgcolor: '#ecfdf5', color: '#047857', fontWeight: 700, fontSize: '0.65rem' }}
           />
           <Typography sx={{ color: '#D4A96A', fontSize: '0.75rem' }}>{org.reference}</Typography>
+          {onChangePassword && (
+            <Button onClick={onChangePassword} size="small" sx={{ color: '#D4A96A', fontSize: '0.7rem', minWidth: 0, p: 0, ml: 1, textTransform: 'none', textDecoration: 'underline' }}>
+              Change password
+            </Button>
+          )}
         </Box>
       </Box>
       <Box sx={{ display: 'flex', gap: 1.5 }}>
@@ -102,7 +108,17 @@ export default function Dashboard() {
   const [snackMsg, setSnackMsg] = useState('');
   const [snackSeverity, setSnackSeverity] = useState('success');
   const wpConfigured = Boolean(getWpBaseUrl());
-  const forgotPasswordUrl = wpConfigured ? `${getWpBaseUrl()}/wp-login.php?action=lostpassword` : '';
+  // The forgot-password page uses Karamoja Core when the CMS has it, else WordPress's own screen.
+  const forgotPasswordUrl = wpConfigured ? '/partners-stakeholders/forgot-password' : '';
+  const [coreAuth, setCoreAuth] = useState(false);
+  const [pwOpen, setPwOpen] = useState(false);
+  const [pwForm, setPwForm] = useState({ current: '', next: '' });
+  const [pwError, setPwError] = useState('');
+  const [pwSaving, setPwSaving] = useState(false);
+
+  useEffect(() => {
+    if (wpConfigured) coreAuthAvailable().then(setCoreAuth);
+  }, [wpConfigured]);
 
   const showSnack = (msg, severity = 'success') => {
     setSnackMsg(msg);
@@ -194,7 +210,24 @@ export default function Dashboard() {
     setLoginError('');
 
     try {
-      const { token: jwt, email } = await getJwtToken(loginForm.username, loginForm.password);
+      let jwt;
+      let email;
+      if (coreAuth) {
+        // Karamoja Core: same token format, plus clear messages for locked or not-yet-active accounts.
+        try {
+          const res = await coreLogin(loginForm.username, loginForm.password);
+          jwt = res.token;
+          email = res.user_email;
+        } catch (err) {
+          throw new Error(
+            ['karamoja_locked', 'karamoja_inactive', 'karamoja_rate_limited'].includes(err.code)
+              ? err.message
+              : 'The email or password is incorrect.',
+          );
+        }
+      } else {
+        ({ token: jwt, email } = await getJwtToken(loginForm.username, loginForm.password));
+      }
       sessionStorage.setItem(TOKEN_KEY, jwt);
       sessionStorage.setItem(USER_EMAIL_KEY, email || loginForm.username);
       setToken(jwt);
@@ -204,6 +237,26 @@ export default function Dashboard() {
       await refreshOrgStatus(email || loginForm.username);
     } catch (err) {
       setLoginError(err.message || 'Sign-in failed. Please try again.');
+    }
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setPwError('');
+    setPwSaving(true);
+    try {
+      const res = await changePassword(token, pwForm.current, pwForm.next);
+      if (res.token) {
+        sessionStorage.setItem(TOKEN_KEY, res.token);
+        setToken(res.token);
+      }
+      setPwOpen(false);
+      setPwForm({ current: '', next: '' });
+      showSnack(res.message || 'Password changed.');
+    } catch (err) {
+      setPwError(err.message);
+    } finally {
+      setPwSaving(false);
     }
   };
 
@@ -239,8 +292,6 @@ export default function Dashboard() {
           <TextField label="Password" type="password" autoComplete="current-password" fullWidth required value={loginForm.password} onChange={(e) => setLoginForm((f) => ({ ...f, password: e.target.value }))} size="small" />
           {forgotPasswordUrl && (
             <Typography sx={{ fontSize: '0.8rem', mt: 1.5 }}>
-              {/* Interim: WordPress's own reset screen. The CMS hotfix sends people back here afterwards.
-                  Replaced by /partners-stakeholders/forgot-password when Karamoja Core ships. */}
               <a href={forgotPasswordUrl} style={{ color: '#C1440E' }}>Forgot your password?</a>
             </Typography>
           )}
@@ -248,6 +299,26 @@ export default function Dashboard() {
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={() => setLoginOpen(false)}>Cancel</Button>
           <Button type="submit" variant="contained" sx={{ bgcolor: '#C1440E' }}>Sign in</Button>
+        </DialogActions>
+      </Box>
+    </Dialog>
+  );
+
+  const pwHint = passwordHint(pwForm.next);
+  const passwordDialog = (
+    <Dialog open={pwOpen} onClose={() => setPwOpen(false)} maxWidth="xs" fullWidth>
+      <DialogTitle sx={{ fontFamily: '"Montserrat", sans-serif' }}>Change password</DialogTitle>
+      <Box component="form" onSubmit={handleChangePassword}>
+        <DialogContent>
+          {pwError && <Alert severity="error" sx={{ mb: 2 }}>{pwError}</Alert>}
+          <TextField label="Current password" type="password" autoComplete="current-password" fullWidth required size="small" sx={{ mb: 2 }} value={pwForm.current} onChange={(e) => setPwForm((f) => ({ ...f, current: e.target.value }))} />
+          <TextField label="New password (at least 10 characters)" type="password" autoComplete="new-password" fullWidth required size="small" value={pwForm.next} onChange={(e) => setPwForm((f) => ({ ...f, next: e.target.value }))} />
+          {pwForm.next && <Typography sx={{ fontSize: '0.75rem', color: pwHint.color, mt: 0.5 }}>{pwHint.label}</Typography>}
+          <Typography sx={{ fontSize: '0.75rem', color: '#5A5A5A', mt: 1.5 }}>You will be signed out on your other devices.</Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setPwOpen(false)}>Cancel</Button>
+          <Button type="submit" variant="contained" disabled={pwSaving || pwHint.score < 1} sx={{ bgcolor: '#C1440E' }}>{pwSaving ? 'Saving…' : 'Change password'}</Button>
         </DialogActions>
       </Box>
     </Dialog>
@@ -304,7 +375,7 @@ export default function Dashboard() {
             />
           ) : (
             <>
-              <OrgHeaderCard org={orgRecord} onSectionChange={changeSection} />
+              <OrgHeaderCard org={orgRecord} onSectionChange={changeSection} onChangePassword={coreAuth ? () => setPwOpen(true) : null} />
 
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 3 }}>
                 {STAT_CARDS.map((c) => (
@@ -368,6 +439,7 @@ export default function Dashboard() {
         </DashboardShell>
 
         {loginDialog}
+        {passwordDialog}
         {snackbar}
       </>
     );

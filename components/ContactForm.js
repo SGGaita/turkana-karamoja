@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Turnstile, { captchaEnabled } from './Turnstile';
 import { Box, Typography, TextField, Button, Alert } from '@mui/material';
 import SendOutlinedIcon from '@mui/icons-material/SendOutlined';
 import { getWpBaseUrl, submitContactForm } from '../lib/wordpress';
@@ -22,6 +23,8 @@ export default function ContactForm({ title, intro }) {
     message: '',
   });
   const [submitting, setSubmitting] = useState(false);
+  const [captcha, setCaptcha] = useState('');
+  const [captchaKey, setCaptchaKey] = useState(0);
   const [status, setStatus] = useState(null);
   const wpConfigured = Boolean(getWpBaseUrl());
 
@@ -41,7 +44,7 @@ export default function ContactForm({ title, intro }) {
     }
 
     try {
-      const result = await submitContactForm(form);
+      const result = await submitContactForm({ ...form, captchaToken: captcha });
       setStatus({
         severity: 'success',
         message: result.message || 'Thank you. Your message has been sent.',
@@ -54,6 +57,8 @@ export default function ContactForm({ title, intro }) {
       });
     } finally {
       setSubmitting(false);
+      setCaptcha('');
+      setCaptchaKey((k) => k + 1); // Captcha tokens work once.
     }
   };
 
@@ -148,10 +153,13 @@ export default function ContactForm({ title, intro }) {
         sx={{ ...inputSx, width: '100%', mb: 2.5 }}
       />
 
+      <Turnstile onToken={setCaptcha} resetKey={captchaKey} />
+      {/* Honeypot: hidden from people, filled in by bots. */}
+      <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ position: 'absolute', left: '-10000px' }} value={form.website || ''} onChange={(e) => setForm((f) => ({ ...f, website: e.target.value }))} />
       <Button
         type="submit"
         variant="contained"
-        disabled={submitting}
+        disabled={submitting || (captchaEnabled && !captcha)}
         endIcon={<SendOutlinedIcon />}
         sx={{
           bgcolor: '#C1440E',
