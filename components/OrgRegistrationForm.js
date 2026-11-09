@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Turnstile, { captchaEnabled } from './Turnstile';
 import {
   Box, Typography, Button, TextField, Select, MenuItem, FormControl, InputLabel, Autocomplete,
 } from '@mui/material';
@@ -41,6 +42,8 @@ export default function OrgRegistrationForm({ defaultEmail = '', onRegistered, o
     name: '', abbr: '', type: '', country: 'KE', contactName: '', contactEmail: defaultEmail, contactPhone: '', description: '',
   });
   const [submitting, setSubmitting] = useState(false);
+  const [captcha, setCaptcha] = useState('');
+  const [captchaKey, setCaptchaKey] = useState(0);
   const wpConfigured = Boolean(getWpBaseUrl());
 
   const handleSubmit = async (e) => {
@@ -59,13 +62,13 @@ export default function OrgRegistrationForm({ defaultEmail = '', onRegistered, o
     }
 
     try {
-      const result = await registerOrganization({ ...form, type: orgType });
+      const result = await registerOrganization({ ...form, type: orgType, captchaToken: captcha });
       // Remember what we registered so the pending screen can show the name/reference even
       // though signed-out status lookups no longer return them.
       saveOrgSession({
         id: result.id,
         reference: result.reference,
-        name: result.existing ? undefined : form.name,
+        name: result.existing || result.already_registered ? undefined : form.name,
         status: result.status || 'pending',
         approved: false,
         contactEmail: form.contactEmail,
@@ -76,6 +79,8 @@ export default function OrgRegistrationForm({ defaultEmail = '', onRegistered, o
       onNotify?.(err.message || 'Registration failed', 'error');
     } finally {
       setSubmitting(false);
+      setCaptcha('');
+      setCaptchaKey((k) => k + 1); // Captcha tokens work once.
     }
   };
 
@@ -132,7 +137,8 @@ export default function OrgRegistrationForm({ defaultEmail = '', onRegistered, o
 
       <TextField label="Brief Description" multiline rows={3} fullWidth value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} sx={{ ...inputSx, mb: 3 }} size="small" placeholder="What type of content will your organisation publish?" />
 
-      <Button type="submit" variant="contained" size="large" fullWidth disabled={submitting} sx={{ bgcolor: '#C1440E', py: 1.5, '&:hover': { bgcolor: '#E8622A' } }}>
+      <Turnstile onToken={setCaptcha} resetKey={captchaKey} />
+      <Button type="submit" variant="contained" size="large" fullWidth disabled={submitting || (captchaEnabled && !captcha)} sx={{ bgcolor: '#C1440E', py: 1.5, '&:hover': { bgcolor: '#E8622A' } }}>
         {submitting ? 'Submitting…' : 'Submit Registration Application'}
       </Button>
     </Box>
