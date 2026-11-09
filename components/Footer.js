@@ -3,6 +3,7 @@ import { APP_NAME, APP_TAGLINE, APP_COPYRIGHT } from '../lib/branding';
 import { FOOTER_REGIONS } from '../lib/regions';
 import { TOLL_FREE_LINES } from '../lib/toll-free-lines';
 import { useLocalizedHomeSections } from '../contexts/LanguageContext';
+import { withoutRetiredLinks } from '../lib/topbar-links';
 
 const partners = ['KMD', 'UMA', 'NDMA', 'OPM', 'OCHA', 'FAO', 'ICPAC', 'UNICEF', 'WFP'];
 
@@ -11,12 +12,17 @@ export default function Footer() {
   const footer = homeSections.footer || {};
 
   const footerLinks = {
-    [footer.columnKaramoja || 'Karamoja']: footer.linksKaramoja?.length
-      ? footer.linksKaramoja
-      : ['About Karamoja', 'Our Partners', 'Data Sources', 'Methodology'],
-    [footer.columnServices || 'Services']: footer.linksServices?.length
-      ? footer.linksServices
-      : ['Early Warnings', 'Weather Forecasts', 'Community Bulletins', 'Submit Advisory', 'Donor Portal'],
+    // "API Access" etc. may still be stored in the CMS or the browser cache; never show it.
+    [footer.columnKaramoja || 'Karamoja']: withoutRetiredLinks(
+      footer.linksKaramoja?.length
+        ? footer.linksKaramoja
+        : ['About Karamoja', 'Our Partners', 'Data Sources', 'Methodology'],
+    ),
+    [footer.columnServices || 'Services']: withoutRetiredLinks(
+      footer.linksServices?.length
+        ? footer.linksServices
+        : ['Early Warnings', 'Weather Forecasts', 'Community Bulletins', 'Submit Advisory', 'Donor Portal'],
+    ),
     [footer.columnRegions || 'Regions']: FOOTER_REGIONS,
   };
 
