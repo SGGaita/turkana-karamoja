@@ -6,18 +6,19 @@ This folder contains the canonical documentation for the Climate Hub platform. T
 
 | Document | Audience | Web Route |
 |----------|----------|-----------|
-| [Frontend User Guide](./user-guide-frontend.md) | Community members, end users | `/help/user-guide` |
-| [Backend & Admin Guide](./user-guide-backend.md) | WordPress administrators, content managers | `/help/admin-guide` |
-| [Technical Documentation](./technical-documentation.md) | Developers, DevOps, integrators | `/help/technical` |
+| [User Guide](./user-guide-frontend.md) | Community members, end users | `/help/user-guide` |
+| [Admin Guide](./developer/admin-guide.md) | WordPress administrators, content managers | **Not public.** Moving into wp-admin › Karamoja › Help |
+| [Technical Documentation](./developer/technical-documentation.md) | Developers, DevOps | **Not public** (repo only) |
 | [Hosting Requirements](./hosting-requirements.md) | DevOps, hosting, infrastructure | — |
 | FAQ (in-app) | General public | `/help/faq` |
 
 ## Quick Start
 
 - **Browse the site:** Start at `/help/user-guide`
-- **Manage content in WordPress:** See `/help/admin-guide`
-- **Integrate with APIs:** See `/help/technical#api-reference`
-- **Local development:** See `technical-documentation.md` → Local Development Setup
+- **Manage content in WordPress:** See `developer/admin-guide.md` (staff only; moving into wp-admin)
+- **Local development, architecture, REST:** See `developer/technical-documentation.md`
+
+`/help/admin-guide` and `/help/technical` were removed from the public site (audit v3 §12.7) and redirect to `/help`.
 
 ## Architecture Summary
 

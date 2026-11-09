@@ -100,7 +100,7 @@ PUSH_BROADCAST_SECRET=your-secret
 1. Install Node.js 18+ and run `npm install` in the frontend repo.
 2. Start XAMPP (Apache + MySQL) and ensure WordPress is accessible.
 3. Copy `.env.example` to `.env.local` and set `NEXT_PUBLIC_WP_BASE_URL`.
-4. Activate required WordPress plugins (see [Backend & Admin Guide](./user-guide-backend.md)).
+4. Activate required WordPress plugins (see [Backend & Admin Guide](./admin-guide.md)).
 5. Run `npm run dev` — frontend starts at `http://localhost:3000`.
 6. Configure CORS on WordPress to allow `http://localhost:3000` with `Authorization` header.
 
@@ -261,4 +261,4 @@ curl "BASE/wp-json/tk/v1/my-submissions" \
 ## Related Documentation
 
 - [Frontend User Guide](./user-guide-frontend.md) — Public website and partner portal usage
-- [Backend & Admin Guide](./user-guide-backend.md) — WordPress administration and content publishing
+- [Backend & Admin Guide](./admin-guide.md) — WordPress administration and content publishing

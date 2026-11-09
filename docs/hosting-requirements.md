@@ -107,7 +107,7 @@ ACF is recommended for structured fields. The custom plugin can run without it.
 
 ## Related documentation
 
-- [Technical documentation](./technical-documentation.md) — architecture, env vars, deployment notes
-- [Backend & admin guide](./user-guide-backend.md) — plugins, CPTs, CMS operations
+- [Technical documentation](./developer/technical-documentation.md) — architecture, env vars, deployment notes
+- [Backend & admin guide](./developer/admin-guide.md) — plugins, CPTs, CMS operations
 - [WordPress setup checklist](../planning/wordpress-setup-checklist.md)
 - [Local XAMPP setup](../planning/wp-local-xampp-setup.md)

@@ -1,7 +1,6 @@
 import { Box, Typography, Chip, Button } from '@mui/material';
 import Link from 'next/link';
 import { toStripAlert } from '../lib/wp-mappers';
-import { weatherItems } from '../lib/fallback-data';
 import PushSubscribeButton from './PushSubscribeButton';
 
 export default function WarningsStrip({ alerts: alertsProp = [], apiStale = false }) {
@@ -40,12 +39,7 @@ export default function WarningsStrip({ alerts: alertsProp = [], apiStale = fals
             alignItems: 'center',
           }}
         >
-          {weatherItems.map((w) => (
-            <Box key={w.label} sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
-              <Typography sx={{ color: '#9A9A9A', fontSize: '0.75rem' }}>{w.label}:</Typography>
-              <Typography sx={{ color: '#F0D9B0', fontSize: '0.75rem', fontWeight: 600 }}>{w.val}</Typography>
-            </Box>
-          ))}
+          {/* Weather readings removed: they were hardcoded, not live (audit v3 E7). */}
           <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1 }}>
             <Box sx={{ width: 7, height: 7, bgcolor: hasAlerts && activeCount ? '#D63030' : '#2E8B57', borderRadius: '50%' }} />
             <Typography sx={{ color: hasAlerts && activeCount ? '#D63030' : '#2E8B57', fontSize: '0.75rem', fontWeight: 700 }}>

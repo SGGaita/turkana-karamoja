@@ -65,7 +65,6 @@ export default function AdvisorySubmissionForm({ token, orgRecord, onNotify, onS
   const [form, setForm] = useState(emptyAdvisoryForm);
   const [submitting, setSubmitting] = useState(false);
   const wpConfigured = Boolean(getWpBaseUrl());
-  const isDemo = token?.startsWith('DEMO_JWT_TOKEN');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -99,18 +98,8 @@ export default function AdvisorySubmissionForm({ token, orgRecord, onNotify, onS
     setSubmitting(true);
     const payload = { ...form, org: orgRecord?.name, organizationId: orgRecord?.id };
 
-    if (isDemo) {
-      setTimeout(() => {
-        onNotify?.(`Advisory submitted (demo)! Reference: DEMO-${Date.now().toString().slice(-6)}. Pending admin review.`);
-        setForm(emptyAdvisoryForm());
-        setSubmitting(false);
-        onSubmitted?.();
-      }, 1500);
-      return;
-    }
-
     if (!wpConfigured) {
-      onNotify?.('WordPress is not configured.', 'warning');
+      onNotify?.('Submissions are unavailable right now. Please try again later.', 'error');
       setSubmitting(false);
       return;
     }

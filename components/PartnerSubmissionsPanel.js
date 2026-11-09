@@ -85,7 +85,7 @@ export default function PartnerSubmissionsPanel({
   const [saving, setSaving] = useState(false);
 
   const load = useCallback(async () => {
-    if (!token || token.startsWith('DEMO_JWT_TOKEN')) {
+    if (!token) {
       setLoading(false);
       setItems([]);
       return;
@@ -227,13 +227,6 @@ export default function PartnerSubmissionsPanel({
     );
   }
 
-  if (token.startsWith('DEMO_JWT_TOKEN')) {
-    return (
-      <Alert severity="info">
-        My Submissions requires a live WordPress connection. Demo login does not sync with the CMS.
-      </Alert>
-    );
-  }
 
   if (!orgRecord || orgRecord.status !== 'approved') {
     return (

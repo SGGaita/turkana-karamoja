@@ -8,3 +8,10 @@ public/sw.js.map
 public/workbox-*.js
 public/workbox-*.js.map
 public/fallback-*.js
+
+# Never commit archives or env files (audit v3 S-1: a source tarball with .env.local was pushed in PR #1)
+*.tgz
+*.tar.gz
+*.zip
+.env*
+!.env.example

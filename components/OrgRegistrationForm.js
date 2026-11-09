@@ -53,20 +53,8 @@ export default function OrgRegistrationForm({ defaultEmail = '', onRegistered, o
     setSubmitting(true);
 
     if (!wpConfigured) {
-      setTimeout(() => {
-        const record = {
-          id: Date.now(),
-          reference: `DEMO-ORG-${Date.now().toString().slice(-6)}`,
-          name: form.name,
-          status: 'approved',
-          approved: true,
-          contactEmail: form.contactEmail,
-        };
-        saveOrgSession(record);
-        onNotify?.(`Organisation registered (demo). Reference: ${record.reference}. You can now sign in and submit content.`);
-        setSubmitting(false);
-        onRegistered?.(form.contactEmail);
-      }, 1200);
+      onNotify?.('Registration is unavailable right now. Please try again later.', 'error');
+      setSubmitting(false);
       return;
     }
 
