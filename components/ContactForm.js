@@ -35,14 +35,8 @@ export default function ContactForm({ title, intro }) {
     setStatus(null);
 
     if (!wpConfigured) {
-      setTimeout(() => {
-        setStatus({
-          severity: 'success',
-          message: 'Thank you. Your message was recorded locally (demo mode — configure WordPress to send email).',
-        });
-        setForm({ name: '', email: '', phone: '', organization: '', subject: '', message: '' });
-        setSubmitting(false);
-      }, 800);
+      setStatus({ severity: 'error', message: 'The contact form is unavailable right now. Please try again later.' });
+      setSubmitting(false);
       return;
     }
 

@@ -102,6 +102,7 @@ export default function Dashboard() {
   const [snackMsg, setSnackMsg] = useState('');
   const [snackSeverity, setSnackSeverity] = useState('success');
   const wpConfigured = Boolean(getWpBaseUrl());
+  const forgotPasswordUrl = wpConfigured ? `${getWpBaseUrl()}/wp-login.php?action=lostpassword` : '';
 
   const showSnack = (msg, severity = 'success') => {
     setSnackMsg(msg);
@@ -158,6 +159,16 @@ export default function Dashboard() {
     if (typeof q === 'string') setSection(q);
   }, [router.query.section]);
 
+  // WordPress sends partners here after they set or reset their password (CMS hotfix).
+  useEffect(() => {
+    if (router.query.password === 'updated') {
+      showSnack('Your password has been saved. Sign in with your email and new password.');
+      setLoginOpen(true);
+      router.replace('/partners-stakeholders', undefined, { shallow: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router.query.password]);
+
   const changeSection = (key) => {
     // Any nav-triggered section change (sidebar link, "New report" button, etc.) is a
     // fresh entry into that section — only handleEditReport should land on a pre-filled form.
@@ -178,19 +189,6 @@ export default function Dashboard() {
     e.preventDefault();
     setLoginError('');
 
-    if (loginForm.username === 'your-email@domian.com' && loginForm.password === 'admin123') {
-      const demoToken = 'DEMO_JWT_TOKEN_' + Date.now();
-      sessionStorage.setItem(TOKEN_KEY, demoToken);
-      sessionStorage.setItem(USER_EMAIL_KEY, loginForm.username);
-      setToken(demoToken);
-      setUserEmail(loginForm.username);
-      setLoginOpen(false);
-      setLoginForm({ username: '', password: '' });
-      await refreshOrgStatus(loginForm.username);
-      showSnack('Demo login successful!');
-      return;
-    }
-
     try {
       const { token: jwt, email } = await getJwtToken(loginForm.username, loginForm.password);
       sessionStorage.setItem(TOKEN_KEY, jwt);
@@ -201,7 +199,7 @@ export default function Dashboard() {
       setLoginForm({ username: '', password: '' });
       await refreshOrgStatus(email || loginForm.username);
     } catch (err) {
-      setLoginError(err.message || 'Login failed. For demo, use your-email@domian.com / admin123');
+      setLoginError(err.message || 'Sign-in failed. Please try again.');
     }
   };
 
@@ -232,12 +230,16 @@ export default function Dashboard() {
           <Typography sx={{ fontSize: '0.85rem', color: '#5A5A5A', mb: 2 }}>
             Sign in with the email address from your organisation registration.
           </Typography>
-          <Alert severity="info" sx={{ mb: 2, fontSize: '0.75rem' }}>
-            <strong>Demo:</strong> your-email@domian.com / admin123
-          </Alert>
           {loginError && <Alert severity="error" sx={{ mb: 2 }}>{loginError}</Alert>}
-          <TextField label="Email" fullWidth required value={loginForm.username} onChange={(e) => setLoginForm((f) => ({ ...f, username: e.target.value }))} sx={{ mb: 2 }} size="small" />
-          <TextField label="Password" type="password" fullWidth required value={loginForm.password} onChange={(e) => setLoginForm((f) => ({ ...f, password: e.target.value }))} size="small" />
+          <TextField label="Email" type="email" autoComplete="username" fullWidth required value={loginForm.username} onChange={(e) => setLoginForm((f) => ({ ...f, username: e.target.value }))} sx={{ mb: 2 }} size="small" />
+          <TextField label="Password" type="password" autoComplete="current-password" fullWidth required value={loginForm.password} onChange={(e) => setLoginForm((f) => ({ ...f, password: e.target.value }))} size="small" />
+          {forgotPasswordUrl && (
+            <Typography sx={{ fontSize: '0.8rem', mt: 1.5 }}>
+              {/* Interim: WordPress's own reset screen. The CMS hotfix sends people back here afterwards.
+                  Replaced by /partners-stakeholders/forgot-password when Karamoja Core ships. */}
+              <a href={forgotPasswordUrl} style={{ color: '#C1440E' }}>Forgot your password?</a>
+            </Typography>
+          )}
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={() => setLoginOpen(false)}>Cancel</Button>
@@ -266,7 +268,7 @@ export default function Dashboard() {
         >
           {!wpConfigured && (
             <Alert severity="info" sx={{ mb: 3 }}>
-              CMS URL not set — configure <code>NEXT_PUBLIC_WP_BASE_URL</code> for live data. Demo login does not sync submissions.
+              CMS URL not set — configure <code>NEXT_PUBLIC_WP_BASE_URL</code> for live data.
             </Alert>
           )}
 
@@ -379,7 +381,7 @@ export default function Dashboard() {
       <Box sx={{ maxWidth: 1100, mx: 'auto', px: { xs: 2, md: 4 }, py: { xs: 4, md: 6 } }}>
         {!wpConfigured && (
           <Alert severity="info" sx={{ mb: 3 }}>
-            CMS URL not set — configure <code>NEXT_PUBLIC_WP_BASE_URL</code> for live data. Demo login does not sync submissions.
+            CMS URL not set — configure <code>NEXT_PUBLIC_WP_BASE_URL</code> for live data.
           </Alert>
         )}
 
