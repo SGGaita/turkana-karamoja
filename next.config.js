@@ -1,6 +1,9 @@
-const wpImagePatterns = [
-  { protocol: 'http', hostname: 'localhost', pathname: '/turkana-karamoja-hub/**' },
-];
+// Local XAMPP images are only allowed in development (or when ALLOW_LOCAL_WP_IMAGES=true for a local
+// production build). In production the image optimiser must not fetch from localhost (audit v3 N-4).
+const allowLocalImages = process.env.NODE_ENV !== 'production' || process.env.ALLOW_LOCAL_WP_IMAGES === 'true';
+const wpImagePatterns = allowLocalImages
+  ? [{ protocol: 'http', hostname: 'localhost', pathname: '/**' }]
+  : [];
 if (process.env.NEXT_PUBLIC_WP_BASE_URL) {
   try {
     const wpUrl = new URL(process.env.NEXT_PUBLIC_WP_BASE_URL);
@@ -22,9 +25,18 @@ const nextConfig = {
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },
-      { protocol: 'http', hostname: 'localhost', pathname: '/**' },
       ...wpImagePatterns,
     ],
+  },
+  async redirects() {
+    return [
+      // Removed from the public site (audit v3 §12.7). Admin docs live in wp-admin, technical docs in the repo.
+      { source: '/help/admin-guide', destination: '/help', permanent: true },
+      { source: '/help/technical', destination: '/help', permanent: true },
+      // Legacy routes, previously redirected in client-side JS.
+      { source: '/dashboard', destination: '/partners-stakeholders', permanent: true },
+      { source: '/submit', destination: '/partners-stakeholders', permanent: true },
+    ];
   },
 };
 
