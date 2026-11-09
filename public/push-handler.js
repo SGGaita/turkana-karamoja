@@ -11,13 +11,16 @@ self.addEventListener('push', (event) => {
     /* use defaults */
   }
 
+  // One notification per alert: a later notice for the same alert (an update or a cancellation) replaces it.
+  // RED alerts stay on screen until the person acts on them.
   const options = {
     body: data.body,
     icon: '/icons/icon-192.png',
     badge: '/icons/badge-96.png',
-    data: { url: data.url || '/early-warnings' },
-    tag: 'karamoja-alert',
-    renotify: true,
+    data: { url: data.url || '/early-warnings', alertId: data.alertId, state: data.state || 'active' },
+    tag: data.tag || 'karamoja-alert',
+    renotify: data.state !== 'cancelled',
+    requireInteraction: data.requireInteraction === true,
   };
 
   event.waitUntil(self.registration.showNotification(data.title, options));
