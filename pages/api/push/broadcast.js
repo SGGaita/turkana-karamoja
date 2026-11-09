@@ -38,8 +38,24 @@ export default async function handler(req, res) {
     title = 'New climate alert',
     body = 'A new advisory has been published.',
     url = '/early-warnings',
+    tag,
+    level,
+    state,
+    alertId,
+    requireInteraction,
   } = req.body || {};
-  const payload = JSON.stringify({ title, body, url });
+  // Only pass through what the service worker understands, in safe shapes (Karamoja Core 0.5.0 sends these).
+  const safeUrl = typeof url === 'string' && url.startsWith('/') && !url.startsWith('//') ? url : '/early-warnings';
+  const payload = JSON.stringify({
+    title: String(title).slice(0, 120),
+    body: String(body).slice(0, 240),
+    url: safeUrl,
+    tag: typeof tag === 'string' && /^[a-z0-9-]{1,64}$/i.test(tag) ? tag : undefined,
+    level: ['red', 'orange', 'yellow', 'green'].includes(level) ? level : undefined,
+    state: state === 'cancelled' ? 'cancelled' : 'active',
+    alertId: Number.isInteger(alertId) ? alertId : undefined,
+    requireInteraction: requireInteraction === true,
+  });
 
   let subs;
   try {
