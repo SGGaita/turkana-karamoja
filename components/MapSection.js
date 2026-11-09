@@ -30,7 +30,7 @@ export default function MapSection({
   showFooter = true,
   eyebrow = 'Geographic Coverage',
   title = 'Regional Coverage Map',
-  subtitle = `Interactive view of climate monitoring stations, published advisories, and key communities across ${COVERAGE_NARRATIVE} Click any marker for details.`,
+  subtitle = `Interactive view of published advisories and key communities across ${COVERAGE_NARRATIVE} Click any marker for details.`,
   id = 'map',
 }) {
   return (

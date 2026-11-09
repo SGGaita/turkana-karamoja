@@ -1,6 +1,7 @@
 import { Box, Typography, Divider } from '@mui/material';
 import { APP_NAME, APP_TAGLINE, APP_COPYRIGHT } from '../lib/branding';
 import { FOOTER_REGIONS } from '../lib/regions';
+import { TOLL_FREE_LINES } from '../lib/toll-free-lines';
 import { useLocalizedHomeSections } from '../contexts/LanguageContext';
 
 const partners = ['KMD', 'UMA', 'NDMA', 'OPM', 'OCHA', 'FAO', 'ICPAC', 'UNICEF', 'WFP'];
@@ -12,7 +13,7 @@ export default function Footer() {
   const footerLinks = {
     [footer.columnKaramoja || 'Karamoja']: footer.linksKaramoja?.length
       ? footer.linksKaramoja
-      : ['About Karamoja', 'Our Partners', 'Data Sources', 'API Access', 'Methodology'],
+      : ['About Karamoja', 'Our Partners', 'Data Sources', 'Methodology'],
     [footer.columnServices || 'Services']: footer.linksServices?.length
       ? footer.linksServices
       : ['Early Warnings', 'Weather Forecasts', 'Community Bulletins', 'Submit Advisory', 'Donor Portal'],
@@ -129,13 +130,16 @@ export default function Footer() {
               >
                 {footer.contactLink || 'Contact Us →'}
               </Box>
-              {[
-                { label: 'Lodwar, Turkana County, Kenya', sub: '' },
-                { label: 'Moroto, Uganda', sub: '' },
-                { label: '+254 (0)54 22 XXX', sub: 'Turkana Coordination Unit' },
-                { label: 'info@tkclimate.org', sub: '' },
-                { label: 'Emergency: +254 700 000 000', sub: '24/7 duty officer' },
-              ].map((c) => (
+              {(footer.contacts?.length
+                ? footer.contacts
+                : [
+                  // Interim until the footer contacts come from the CMS (audit v3 §8). Placeholder
+                  // numbers, the demo email and the fake "24/7 duty officer" line were removed (E8).
+                  { label: 'Lodwar, Turkana County, Kenya', sub: '' },
+                  { label: 'Moroto, Uganda', sub: '' },
+                  ...TOLL_FREE_LINES.map((l) => ({ label: l.display, sub: l.label })),
+                ]
+              ).map((c) => (
                 <Box key={c.label}>
                   <Typography sx={{ fontSize: '0.78rem', color: '#9A9A9A', lineHeight: 1.5 }}>{c.label}</Typography>
                   {c.sub && <Typography sx={{ fontSize: '0.68rem', color: '#6B4226' }}>{c.sub}</Typography>}

@@ -29,13 +29,7 @@ const communityMarkers = HUB_MAP_LOCATIONS.map((loc) => ({
   type: 'Community',
 }));
 
-const weatherStations = [
-  { name: 'Lodwar Met Station',  lat: 3.12, lng: 35.61, temp: 38, humidity: 18, rainfall: '0.2 mm', wind: 'NE 12 km/h' },
-  { name: 'Lokichogio Station',  lat: 4.22, lng: 34.35, temp: 35, humidity: 22, rainfall: '0 mm',   wind: 'N 8 km/h'   },
-  { name: 'Moroto Station',      lat: 2.54, lng: 34.68, temp: 32, humidity: 28, rainfall: '1.5 mm', wind: 'SE 6 km/h'  },
-  { name: 'Kakuma Station',      lat: 3.73, lng: 34.88, temp: 36, humidity: 20, rainfall: '0 mm',   wind: 'NE 10 km/h' },
-  { name: 'Kapenguria Station',  lat: 1.24, lng: 35.11, temp: 33, humidity: 24, rainfall: '0.5 mm', wind: 'NE 9 km/h'  },
-];
+// Weather stations removed: their readings were hardcoded, not live (audit v3 E7).
 
 const ALERT_RADII = { severe: 55000, moderate: 45000, watch: 35000 };
 
@@ -46,16 +40,6 @@ function makeCommunityIcon() {
     iconSize: [12, 12],
     iconAnchor: [6, 6],
     popupAnchor: [0, -10],
-  });
-}
-
-function makeStationIcon() {
-  return L.divIcon({
-    html: `<div style="width:20px;height:20px;background:#2E7BB4;border:2.5px solid white;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,0.35);"></div>`,
-    className: '',
-    iconSize: [20, 20],
-    iconAnchor: [10, 10],
-    popupAnchor: [0, -14],
   });
 }
 
@@ -72,7 +56,6 @@ function makeAdvisoryIcon(color) {
 const LAYERS = [
   { key: 'all',     label: 'All' },
   { key: 'alerts',  label: 'Alerts' },
-  { key: 'weather', label: 'Weather' },
 ];
 
 const filterBtn = (active) => ({
@@ -97,7 +80,6 @@ export default function RegionalMap({ liveAdvisories = [], apiStale = false }) {
 
   const hasLiveAdvisories = liveAdvisories.length > 0;
   const showAlerts = activeLayer === 'all' || activeLayer === 'alerts';
-  const showStations  = activeLayer === 'all' || activeLayer === 'weather';
   const showCommunities = activeLayer === 'all';
 
   return (
@@ -148,10 +130,6 @@ export default function RegionalMap({ liveAdvisories = [], apiStale = false }) {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.65, pt: 0.75, borderTop: '1px solid #E8E0D5' }}>
           <Box sx={{ width: 10, height: 10, bgcolor: '#2E8B57', borderRadius: '50%', border: '1.5px solid white', flexShrink: 0 }} />
           <Typography sx={{ fontSize: '0.7rem', color: '#5A5A5A' }}>Community</Typography>
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.65 }}>
-          <Box sx={{ width: 12, height: 12, bgcolor: '#2E7BB4', borderRadius: '3px', border: '1.5px solid white', flexShrink: 0 }} />
-          <Typography sx={{ fontSize: '0.7rem', color: '#5A5A5A' }}>Met Station</Typography>
         </Box>
       </Box>
 
@@ -293,19 +271,6 @@ export default function RegionalMap({ liveAdvisories = [], apiStale = false }) {
             </Marker>
           ))}
 
-          {showStations && weatherStations.map((ws) => (
-            <Marker
-              key={ws.name}
-              position={[ws.lat, ws.lng]}
-              icon={makeStationIcon()}
-              eventHandlers={{ click: () => setSelected({ type: 'station', data: ws }) }}
-            >
-              <Popup>
-                <strong>{ws.name}</strong><br />
-                {ws.temp}°C · {ws.humidity}% RH · {ws.rainfall}
-              </Popup>
-            </Marker>
-          ))}
         </MapContainer>
       </Box>
     </Box>

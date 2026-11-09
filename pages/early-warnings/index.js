@@ -45,7 +45,7 @@ export default function EarlyWarnings({ alerts, mapAdvisories, alertLegend, apiS
             apiStale={apiStale}
             eyebrow="Live map"
             title="Advisory coverage map"
-            subtitle="Published advisories with pinned locations appear on the map below. Use the layer filters to switch between alerts, weather stations, and communities."
+            subtitle="Published advisories with pinned locations appear on the map below. Use the layer filters to switch between alerts and communities."
           />
         </Box>
 
