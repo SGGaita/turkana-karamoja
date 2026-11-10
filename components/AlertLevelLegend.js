@@ -1,11 +1,14 @@
 import { Box, Typography } from '@mui/material';
 import { fallbackAlertLegend } from '../lib/fallback-data';
+import { useShell } from '../contexts/LanguageContext';
 
 export const ALERT_LEVEL_LEGEND = fallbackAlertLegend.items;
 
 export default function AlertLevelLegend({ title, items, compact = false }) {
-  const legendTitle = title || fallbackAlertLegend.title;
-  const legendItems = items?.length ? items : fallbackAlertLegend.items;
+  // Site settings → Alert legend once saved; then what the page passed; then the built-in guide.
+  const fromCms = useShell()?.legend;
+  const legendTitle = fromCms?.title || title || fallbackAlertLegend.title;
+  const legendItems = fromCms?.items?.length ? fromCms.items : (items?.length ? items : fallbackAlertLegend.items);
 
   return (
     <Box

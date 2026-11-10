@@ -166,7 +166,7 @@ export function LanguageProvider({
     };
     const globalsFor = (loc) => clientGlobals[loc] || SNAPSHOT_GLOBALS[loc] || clientGlobals.en || SNAPSHOT_GLOBALS.en || null;
     // Languages not marked ready in Site settings → Languages fall back to English.
-    const offered = shellFromGlobals(globalsFor('en'))?.languages;
+    const offered = shellFromGlobals(globalsFor(cmsLoc))?.languages; // Every language's settings carry the list; the freshest copy wins.
     const allowed = !offered || offered.some((l) => l.code === activeLocale || l.cms === cmsLoc);
     const effective = allowed ? activeLocale : 'en';
     const legacyHeader = headers[effective] || headers.en || fallbackSiteHeader;

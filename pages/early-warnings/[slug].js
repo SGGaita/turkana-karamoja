@@ -15,8 +15,13 @@ import ShareLinks from '../../components/ShareLinks';
 import PageHero from '../../components/PageHero';
 import StaleContentBanner from '../../components/StaleContentBanner';
 import AlertLevelLegend from '../../components/AlertLevelLegend';
-import { getAlertById, getAlerts, getAlertLegend } from '../../lib/wordpress';
+import { getAlertById, getAlertLegend } from '../../lib/wordpress';
 import { buildSlugPath, extractIdFromSlugPath } from '../../lib/slug';
+import { getAlert, getPageAllLocales, inAllLocales, isPublishedPage } from '../../lib/cms';
+import { alertFromCms, pickLocale } from '../../lib/cms-alerts';
+import { useLanguage } from '../../contexts/LanguageContext';
+
+const HERO_IMAGE = 'https://images.unsplash.com/photo-1504608524841-42584120d693?w=1400&q=70';
 
 const ADVISORY_PAGE_WIDTH = 1400;
 
@@ -30,8 +35,13 @@ const panelCardSx = {
   overflow: 'hidden',
 };
 
-export default function AdvisoryDetail({ alert, alertLegend, apiStale }) {
+export default function AdvisoryDetail({ alert: legacyAlert, alertLegend, apiStale, alertByLocale, pageByLocale }) {
   const router = useRouter();
+  const { locale } = useLanguage();
+  // Karamoja Core: the alert in the reader's language (English where not translated).
+  const alert = alertByLocale ? alertFromCms(pickLocale(alertByLocale, locale)) : legacyAlert;
+  const sections = pickLocale(pageByLocale, locale)?.sections || null;
+  const label = (section, field, fallback) => (sections?.[section]?.[field] || fallback);
 
   if (router.isFallback) {
     return (
@@ -50,11 +60,11 @@ export default function AdvisoryDetail({ alert, alertLegend, apiStale }) {
   const alertPath = `/early-warnings/${buildSlugPath(alert.title, alert.id)}`;
 
   return (
-    <Layout title={alert.title} description={alert.body}>
+    <Layout title={alert.title} description={String(alert.body || "").replace(/<[^>]*>/g, "").slice(0, 160)}>
       <PageHero
         title={alert.title}
-        subtitle={alert.area || 'Early warning advisory'}
-        image="https://images.unsplash.com/photo-1504608524841-42584120d693?w=1400&q=70"
+        subtitle={alert.area || label('hero', 'fallback_subtitle', 'Early warning advisory')}
+        image={sections?.hero?.image?.url || HERO_IMAGE}
         breadcrumbs={['Early Warnings', alert.level]}
         contentMaxWidth={ADVISORY_PAGE_WIDTH}
       />
@@ -154,10 +164,29 @@ export default function AdvisoryDetail({ alert, alertLegend, apiStale }) {
                       {alert.issued && alert.valid ? ' · ' : ''}
                       {alert.valid || ''}
                     </Typography>
+                    {alert.updated && (
+                      <Typography sx={{ fontSize: '0.75rem', color: '#6B5E52', mt: 0.25 }}>
+                        Last updated {alert.updated}
+                      </Typography>
+                    )}
                   </Box>
                 </Box>
               )}
             </Box>
+
+            {alertByLocale && !alert.active && (
+              <Box role="status" sx={{ bgcolor: '#F4F1EE', border: '1px solid #D9D2CA', borderRadius: 2, p: 2, mb: 3 }}>
+                <Typography sx={{ fontWeight: 700, color: '#3D2B1F', fontSize: '0.9rem' }}>
+                  {alert.cancelled ? 'This warning was cancelled.' : 'This warning is no longer active.'}
+                </Typography>
+                {alert.cancelled && alert.cancelReason && (
+                  <Typography sx={{ color: '#5A5A5A', fontSize: '0.85rem', mt: 0.5 }}>{alert.cancelReason}</Typography>
+                )}
+                <Typography component={Link} href="/early-warnings" sx={{ color: '#2E7BB4', fontSize: '0.85rem' }}>
+                  See the active warnings
+                </Typography>
+              </Box>
+            )}
 
             <Box sx={{ mb: 3 }}>
               <ShareLinks title={alert.title} path={alertPath} size="medium" />
@@ -168,9 +197,17 @@ export default function AdvisoryDetail({ alert, alertLegend, apiStale }) {
             <Typography sx={{ fontWeight: 700, fontSize: '0.95rem', color: '#3D2B1F', mb: 1.25 }}>
               Situation
             </Typography>
-            <Typography sx={{ fontSize: '0.95rem', color: '#3D2B1F', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
-              {alert.body || 'No advisory details were provided.'}
-            </Typography>
+            {alert.bodyHtml ? (
+              // Sanitised by Karamoja Core (strict allow-list: paragraphs, lists, emphasis, links).
+              <Box
+                sx={{ fontSize: '0.95rem', color: '#3D2B1F', lineHeight: 1.8, '& p': { mt: 0, mb: 1.5 }, '& a': { color: '#2E7BB4' }, '& ul, & ol': { pl: 3 } }}
+                dangerouslySetInnerHTML={{ __html: alert.bodyHtml }}
+              />
+            ) : (
+              <Typography sx={{ fontSize: '0.95rem', color: '#3D2B1F', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
+                {alert.body || 'No advisory details were provided.'}
+              </Typography>
+            )}
 
             {actions.length > 0 && (
               <Box
@@ -194,7 +231,7 @@ export default function AdvisoryDetail({ alert, alertLegend, apiStale }) {
                   }}
                 >
                   <ChecklistOutlinedIcon sx={{ fontSize: 20, color: alert.color }} />
-                  Recommended actions
+                  {label('actions', 'title', 'Recommended actions')}
                 </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
                   {actions.map((act) => (
@@ -232,7 +269,7 @@ export default function AdvisoryDetail({ alert, alertLegend, apiStale }) {
                 }}
               >
                 <ShareOutlinedIcon sx={{ fontSize: 18, color: '#C1440E' }} />
-                Share
+                {label('share', 'text', 'Share')}
               </Typography>
               <ShareLinks title={alert.title} path={alertPath} size="medium" />
             </Box>
@@ -346,17 +383,46 @@ export default function AdvisoryDetail({ alert, alertLegend, apiStale }) {
 }
 
 export async function getStaticPaths() {
-  const { data } = await getAlerts();
-  return {
-    paths: (data || [])
-      .filter((a) => a.id != null)
-      .map((a) => ({ params: { slug: buildSlugPath(a.title, a.id) } })),
-    fallback: true,
-  };
+  // Pages are built on first visit and then kept (ISR); instant updates rebuild them on change.
+  return { paths: [], fallback: 'blocking' };
+}
+
+/** Karamoja Core: the alert in every language, and the detail page text. Null = not found. */
+async function cmsProps(id) {
+  let alertByLocale;
+  try {
+    alertByLocale = await inAllLocales((l) => getAlert(id, l));
+  } catch (err) {
+    if (err?.code === 'karamoja_not_found') return null;
+    throw err;
+  }
+  const pages = await getPageAllLocales('alert-detail').catch(() => null);
+  return { alertByLocale, pageByLocale: isPublishedPage(pages?.en) ? pages : null, apiStale: false };
 }
 
 export async function getStaticProps({ params }) {
   const id = extractIdFromSlugPath(params.slug);
+  if (!/^\d+$/.test(String(id))) return { notFound: true };
+
+  let props = null;
+  let cmsAnswered = false;
+  try {
+    props = await cmsProps(id);
+    cmsAnswered = true;
+  } catch (err) {
+    if (process.env.NODE_ENV === 'development') console.warn('[cms] alert:', err.message);
+  }
+  if (cmsAnswered) {
+    if (!props) return { notFound: true, revalidate: 120 };
+    const en = props.alertByLocale.en;
+    const canonical = buildSlugPath(en.title, en.id);
+    if (canonical !== params.slug) {
+      return { redirect: { destination: `/early-warnings/${canonical}`, permanent: true } };
+    }
+    return { props, revalidate: 120 };
+  }
+
+  // Karamoja Core not reachable: the old endpoint, as before.
   const [{ data, apiStale }, alertLegendRes] = await Promise.all([
     getAlertById(id),
     getAlertLegend(),
