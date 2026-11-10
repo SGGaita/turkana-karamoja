@@ -68,7 +68,7 @@ export default function GetInvolvedSection() {
 
         <Button
           component={Link}
-          href="/partners-stakeholders"
+          href={copy.buttonHref || '/partners-stakeholders'}
           variant="contained"
           size="large"
           startIcon={<HandshakeOutlinedIcon />}
