@@ -3,6 +3,8 @@ import { fallbackSiteHeader, fallbackHomeSections } from '../lib/fallback-data';
 import { getHomeSections, getSiteHeader } from '../lib/wordpress';
 import { mapSiteHeader } from '../lib/wp-mappers';
 import siteHeaderSnapshot from '../lib/site-header.snapshot.json';
+import { cmsLocale, getGlobals } from '../lib/cms';
+import { isPublishedGlobals, shellFromGlobals } from '../lib/cms-globals';
 
 export const LANG_COOKIE = 'tk_hub_lang';
 export const SUPPORTED_LOCALES = ['en', 'sw', 'tu', 'pk', 'ng'];
@@ -25,9 +27,10 @@ function writeLangCookie(locale) {
 const CMS_CACHE_MAX_AGE_MS = 1000 * 60 * 30;
 const HOME_SECTION_LOCALES = ['en', 'sw'];
 
-function createCmsLoader(storageKey, fetcher) {
+function createCmsLoader(storageKey, fetcher, { refreshEachVisit = false } = {}) {
   const memory = {};
   const inflight = {};
+  const refreshed = {};
 
   const readStore = () => {
     try {
@@ -69,8 +72,11 @@ function createCmsLoader(storageKey, fetcher) {
     get(locale, onFresh) {
       const stored = readStore()[locale];
       if (stored?.data && !memory[locale]) memory[locale] = stored.data;
-      const isFresh = stored && Date.now() - stored.at < CMS_CACHE_MAX_AGE_MS;
-      if (!isFresh) fetchFresh(locale).then((data) => data && onFresh(data));
+      const isFresh = stored && Date.now() - stored.at < CMS_CACHE_MAX_AGE_MS && !(refreshEachVisit && !refreshed[locale]);
+      if (!isFresh) {
+        refreshed[locale] = true;
+        fetchFresh(locale).then((data) => data && onFresh(data));
+      }
       return memory[locale] || null;
     },
   };
@@ -78,6 +84,14 @@ function createCmsLoader(storageKey, fetcher) {
 
 const siteHeaderLoader = createCmsLoader('tk_hub_site_header_v1', getSiteHeader);
 const homeSectionsLoader = createCmsLoader('tk_hub_home_sections_v1', getHomeSections);
+// Karamoja → Site settings: checked once per visit so edits show on the next page load (cheap: ETag / 304).
+const globalsLoader = createCmsLoader(
+  'kc_globals_v1',
+  (loc) => getGlobals(loc).then((data) => ({ data, apiStale: !isPublishedGlobals(data) })),
+  { refreshEachVisit: true },
+);
+// Saved into the build by scripts/fetch-site-header.js, so the first paint already has the CMS header and footer.
+const SNAPSHOT_GLOBALS = siteHeaderSnapshot?.globals || {};
 
 function useCmsContent(loader, locale, enabled) {
   const [byLocale, setByLocale] = useState(() => ({ ...loader.memory }));
@@ -107,6 +121,7 @@ const LanguageContext = createContext({
   siteHeaderByLocale: { en: fallbackSiteHeader, sw: fallbackSiteHeader },
   homeSectionsByLocale: { en: fallbackHomeSections, sw: fallbackHomeSections },
   heroByLocale: null,
+  shell: null,
 });
 
 export function LanguageProvider({
@@ -133,31 +148,42 @@ export function LanguageProvider({
     homeSectionsLoader, homeLocale, mounted && !homeSectionsByLocale?.[homeLocale],
   );
 
+  const cmsLoc = cmsLocale(activeLocale);
+  const clientGlobals = useCmsContent(globalsLoader, cmsLoc, mounted);
+
   const setLocale = useCallback((nextLocale) => {
     if (!SUPPORTED_LOCALES.includes(nextLocale)) return;
     setLocaleState(nextLocale);
     writeLangCookie(nextLocale);
   }, []);
 
-  const value = useMemo(
-    () => ({
-      locale: mounted ? locale : 'en',
+  const value = useMemo(() => {
+    const headers = {
+      en: fallbackSiteHeader,
+      ...SNAPSHOT_SITE_HEADER,
+      ...clientSiteHeader,
+      ...(siteHeaderByLocale || {}),
+    };
+    const globalsFor = (loc) => clientGlobals[loc] || SNAPSHOT_GLOBALS[loc] || clientGlobals.en || SNAPSHOT_GLOBALS.en || null;
+    // Languages not marked ready in Site settings → Languages fall back to English.
+    const offered = shellFromGlobals(globalsFor('en'))?.languages;
+    const allowed = !offered || offered.some((l) => l.code === activeLocale || l.cms === cmsLoc);
+    const effective = allowed ? activeLocale : 'en';
+    const legacyHeader = headers[effective] || headers.en || fallbackSiteHeader;
+    const shell = shellFromGlobals(globalsFor(cmsLocale(effective)), legacyHeader);
+    return {
+      locale: effective,
       setLocale,
-      siteHeaderByLocale: {
-        en: fallbackSiteHeader,
-        ...SNAPSHOT_SITE_HEADER,
-        ...clientSiteHeader,
-        ...(siteHeaderByLocale || {}),
-      },
+      shell,
+      siteHeaderByLocale: shell ? { ...headers, [effective]: shell.header } : headers,
       homeSectionsByLocale: {
         en: fallbackHomeSections,
         ...clientHomeSections,
         ...(homeSectionsByLocale || {}),
       },
       heroByLocale,
-    }),
-    [mounted, locale, setLocale, siteHeaderByLocale, homeSectionsByLocale, clientSiteHeader, clientHomeSections, heroByLocale]
-  );
+    };
+  }, [activeLocale, cmsLoc, setLocale, siteHeaderByLocale, homeSectionsByLocale, clientSiteHeader, clientHomeSections, clientGlobals, heroByLocale]);
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 }
@@ -182,4 +208,9 @@ export function useLocalizedHero(fallbackHero) {
     return heroByLocale[locale] || heroByLocale.en || fallbackHero;
   }
   return fallbackHero;
+}
+
+/** Header, footer, helplines, languages and SEO from Karamoja → Site settings, or null (old sources in use). */
+export function useShell() {
+  return useLanguage().shell;
 }

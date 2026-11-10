@@ -1,6 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import PhoneInTalkOutlinedIcon from '@mui/icons-material/PhoneInTalkOutlined';
 import { TOLL_FREE_LINES } from '../lib/toll-free-lines';
+import { useShell } from '../contexts/LanguageContext';
 
 const VARIANTS = {
   light: {
@@ -25,6 +26,10 @@ const VARIANTS = {
 
 export default function TollFreeLines({ variant = 'light', title = 'Toll-free helplines', subtitle = 'Free to call from any network', sx }) {
   const v = VARIANTS[variant] || VARIANTS.light;
+  // Site settings → Hotlines once saved (an empty list hides the block); the built-in list until then.
+  const shell = useShell();
+  const lines = shell ? shell.hotlines : TOLL_FREE_LINES;
+  if (!lines.length) return null;
 
   return (
     <Box sx={{ ...v.wrap, ...sx }}>
@@ -35,7 +40,7 @@ export default function TollFreeLines({ variant = 'light', title = 'Toll-free he
         <Typography sx={{ fontSize: '0.8rem', color: v.sub, mb: 2 }}>{subtitle}</Typography>
       )}
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
-        {TOLL_FREE_LINES.map((line) => (
+        {lines.map((line) => (
           <Box
             key={line.tel}
             component="a"

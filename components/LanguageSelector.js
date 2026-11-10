@@ -4,12 +4,15 @@ import LanguageIcon from '@mui/icons-material/Language';
 import CheckIcon from '@mui/icons-material/Check';
 
 import { HUB_LANGUAGES } from '../lib/languages';
-import { useLanguage, SUPPORTED_LOCALES } from '../contexts/LanguageContext';
-
-const languages = HUB_LANGUAGES;
+import { useLanguage, useShell, SUPPORTED_LOCALES } from '../contexts/LanguageContext';
+import { cmsLocale } from '../lib/cms';
 
 export default function LanguageSelector({ variant = 'default' }) {
   const { locale, setLocale } = useLanguage();
+  // Site settings → Languages decides which languages are offered; the built-in list until those are saved.
+  const shell = useShell();
+  const languages = shell?.languages?.length ? shell.languages : HUB_LANGUAGES;
+  const isCurrent = (lang) => lang.code === locale || (lang.cms && lang.cms === cmsLocale(locale));
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -28,7 +31,7 @@ export default function LanguageSelector({ variant = 'default' }) {
     }
   };
 
-  const currentLanguage = languages.find((lang) => lang.code === locale) || languages[0];
+  const currentLanguage = languages.find(isCurrent) || languages[0];
   const isDrawer = variant === 'drawer';
 
   return (
@@ -78,7 +81,7 @@ export default function LanguageSelector({ variant = 'default' }) {
             <MenuItem
               key={lang.code}
               onClick={() => handleLanguageSelect(lang.code)}
-              selected={lang.code === locale}
+              selected={isCurrent(lang)}
               disabled={!isSupported}
               sx={{
                 py: 1.5,
@@ -93,11 +96,13 @@ export default function LanguageSelector({ variant = 'default' }) {
                   <Typography sx={{ fontSize: '0.88rem', fontWeight: 600, color: '#3D2B1F', mb: 0.2 }}>
                     {lang.nativeName}
                   </Typography>
-                  <Typography sx={{ fontSize: '0.7rem', color: '#9A9A9A' }}>
-                    {lang.name}
-                  </Typography>
+                  {lang.name && lang.name !== lang.nativeName && (
+                    <Typography sx={{ fontSize: '0.7rem', color: '#9A9A9A' }}>
+                      {lang.name}
+                    </Typography>
+                  )}
                 </Box>
-                {lang.code === locale && (
+                {isCurrent(lang) && (
                   <CheckIcon sx={{ fontSize: 18, color: '#C1440E', ml: 2 }} />
                 )}
               </Box>
