@@ -2,29 +2,52 @@ import { Box, Typography, Divider } from '@mui/material';
 import { APP_NAME, APP_TAGLINE, APP_COPYRIGHT } from '../lib/branding';
 import { FOOTER_REGIONS } from '../lib/regions';
 import { TOLL_FREE_LINES } from '../lib/toll-free-lines';
-import { useLocalizedHomeSections } from '../contexts/LanguageContext';
+import Link from 'next/link';
+import { useLocalizedHomeSections, useShell } from '../contexts/LanguageContext';
 import { withoutRetiredLinks } from '../lib/topbar-links';
 
-const partners = ['KMD', 'UMA', 'NDMA', 'OPM', 'OCHA', 'FAO', 'ICPAC', 'UNICEF', 'WFP'];
+/** The old footer content (home sections + built-in lists), until Site settings are saved. */
+function legacyFooter(footer) {
+  const asLinks = (list) => withoutRetiredLinks(list).map((l) => (typeof l === 'string' ? { label: l, href: '' } : l));
+  return {
+    siteName: APP_NAME,
+    tagline: APP_TAGLINE,
+    about: footer.metaDescription,
+    partners: ['KMD', 'UMA', 'NDMA', 'OPM', 'OCHA', 'FAO', 'ICPAC', 'UNICEF', 'WFP'],
+    columns: [
+      // "API Access" etc. may still be stored in the CMS or the browser cache; never show it.
+      { title: footer.columnKaramoja || 'Karamoja', links: asLinks(footer.linksKaramoja?.length ? footer.linksKaramoja : ['About Karamoja', 'Our Partners', 'Data Sources', 'Methodology']) },
+      { title: footer.columnServices || 'Services', links: asLinks(footer.linksServices?.length ? footer.linksServices : ['Early Warnings', 'Weather Forecasts', 'Community Bulletins', 'Submit Advisory', 'Donor Portal']) },
+    ],
+    regionsTitle: footer.columnRegions || 'Regions',
+    regions: FOOTER_REGIONS,
+    contactTitle: footer.columnContact || 'Contact',
+    contactLink: { label: footer.contactLink || 'Contact Us →', href: '/contact' },
+    contactLines: (footer.contacts?.length
+      ? footer.contacts
+      : [
+        // Placeholder numbers, the demo email and the fake "24/7 duty officer" line were removed (E8).
+        { label: 'Lodwar, Turkana County, Kenya', sub: '' },
+        { label: 'Moroto, Uganda', sub: '' },
+        ...TOLL_FREE_LINES.map((l) => ({ label: l.display, sub: l.label })),
+      ]).map((c) => ({ text: c.label, note: c.sub })),
+    copyright: `${APP_COPYRIGHT} · Kenya · Uganda`,
+    social: [],
+  };
+}
 
 export default function Footer() {
   const homeSections = useLocalizedHomeSections();
-  const footer = homeSections.footer || {};
-
-  const footerLinks = {
-    // "API Access" etc. may still be stored in the CMS or the browser cache; never show it.
-    [footer.columnKaramoja || 'Karamoja']: withoutRetiredLinks(
-      footer.linksKaramoja?.length
-        ? footer.linksKaramoja
-        : ['About Karamoja', 'Our Partners', 'Data Sources', 'Methodology'],
-    ),
-    [footer.columnServices || 'Services']: withoutRetiredLinks(
-      footer.linksServices?.length
-        ? footer.linksServices
-        : ['Early Warnings', 'Weather Forecasts', 'Community Bulletins', 'Submit Advisory', 'Donor Portal'],
-    ),
-    [footer.columnRegions || 'Regions']: FOOTER_REGIONS,
-  };
+  const shell = useShell();
+  if (shell && shell.footer.enabled === false) return null;
+  // Karamoja → Site settings → Footer once saved; the old content until then.
+  const data = shell
+    ? { ...shell.footer, contactLines: [...shell.footer.contactLines, ...shell.hotlines.map((l) => ({ text: l.display, note: l.label }))] }
+    : legacyFooter(homeSections.footer || {});
+  const columns = [
+    ...data.columns,
+    ...(data.regions.length ? [{ title: data.regionsTitle, links: data.regions.map((r) => ({ label: r, href: '' })) }] : []),
+  ];
 
   return (
     <Box
@@ -45,17 +68,17 @@ export default function Footer() {
                   lineHeight: 1.2,
                 }}
               >
-                {APP_NAME}
+                {data.siteName}
               </Typography>
               <Typography sx={{ fontSize: '0.62rem', color: '#D4A96A', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                {APP_TAGLINE}
+                {data.tagline}
               </Typography>
             </Box>
             <Typography sx={{ fontSize: '0.8rem', lineHeight: 1.75, mb: 2.5, maxWidth: 280 }}>
-              {footer.metaDescription}
+              {data.about}
             </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-              {partners.map((p) => (
+              {data.partners.map((p) => (
                 <Box
                   key={p}
                   sx={{
@@ -74,9 +97,18 @@ export default function Footer() {
                 </Box>
               ))}
             </Box>
+            {data.social.length > 0 && (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 2 }}>
+                {data.social.map((sl) => (
+                  <Box key={sl.url} component="a" href={sl.url} target="_blank" rel="noopener noreferrer" sx={{ fontSize: '0.75rem', color: '#D4A96A', textDecoration: 'none', textTransform: 'capitalize', '&:hover': { color: '#F0D9B0' } }}>
+                    {sl.network || sl.url}
+                  </Box>
+                ))}
+              </Box>
+            )}
           </Box>
 
-          {Object.entries(footerLinks).map(([heading, links]) => (
+          {columns.map(({ title: heading, links }) => (
             <Box key={heading} sx={{ flex: '1 1 140px' }}>
               <Typography
                 sx={{
@@ -92,9 +124,8 @@ export default function Footer() {
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 {links.map((link) => (
                   <Box
-                    key={link}
-                    component="a"
-                    href="#"
+                    key={link.label}
+                    {...(link.href ? { component: Link, href: link.href } : { component: 'span' })}
                     sx={{
                       fontSize: '0.78rem',
                       color: '#9A9A9A',
@@ -103,7 +134,7 @@ export default function Footer() {
                       transition: 'color 0.2s',
                     }}
                   >
-                    {link}
+                    {link.label}
                   </Box>
                 ))}
               </Box>
@@ -120,12 +151,13 @@ export default function Footer() {
                 mb: 2,
               }}
             >
-              {footer.columnContact || 'Contact'}
+              {data.contactTitle}
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+              {data.contactLink && (
               <Box
-                component="a"
-                href="/contact"
+                component={Link}
+                href={data.contactLink.href}
                 sx={{
                   fontSize: '0.78rem',
                   color: '#D4A96A',
@@ -134,21 +166,13 @@ export default function Footer() {
                   '&:hover': { color: '#F0D9B0' },
                 }}
               >
-                {footer.contactLink || 'Contact Us →'}
+                {data.contactLink.label}
               </Box>
-              {(footer.contacts?.length
-                ? footer.contacts
-                : [
-                  // Interim until the footer contacts come from the CMS (audit v3 §8). Placeholder
-                  // numbers, the demo email and the fake "24/7 duty officer" line were removed (E8).
-                  { label: 'Lodwar, Turkana County, Kenya', sub: '' },
-                  { label: 'Moroto, Uganda', sub: '' },
-                  ...TOLL_FREE_LINES.map((l) => ({ label: l.display, sub: l.label })),
-                ]
-              ).map((c) => (
-                <Box key={c.label}>
-                  <Typography sx={{ fontSize: '0.78rem', color: '#9A9A9A', lineHeight: 1.5 }}>{c.label}</Typography>
-                  {c.sub && <Typography sx={{ fontSize: '0.68rem', color: '#6B4226' }}>{c.sub}</Typography>}
+              )}
+              {data.contactLines.map((c) => (
+                <Box key={c.text}>
+                  <Typography sx={{ fontSize: '0.78rem', color: '#9A9A9A', lineHeight: 1.5 }}>{c.text}</Typography>
+                  {c.note && <Typography sx={{ fontSize: '0.68rem', color: '#6B4226' }}>{c.note}</Typography>}
                 </Box>
               ))}
             </Box>
@@ -174,7 +198,7 @@ export default function Footer() {
         <Typography
           sx={{ fontSize: '0.68rem', color: '#5A5A5A', fontFamily: '"Montserrat", sans-serif' }}
         >
-          {APP_COPYRIGHT} · Kenya · Uganda
+          {data.copyright}
         </Typography>
         <Box sx={{ display: 'flex', gap: 3 }}>
           {['Privacy Policy', 'Terms of Use', 'Accessibility', 'Data Policy'].map((l) => (
