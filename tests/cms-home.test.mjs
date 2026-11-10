@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { heroFromCms, homeSectionsFromCms, homeVisibility, homeProps } from '../lib/cms-home';
+import { heroFromCms, homeSectionsFromCms, homeVisibility, homeProps, overviewFromCms, overviewHasContent, initiativesFromCms } from '../lib/cms-home';
 
 const page = (over = {}) => ({
   page: 'home',
@@ -15,11 +15,11 @@ const page = (over = {}) => ({
       primary_cta: { label: 'See warnings', href: '/early-warnings', external: false },
       secondary_cta: { label: '', href: '', external: false },
     },
-    overview: { enabled: true, title: 'Now', subtitle: '', note: 'Rains', metrics: [{ value: '3', label: 'Warnings', note: 'x', color: 'orange' }, { value: '1', label: 'Odd', note: '', color: 'nope' }] },
+    overview: { enabled: true, title: 'Now', subtitle: '', note: 'Rains', as_of: '2026-11-01', warnings_label: 'Warnings active', warnings: { total: 3, red: 1, orange: 2, yellow: 0, green: 0 }, metrics: [{ value: '3', label: 'Warnings', note: 'x', color: 'orange' }, { value: '1', label: 'Odd', note: '', color: 'nope' }] },
     about: { enabled: true, eyebrow: 'About', title_line_1: 'A', title_line_2: 'B', description: 'D', partner_count_label: 'Partners', cta: { label: 'More', href: '/about' }, highlights: [{ title: 'T', text: 'X' }, { title: '', text: '' }] },
     map: { enabled: true, eyebrow: 'Map', title: 'Coverage', subtitle: 'S' },
     warnings: { enabled: false },
-    initiatives: { enabled: true, items: [] },
+    initiatives: { enabled: true, eyebrow: 'Leading', title: 'T', subtitle: '', button: { label: 'More', href: '/community' }, items: [{ id: 5, title: 'Water project', excerpt: 'E', image: '' }, { id: 9, title: 'New one', excerpt: 'N', image: 'https://cms/i.jpg' }] },
     get_involved: { enabled: true, eyebrow: 'Join', heading: 'H', body: 'B', button: { label: 'Go', href: '/partners-stakeholders' } },
     ...over,
   },
@@ -54,7 +54,7 @@ describe('home from CMS', () => {
   });
 
   it('reads hidden sections', () => {
-    expect(homeVisibility(page())).toEqual({ hero: true, about: true, map: true, warnings: false, initiatives: true, getInvolved: true });
+    expect(homeVisibility(page())).toEqual({ hero: true, overview: true, about: true, map: true, warnings: false, initiatives: true, getInvolved: true });
   });
 
   it('builds every website language; tu and ng read the combined CMS locale; missing ones use English', () => {
@@ -67,5 +67,30 @@ describe('home from CMS', () => {
     expect(props.heroByLocale.sw.eyebrow).toBe('Kenya · Uganda Districts');
     expect(props.homeSectionsByLocale.pk.footer).toEqual({ a: 1 });
     expect(props.homeVisible.warnings).toBe(false);
+  });
+
+  it('shows the editors\' figures only with a date; the warning count always', () => {
+    const dated = overviewFromCms(page().sections.overview);
+    expect(dated.asOf).toBe('2026-11-01');
+    expect(dated.metrics).toHaveLength(2);
+    expect(dated.warnings).toEqual({ label: 'Warnings active', total: 3, red: 1, orange: 2, yellow: 0, green: 0 });
+    const undated = overviewFromCms({ ...page().sections.overview, as_of: '' });
+    expect(undated.metrics).toEqual([]);
+    expect(overviewHasContent(undated)).toBe(true);
+    expect(overviewHasContent(overviewFromCms({ warnings_label: '', metrics: [{ value: '1', label: 'x' }] }))).toBe(false);
+    expect(overviewFromCms({ as_of: 'soon', warnings: { total: 'x' } })).toMatchObject({ asOf: '', warnings: { total: 0 } });
+  });
+
+  it('uses the initiatives chosen in wp-admin, reusing the loaded ones', () => {
+    const legacy = [{ id: 5, title: 'Water project', tag: 'Water', img: 'https://old.jpg' }, { id: 7, title: 'Other' }];
+    const list = initiativesFromCms(page(), legacy);
+    expect(list.map((x) => x.id)).toEqual([5, 9]);
+    expect(list[0].tag).toBe('Water');
+    expect(list[1]).toMatchObject({ title: 'New one', img: 'https://cms/i.jpg', tag: 'Community' });
+    expect(list[1].slugPath).toContain('9');
+    expect(homeProps({ en: page() }, {}, {}, legacy).initiatives.map((x) => x.id)).toEqual([5, 9]);
+    const none = page({ initiatives: { enabled: true, items: [] } });
+    expect(homeProps({ en: none }, {}, {}, legacy).initiatives).toBe(legacy);
+    expect(homeSectionsFromCms(page()).initiatives).toMatchObject({ eyebrow: 'Leading', buttonLabel: 'More', buttonHref: '/community' });
   });
 });

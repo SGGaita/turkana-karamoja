@@ -3,6 +3,7 @@ import { Box, Typography, Button, Card, CardMedia, CardContent, Chip } from '@mu
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { fallbackInitiatives } from '../lib/fallback-data';
+import { useLocalizedHomeSections } from '../contexts/LanguageContext';
 
 function initiativeHref(init) {
   if (init.slugPath) return `/community/${init.slugPath}`;
@@ -10,31 +11,52 @@ function initiativeHref(init) {
 }
 
 export default function InitiativesSection({ initiatives: initiativesProp }) {
-  const initiatives = (initiativesProp?.length ? initiativesProp : fallbackInitiatives).slice(0, 3);
+  // From Karamoja → Website pages → Home when the website reads it; the old fixed text otherwise.
+  const cms = useLocalizedHomeSections().initiatives;
+  // The CMS list is already the editors' choice (up to 6); the old endpoint lists everything, so show 3.
+  const initiatives = (initiativesProp?.length ? initiativesProp : fallbackInitiatives).slice(0, cms ? 6 : 3);
+  const copy = cms || {
+    eyebrow: 'Leading Initiatives',
+    title: null,
+    subtitle: '',
+    buttonLabel: 'More Initiatives',
+    buttonHref: '/community',
+  };
 
   return (
     <Box id="initiatives" sx={{ bgcolor: 'white', py: { xs: 7, md: 10 } }}>
       <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, md: 4 } }}>
         <Box sx={{ mb: 5 }}>
-          <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: '#C1440E', textTransform: 'uppercase', letterSpacing: '0.12em', mb: 1 }}>
-            Leading Initiatives
-          </Typography>
+          {copy.eyebrow && (
+            <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: '#C1440E', textTransform: 'uppercase', letterSpacing: '0.12em', mb: 1 }}>
+              {copy.eyebrow}
+            </Typography>
+          )}
           <Box sx={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
             <Typography variant="h2" sx={{ fontSize: { xs: '1.7rem', md: '2.2rem' }, color: '#3D2B1F' }}>
-              Leading the Way in
-              <br />
-              Climate Resilience
+              {copy.title ?? (
+                <>
+                  Leading the Way in
+                  <br />
+                  Climate Resilience
+                </>
+              )}
             </Typography>
+            {copy.buttonLabel && (
             <Button
               component={Link}
-              href="/community"
+              href={copy.buttonHref || '/community'}
               variant="outlined"
               endIcon={<ArrowForwardIcon />}
               sx={{ borderColor: '#C1440E', color: '#C1440E', '&:hover': { bgcolor: '#FFF0EC' } }}
             >
-              More Initiatives
+              {copy.buttonLabel}
             </Button>
+            )}
           </Box>
+          {copy.subtitle && (
+            <Typography sx={{ mt: 1.5, color: '#5A5A5A', maxWidth: 720, lineHeight: 1.7 }}>{copy.subtitle}</Typography>
+          )}
         </Box>
 
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>

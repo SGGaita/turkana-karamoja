@@ -9,6 +9,7 @@ import MapSection from '../components/MapSection';
 import WarningsStrip from '../components/WarningsStrip';
 import InitiativesSection from '../components/InitiativesSection';
 import GetInvolvedSection from '../components/GetInvolvedSection';
+import HomeOverview from '../components/HomeOverview';
 import Footer from '../components/Footer';
 import {
   getAlerts,
@@ -23,7 +24,8 @@ import { getPageAllLocales, isPublishedPage } from '../lib/cms';
 import { homeProps } from '../lib/cms-home';
 import { fallbackHomeSections } from '../lib/fallback-data';
 
-const ALL_VISIBLE = { hero: true, about: true, map: true, warnings: true, initiatives: true, getInvolved: true };
+// The overview panel shows only from the CMS (no made-up figures, audit E7).
+const ALL_VISIBLE = { hero: true, overview: false, about: true, map: true, warnings: true, initiatives: true, getInvolved: true };
 
 function HomeMapSection({ mapAdvisories, apiStale }) {
   const homeSections = useLocalizedHomeSections();
@@ -67,6 +69,7 @@ export default function Home({
       <Box sx={{ bgcolor: '#FDF6EC', minHeight: '100vh' }}>
         <Navbar urgentBanner={urgentBanner} />
         {show.hero && <Hero />}
+        {show.overview && <HomeOverview />}
         {show.about && <ClimateHubSection />}
         {show.map && <HomeMapSection mapAdvisories={mapAdvisories} apiStale={apiStale} />}
         {show.warnings && alerts?.length > 0 && <WarningsStrip alerts={alerts} apiStale={apiStale} />}
@@ -115,7 +118,7 @@ export async function getStaticProps() {
   try {
     const pages = await getPageAllLocales('home');
     if (isPublishedPage(pages.en)) {
-      content = { ...homeProps(pages, legacyHero, { en: fallbackHomeSections, ...legacyHome }), homeSource: 'cms' };
+      content = { ...homeProps(pages, legacyHero, { en: fallbackHomeSections, ...legacyHome }, initiativesRes.data || []), homeSource: 'cms' };
     }
   } catch (err) {
     if (process.env.NODE_ENV === 'development') console.warn('[cms] home:', err.message);
@@ -127,7 +130,7 @@ export async function getStaticProps() {
       mapAdvisories,
       initiatives: initiativesRes.data,
       apiStale,
-      ...content,
+      ...content, // CMS: the initiatives chosen in wp-admin.
     },
     revalidate: 120,
   };
