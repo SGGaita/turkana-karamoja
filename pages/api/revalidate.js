@@ -13,6 +13,7 @@ import crypto from 'crypto';
  */
 
 const MAX_PATHS = 100;
+const CONCURRENCY = 4;
 
 function secretMatches(given, expected) {
   if (!given || !expected || expected.length < 32) return false;
@@ -51,16 +52,22 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'No valid paths' });
   }
 
-  const results = [];
-  for (const path of wanted) {
-    try {
-      // eslint-disable-next-line no-await-in-loop
-      await res.revalidate(path);
-      results.push({ path, ok: true });
-    } catch (err) {
-      results.push({ path, ok: false, error: err?.message || 'failed' });
+  // Rebuild a few pages at a time: one by one, a full refresh can outlast WordPress's wait.
+  const results = new Array(wanted.length);
+  let next = 0;
+  const worker = async () => {
+    while (next < wanted.length) {
+      const i = next++;
+      const path = wanted[i];
+      try {
+        await res.revalidate(path);
+        results[i] = { path, ok: true };
+      } catch (err) {
+        results[i] = { path, ok: false, error: err?.message || 'failed' };
+      }
     }
-  }
+  };
+  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, wanted.length) }, worker));
   const ok = results.filter((r) => r.ok).length;
   return res.status(200).json({ revalidated: ok, failed: results.length - ok, results });
 }
