@@ -124,8 +124,8 @@ export function LanguageProvider({
   }, []);
 
   const activeLocale = mounted ? locale : 'en';
-  // Only en/sw home copy is managed in the CMS; other locales use en (as before).
-  const homeLocale = HOME_SECTION_LOCALES.includes(activeLocale) ? activeLocale : 'en';
+  // Pages built from Karamoja Core pass every language; the legacy home copy has only en/sw (others use en).
+  const homeLocale = (homeSectionsByLocale?.[activeLocale] || HOME_SECTION_LOCALES.includes(activeLocale)) ? activeLocale : 'en';
   const clientSiteHeader = useCmsContent(
     siteHeaderLoader, activeLocale, mounted && !siteHeaderByLocale?.[activeLocale],
   );

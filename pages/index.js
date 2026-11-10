@@ -19,6 +19,11 @@ import {
 } from '../lib/wordpress';
 import { toMapAdvisoryMarker } from '../lib/wp-mappers';
 import { useLocalizedHomeSections } from '../contexts/LanguageContext';
+import { getPageAllLocales, isPublishedPage } from '../lib/cms';
+import { homeProps } from '../lib/cms-home';
+import { fallbackHomeSections } from '../lib/fallback-data';
+
+const ALL_VISIBLE = { hero: true, about: true, map: true, warnings: true, initiatives: true, getInvolved: true };
 
 function HomeMapSection({ mapAdvisories, apiStale }) {
   const homeSections = useLocalizedHomeSections();
@@ -39,7 +44,9 @@ export default function Home({
   mapAdvisories,
   initiatives,
   apiStale,
+  homeVisible = ALL_VISIBLE,
 }) {
+  const show = { ...ALL_VISIBLE, ...(homeVisible || {}) };
   const topAlert = (alerts || []).find((a) => a.level === 'RED' || a.level === 'ORANGE') || null;
   const urgentBanner = topAlert
     ? {
@@ -59,12 +66,12 @@ export default function Home({
       </Head>
       <Box sx={{ bgcolor: '#FDF6EC', minHeight: '100vh' }}>
         <Navbar urgentBanner={urgentBanner} />
-        <Hero />
-        <ClimateHubSection />
-        <HomeMapSection mapAdvisories={mapAdvisories} apiStale={apiStale} />
-        {alerts?.length > 0 && <WarningsStrip alerts={alerts} apiStale={apiStale} />}
-        <InitiativesSection initiatives={initiatives} />
-        <GetInvolvedSection />
+        {show.hero && <Hero />}
+        {show.about && <ClimateHubSection />}
+        {show.map && <HomeMapSection mapAdvisories={mapAdvisories} apiStale={apiStale} />}
+        {show.warnings && alerts?.length > 0 && <WarningsStrip alerts={alerts} apiStale={apiStale} />}
+        {show.initiatives && <InitiativesSection initiatives={initiatives} />}
+        {show.getInvolved && <GetInvolvedSection />}
         <Footer />
       </Box>
     </>
@@ -94,22 +101,33 @@ export async function getStaticProps() {
     .map((alert, index) => toMapAdvisoryMarker(alert, index))
     .filter(Boolean);
 
+  const legacyHero = { en: heroEnRes.data, sw: heroSwRes.data };
+  // Only pass legacy copy when it actually loaded, so a failed build-time fetch
+  // doesn't pin fallback text over the client-side refresh.
+  const legacyHome = {
+    ...(homeEnRes.apiStale ? {} : { en: homeEnRes.data }),
+    ...(homeSwRes.apiStale ? {} : { sw: homeSwRes.data }),
+  };
+
+  // Karamoja → Website pages → Home, once it has been saved in wp-admin. Until then (or if Karamoja Core is not
+  // reachable) the legacy hero and home sections are used, as before.
+  let content = { heroByLocale: legacyHero, homeSectionsByLocale: legacyHome, homeVisible: ALL_VISIBLE, homeSource: 'legacy' };
+  try {
+    const pages = await getPageAllLocales('home');
+    if (isPublishedPage(pages.en)) {
+      content = { ...homeProps(pages, legacyHero, { en: fallbackHomeSections, ...legacyHome }), homeSource: 'cms' };
+    }
+  } catch (err) {
+    if (process.env.NODE_ENV === 'development') console.warn('[cms] home:', err.message);
+  }
+
   return {
     props: {
       alerts: alertsRes.data,
       mapAdvisories,
       initiatives: initiativesRes.data,
       apiStale,
-      heroByLocale: {
-        en: heroEnRes.data,
-        sw: heroSwRes.data,
-      },
-      // Only pass CMS copy when it actually loaded, so a failed build-time fetch
-      // doesn't pin fallback text over the client-side refresh.
-      homeSectionsByLocale: {
-        ...(homeEnRes.apiStale ? {} : { en: homeEnRes.data }),
-        ...(homeSwRes.apiStale ? {} : { sw: homeSwRes.data }),
-      },
+      ...content,
     },
     revalidate: 120,
   };

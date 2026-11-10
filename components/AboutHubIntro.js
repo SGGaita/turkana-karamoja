@@ -124,7 +124,7 @@ export default function AboutHubIntro({ showCta = false, excludeCommissionedHigh
         {showCta && (
           <Button
             component={Link}
-            href="/about"
+            href={about.ctaHref || '/about'}
             variant="contained"
             sx={{
               bgcolor: '#2E8B57',
