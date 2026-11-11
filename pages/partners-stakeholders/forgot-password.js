@@ -4,6 +4,7 @@ import Layout from '../../components/Layout';
 import PageHero from '../../components/PageHero';
 import Turnstile, { captchaEnabled } from '../../components/Turnstile';
 import { coreAuthAvailable, requestPasswordReset, wpLostPasswordUrl } from '../../lib/partner-auth';
+import HelpStepLink from '../../components/HelpStepLink';
 
 export default function ForgotPassword() {
   const [ready, setReady] = useState(null); // null = checking, true = Core, false = fallback
@@ -52,6 +53,7 @@ export default function ForgotPassword() {
               <Button href={wpLostPasswordUrl()} variant="contained" sx={{ bgcolor: '#C1440E', '&:hover': { bgcolor: '#E8622A' } }}>
                 Reset my password
               </Button>
+              <HelpStepLink article="partner-forgot-password" sx={{ display: 'flex', mt: 2 }} />
             </>
           )}
           {ready && done && <Alert severity="success">{done}</Alert>}
@@ -60,6 +62,7 @@ export default function ForgotPassword() {
               <Typography sx={{ fontSize: '0.9rem', color: '#5A5A5A', mb: 2 }}>
                 Enter the email address your organisation registered with. The link works once and expires after an hour.
               </Typography>
+              <HelpStepLink article="partner-forgot-password" sx={{ mb: 2 }} />
               {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
               <TextField label="Email" type="email" autoComplete="email" fullWidth required size="small" value={email} onChange={(e) => setEmail(e.target.value)} />
               <Turnstile onToken={setCaptcha} resetKey={resetKey} />

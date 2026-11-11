@@ -9,6 +9,7 @@ import ReportKeywordsField from './ReportKeywordsField';
 import ReportCategoriesField from './ReportCategoriesField';
 import { HUB_COUNTRIES, getCountryLabel } from '../lib/countries';
 import { isRichTextEmpty } from './HubRichTextEditor';
+import HelpStepLink from './HelpStepLink';
 
 const HubRichTextEditor = dynamic(() => import('./HubRichTextEditor'), { ssr: false });
 
@@ -139,6 +140,7 @@ export default function ReportSubmissionForm({
               ? 'Update this report\'s category, title, description, countries, or keywords. To add or remove documents, use "Manage documents" from the submissions list.'
               : 'Upload situation reports, assessments, and monitoring documents. Add multiple files in different languages (e.g. English + Kiswahili). Files appear on the Reports page after admin review.'}
           </Typography>
+          <HelpStepLink article={isEdit ? 'partner-edit-withdraw' : 'partner-submit-report'} sx={{ mt: -2, mb: 3 }} />
         </>
       )}
 

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { Box, Typography, TextField, Button, Alert, LinearProgress } from '@mui/material';
 import { passwordHint, setPassword, resetPassword } from '../lib/partner-auth';
+import HelpStepLink from './HelpStepLink';
 
 /**
  * Choose a password from an emailed link: kind 'setup' (after approval) or 'reset'.
@@ -49,6 +50,7 @@ export default function PasswordSetForm({ kind }) {
         Use at least 10 characters. A few unrelated words with a number or symbol work well. Don&apos;t use your
         email, name or organisation name.
       </Typography>
+      <HelpStepLink article={kind === 'setup' ? 'partner-set-password' : 'partner-forgot-password'} sx={{ mb: 2 }} />
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       <TextField
         label="New password" type="password" autoComplete="new-password" fullWidth required size="small"
@@ -83,6 +85,7 @@ function LinkProblem({ kind, message }) {
       <Button href="/partners-stakeholders/forgot-password" variant="contained" sx={{ bgcolor: '#C1440E', '&:hover': { bgcolor: '#E8622A' } }}>
         {kind === 'setup' ? 'Send me a new link' : 'Ask for a new reset link'}
       </Button>
+      <HelpStepLink article="partner-link-expired" sx={{ display: 'flex', mt: 2 }} />
     </Box>
   );
 }

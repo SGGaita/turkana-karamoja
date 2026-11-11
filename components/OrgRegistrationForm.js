@@ -5,6 +5,7 @@ import {
 } from '@mui/material';
 import { registerOrganization, getWpBaseUrl } from '../lib/wordpress';
 import { saveOrgSession } from '../lib/org-session';
+import HelpStepLink from './HelpStepLink';
 
 const ORG_TYPE_OPTIONS = [
   'Met Agency',
@@ -92,6 +93,7 @@ export default function OrgRegistrationForm({ defaultEmail = '', onRegistered, o
       <Typography sx={{ fontSize: '0.85rem', color: '#5A5A5A', mb: 3 }}>
         Government agencies, UN bodies, NGOs, and research institutions must register before publishing content. Your application will be reviewed by platform administrators.
       </Typography>
+      <HelpStepLink article="partner-register" sx={{ mt: -2, mb: 3 }} />
 
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2.5 }}>
         <TextField label="Organisation Name *" required value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} sx={{ ...inputSx, flex: '1 1 280px' }} size="small" />

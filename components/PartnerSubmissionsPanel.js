@@ -15,6 +15,7 @@ import {
 import { getLanguageLabel } from '../lib/wp-mappers';
 import { HUB_LANGUAGES } from '../lib/languages';
 import { formatFileSize } from '../lib/report-utils';
+import HelpStepLink from './HelpStepLink';
 
 const STATUS_STYLES = {
   pending: { bg: '#fff4ec', color: '#b45309', border: '#f59e0b' },
@@ -247,7 +248,8 @@ export default function PartnerSubmissionsPanel({
         </Button>
       </Box>
       <Typography sx={{ fontSize: '0.85rem', color: '#5A5A5A', mb: 3 }}>
-        View advisories and reports submitted by your organisation. Reports can be edited any time, including after approval; advisories can be edited while pending or rejected. Items can also be withdrawn or extended with more documents.
+        View advisories and reports submitted by your organisation. Reports can be edited any time, including after approval; advisories can be edited while pending or rejected. Items can also be withdrawn or extended with more documents.{' '}
+        <HelpStepLink article="partner-review-statuses" />
       </Typography>
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
