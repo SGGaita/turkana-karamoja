@@ -14,6 +14,7 @@ import { getPageAllLocales, isPublishedPage } from '../lib/cms';
 import { pageCopy } from '../lib/cms-community';
 import { fallbackAboutPage } from '../lib/fallback-data';
 import { featuresFromCms, stepsFromCms, partnersFromCms } from '../lib/cms-about-contact';
+import { getCoverageAreas } from '../lib/cms-areas';
 import { useLanguage } from '../contexts/LanguageContext';
 import { APP_NAME } from '../lib/branding';
 import {
@@ -55,7 +56,7 @@ const richTextSx = {
 const headingSx = { fontFamily: '"Montserrat", sans-serif', fontSize: { xs: '1.6rem', md: '2rem' }, fontWeight: 700, color: '#3D2B1F', mb: 1 };
 
 /** About from Karamoja → Website pages → About (once saved). */
-function CmsAbout({ pageByLocale }) {
+function CmsAbout({ pageByLocale, areas }) {
   const { locale } = useLanguage();
   const { copy, shown, hero } = pageCopy(pageByLocale, locale, { hero: { image: fallbackAboutPage.featuredImage } });
   const intro = copy('intro');
@@ -79,7 +80,7 @@ function CmsAbout({ pageByLocale }) {
 
       <CommissionedBySection />
 
-      <GeographicCoverageSection />
+      <GeographicCoverageSection areas={areas} />
 
       {features.length > 0 && <KeyFeaturesCards features={features} title={copy('features').title || undefined} />}
 
@@ -109,12 +110,12 @@ function CmsAbout({ pageByLocale }) {
   );
 }
 
-export default function About({ source = 'legacy', pageByLocale, page, apiStale }) {
-  if (source === 'cms') return <CmsAbout pageByLocale={pageByLocale} />;
-  return <LegacyAbout page={page} apiStale={apiStale} />;
+export default function About({ source = 'legacy', pageByLocale, page, apiStale, areas = null }) {
+  if (source === 'cms') return <CmsAbout pageByLocale={pageByLocale} areas={areas} />;
+  return <LegacyAbout page={page} apiStale={apiStale} areas={areas} />;
 }
 
-function LegacyAbout({ page, apiStale }) {
+function LegacyAbout({ page, apiStale, areas }) {
   const { outro, hasFeatures, hasStepper } = splitAboutContent(page.content);
   const features = parseKeyFeatures(page.content);
   const steps = parseHowItWorksSteps(page.content);
@@ -134,7 +135,7 @@ function LegacyAbout({ page, apiStale }) {
 
       <CommissionedBySection />
 
-      <GeographicCoverageSection />
+      <GeographicCoverageSection areas={areas} />
 
       {hasFeatures && <KeyFeaturesCards features={features} />}
 
@@ -148,16 +149,17 @@ function LegacyAbout({ page, apiStale }) {
 }
 
 export async function getStaticProps() {
+  const areas = await getCoverageAreas();
   try {
     const pageByLocale = await getPageAllLocales('about');
-    if (isPublishedPage(pageByLocale.en)) return { props: { source: 'cms', pageByLocale }, revalidate: 3600 };
+    if (isPublishedPage(pageByLocale.en)) return { props: { source: 'cms', pageByLocale, areas }, revalidate: 3600 };
   } catch (err) {
     if (process.env.NODE_ENV === 'development') console.warn('[cms] about:', err.message);
   }
   // Until Website pages → About is saved (or Karamoja Core can't be reached): the old WordPress page.
   const { data, apiStale } = await getAboutPage();
   return {
-    props: { page: data, apiStale },
+    props: { page: data, apiStale, areas },
     revalidate: 3600,
   };
 }
