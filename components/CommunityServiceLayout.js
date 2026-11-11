@@ -43,3 +43,26 @@ export function StatChip({ value, label, color = '#3D2B1F' }) {
     </Box>
   );
 }
+
+/** The page's Introduction section (Karamoja → Website pages); nothing when both fields are empty. */
+export function IntroBox({ title, text, color = '#2E7BB4', bg = 'white', children }) {
+  if (!title && !text && !children) return null;
+  return (
+    <Box sx={{ bgcolor: bg, border: `1px solid ${color}40`, borderLeft: `4px solid ${color}`, borderRadius: 2, p: 2.5, mb: 4 }}>
+      <Typography component="div" sx={{ fontSize: '0.85rem', color: '#5A5A5A', lineHeight: 1.7, whiteSpace: 'pre-line' }}>
+        {title && <strong style={{ color: '#3D2B1F' }}>{title} </strong>}
+        {children || text}
+      </Typography>
+    </Box>
+  );
+}
+
+/** Shown in place of a list with no items. */
+export function EmptyNote({ text }) {
+  if (!text) return null;
+  return (
+    <Box sx={{ bgcolor: 'white', border: '1px solid #E8E0D5', borderRadius: 2, p: 3, textAlign: 'center' }}>
+      <Typography sx={{ fontSize: '0.88rem', color: '#5A5A5A', lineHeight: 1.7 }}>{text}</Typography>
+    </Box>
+  );
+}

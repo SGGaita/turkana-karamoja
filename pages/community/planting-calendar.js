@@ -2,12 +2,30 @@ import { Box, Typography } from '@mui/material';
 import Layout from '../../components/Layout';
 import PageHero from '../../components/PageHero';
 import StaleContentBanner from '../../components/StaleContentBanner';
-import { CommunityBackLink, StatusPill } from '../../components/CommunityServiceLayout';
+import { CommunityBackLink, StatusPill, IntroBox, EmptyNote } from '../../components/CommunityServiceLayout';
 import { getPlantingAdvisories } from '../../lib/wordpress';
 import { PLANTING_STATUS, formatDateRange } from '../../lib/community-services';
 import { seasonalOutlook } from '../../lib/fallback-data';
+import { listCmsProps, pageCopy, plantingFromCms } from '../../lib/cms-community';
+import { pickLocale } from '../../lib/cms-alerts';
+import { useLanguage } from '../../contexts/LanguageContext';
 
-export default function PlantingCalendarPage({ advisories, apiStale }) {
+// What the page showed before Karamoja → Website pages → Planting calendar is saved.
+const DEFAULT_COPY = {
+  hero: {
+    title: 'Farming & Planting Calendar',
+    subtitle: 'Climate-smart agriculture advisories, seasonal planting windows, and agro-dealer locations',
+    image: 'https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=1400&q=70',
+  },
+  intro: {},
+  empty: { text: 'No planting advisories have been published yet.' },
+};
+
+export default function PlantingCalendarPage({ source = 'legacy', advisories: legacyAdvisories, itemsByLocale, pageByLocale, apiStale }) {
+  const { locale } = useLanguage();
+  const cms = source === 'cms';
+  const advisories = (cms ? pickLocale(itemsByLocale, locale) : legacyAdvisories) || [];
+  const { copy, hero } = pageCopy(cms ? pageByLocale : null, locale, DEFAULT_COPY);
   const bySeason = advisories.reduce((acc, row) => {
     const key = row.season || 'General';
     if (!acc[key]) acc[key] = [];
@@ -16,11 +34,11 @@ export default function PlantingCalendarPage({ advisories, apiStale }) {
   }, {});
 
   return (
-    <Layout title="Farming & Planting Calendar">
+    <Layout title={hero.title}>
       <PageHero
-        title="Farming & Planting Calendar"
-        subtitle="Climate-smart agriculture advisories, seasonal planting windows, and agro-dealer locations"
-        image="https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=1400&q=70"
+        title={hero.title}
+        subtitle={hero.subtitle}
+        image={hero.image}
         breadcrumbs={['Community', 'Planting Calendar']}
       />
 
@@ -28,6 +46,9 @@ export default function PlantingCalendarPage({ advisories, apiStale }) {
         <CommunityBackLink />
         <StaleContentBanner show={apiStale} />
 
+        {/* Karamoja Core: the Introduction section replaces the built-in sample outlook (it had placeholder figures). */}
+        {cms && <IntroBox title={copy('intro').title} text={copy('intro').text} color="#2E8B57" />}
+        {!cms && (
         <Box sx={{ bgcolor: 'white', border: '1px solid #2E8B57', borderLeft: '4px solid #2E8B57', borderRadius: 2, p: 3, mb: 4 }}>
           <Typography sx={{ fontWeight: 700, fontSize: '0.9rem', color: '#3D2B1F', mb: 1 }}>Season Outlook</Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -39,7 +60,9 @@ export default function PlantingCalendarPage({ advisories, apiStale }) {
             ))}
           </Box>
         </Box>
+        )}
 
+        {!advisories.length && !apiStale && <EmptyNote text={copy('empty').text} />}
         {Object.entries(bySeason).map(([season, rows]) => (
           <Box key={season} sx={{ mb: 5 }}>
             <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontSize: '1.2rem', fontWeight: 700, mb: 2 }}>{season}</Typography>
@@ -79,6 +102,11 @@ export default function PlantingCalendarPage({ advisories, apiStale }) {
 }
 
 export async function getStaticProps() {
+  try {
+    return { props: await listCmsProps('planting-advisories', 'planting-calendar', plantingFromCms), revalidate: 60 };
+  } catch (err) {
+    if (process.env.NODE_ENV === 'development') console.warn('[cms] planting advisories:', err.message);
+  }
   const res = await getPlantingAdvisories();
   return { props: { advisories: res.data, apiStale: res.apiStale }, revalidate: 60 };
 }
