@@ -70,6 +70,13 @@ describe('alerts from Karamoja Core', () => {
     expect(recent[0]).toMatchObject({ id: 3, cancelled: true, cancelReason: 'False alarm', valid: 'Cancelled' });
   });
 
+  it('knows a replaced alert and links only to an early-warnings page', () => {
+    const a = alertFromCms(dto({ id: 4, active: false, lifecycle: 'updated', replaced_by: { id: 9, title: 'Flood warning upgraded', path: '/early-warnings/flood-warning-upgraded-9' } }));
+    expect(a).toMatchObject({ replaced: true, cancelled: false, replacedBy: { path: '/early-warnings/flood-warning-upgraded-9', title: 'Flood warning upgraded' } });
+    expect(alertFromCms(dto({ id: 5, lifecycle: 'updated', replaced_by: { path: 'https://evil.example/x' } })).replacedBy).toBeNull();
+    expect(alertFromCms(dto({ id: 6 })).replaced).toBe(false);
+  });
+
   it('reads plain text from HTML', () => {
     expect(htmlToText('<p>A &amp; B</p><p>C</p>')).toBe('A & B\nC');
   });

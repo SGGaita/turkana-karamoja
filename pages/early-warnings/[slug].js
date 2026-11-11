@@ -177,10 +177,16 @@ export default function AdvisoryDetail({ alert: legacyAlert, alertLegend, apiSta
             {alertByLocale && !alert.active && (
               <Box role="status" sx={{ bgcolor: '#F4F1EE', border: '1px solid #D9D2CA', borderRadius: 2, p: 2, mb: 3 }}>
                 <Typography sx={{ fontWeight: 700, color: '#3D2B1F', fontSize: '0.9rem' }}>
-                  {alert.cancelled ? t('alerts.was_cancelled') : t('alerts.no_longer_active')}
+                  {alert.cancelled ? t('alerts.was_cancelled') : (alert.replaced ? t('alerts.was_replaced') : t('alerts.no_longer_active'))}
                 </Typography>
                 {alert.cancelled && alert.cancelReason && (
                   <Typography sx={{ color: '#5A5A5A', fontSize: '0.85rem', mt: 0.5 }}>{alert.cancelReason}</Typography>
+                )}
+                {alert.replacedBy && (
+                  <Typography sx={{ fontSize: '0.9rem', mt: 0.5, mb: 0.5 }}>
+                    {t('alerts.read_newer')}:{' '}
+                    <Link href={alert.replacedBy.path} style={{ color: '#C1440E', fontWeight: 700 }}>{alert.replacedBy.title}</Link>
+                  </Typography>
                 )}
                 <Typography component={Link} href="/early-warnings" sx={{ color: '#2E7BB4', fontSize: '0.85rem' }}>
                   {t('alerts.see_active')}

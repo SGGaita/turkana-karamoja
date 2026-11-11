@@ -52,7 +52,7 @@ function AlertCard({ a, ended = false }) {
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, px: 3, py: 2, flexWrap: 'wrap' }}>
         <Chip label={levelLabel(a.level, t)} size="small" sx={{ bgcolor: a.color, color: 'white', fontWeight: 700, fontSize: '0.65rem' }} />
         {ended && (
-          <Chip label={a.cancelled ? t('alerts.cancelled') : t('alerts.ended')} size="small" sx={{ bgcolor: '#5A5A5A', color: 'white', fontWeight: 700, fontSize: '0.65rem' }} />
+          <Chip label={a.cancelled ? t('alerts.cancelled') : (a.replaced ? t('alerts.replaced') : t('alerts.ended'))} size="small" sx={{ bgcolor: '#5A5A5A', color: 'white', fontWeight: 700, fontSize: '0.65rem' }} />
         )}
         <Typography
           component={href ? Link : 'span'}
