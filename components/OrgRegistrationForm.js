@@ -38,7 +38,7 @@ const inputSx = {
 
 /** Public organisation-registration form. No login required — this is how a new
  *  partner organisation gets into the review queue in the first place. */
-export default function OrgRegistrationForm({ defaultEmail = '', onRegistered, onNotify, title = 'Organisation Registration' }) {
+export default function OrgRegistrationForm({ defaultEmail = '', onRegistered, onNotify, title = 'Organisation Registration', intro = 'Government agencies, UN bodies, NGOs, and research institutions must register before publishing content. Your application will be reviewed by platform administrators.' }) {
   const [form, setForm] = useState({
     name: '', abbr: '', type: '', country: 'KE', contactName: '', contactEmail: defaultEmail, contactPhone: '', description: '',
   });
@@ -91,7 +91,7 @@ export default function OrgRegistrationForm({ defaultEmail = '', onRegistered, o
         {title}
       </Typography>
       <Typography sx={{ fontSize: '0.85rem', color: '#5A5A5A', mb: 3 }}>
-        Government agencies, UN bodies, NGOs, and research institutions must register before publishing content. Your application will be reviewed by platform administrators.
+        {intro}
       </Typography>
       <HelpStepLink article="partner-register" sx={{ mt: -2, mb: 3 }} />
 

@@ -32,6 +32,9 @@ import {
   TOKEN_KEY, USER_EMAIL_KEY,
 } from '../lib/org-session';
 import HelpStepLink from '../components/HelpStepLink';
+import { getPageAllLocales, isPublishedPage } from '../lib/cms';
+import { pageCopy } from '../lib/cms-community';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const STAT_CARDS = [
   { key: 'total', label: 'Total submissions', color: '#3D2B1F' },
@@ -90,7 +93,28 @@ function OrgHeaderCard({ org, onSectionChange, onChangePassword }) {
   );
 }
 
-export default function Dashboard() {
+// Text before Karamoja → Website pages → Partner portal is saved (same as Core's content pack).
+const DEFAULT_COPY = {
+  hero: {
+    title: 'Partner Dashboard',
+    subtitle: 'Register your organisation, then manage the advisories and reports it submits',
+    image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1400&q=70',
+  },
+  register: {
+    title: 'Organisation Registration',
+    intro: 'Government agencies, UN bodies, NGOs, and research institutions must register before publishing content. Your application will be reviewed by platform administrators.',
+  },
+  signin: {
+    title: 'Sign in to view your dashboard',
+    intro: 'Use the email address your organisation registered with. Not registered yet? Apply below.',
+  },
+};
+
+export default function Dashboard({ pageByLocale = null }) {
+  const { locale: pageLocale } = useLanguage();
+  const { copy: pageText, hero } = pageCopy(pageByLocale, pageLocale, DEFAULT_COPY);
+  const registerCopy = { ...DEFAULT_COPY.register, ...pageText('register') };
+  const signinCopy = { ...DEFAULT_COPY.signin, ...pageText('signin') };
   const router = useRouter();
   const [token, setToken] = useState(null);
   const [userEmail, setUserEmail] = useState('');
@@ -448,13 +472,8 @@ export default function Dashboard() {
   }
 
   return (
-    <Layout title="Partner Dashboard">
-      <PageHero
-        title="Partner Dashboard"
-        subtitle="Register your organisation, then manage the advisories and reports it submits"
-        image="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1400&q=70"
-        breadcrumbs={['Dashboard']}
-      />
+    <Layout title={hero.title}>
+      <PageHero title={hero.title} subtitle={hero.subtitle} image={hero.image} breadcrumbs={[hero.title]} />
 
       <Box sx={{ maxWidth: 1100, mx: 'auto', px: { xs: 2, md: 4 }, py: { xs: 4, md: 6 } }}>
         {!wpConfigured && (
@@ -471,7 +490,8 @@ export default function Dashboard() {
           <Box>
             <OrgRegistrationForm
               defaultEmail={userEmail}
-              title={orgRecord?.status === 'rejected' ? 'Re-apply for Registration' : 'Organisation Registration'}
+              title={orgRecord?.status === 'rejected' ? 'Re-apply for Registration' : registerCopy.title}
+              intro={registerCopy.intro}
               onRegistered={handleRegistered}
               onNotify={showSnack}
             />
@@ -482,11 +502,11 @@ export default function Dashboard() {
         ) : !orgRecord ? (
           !token ? (
             <Box sx={{ bgcolor: 'white', border: '1px solid #E8E0D5', borderRadius: 2, p: { xs: 3, md: 5 }, textAlign: 'center' }}>
-              <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontWeight: 700, fontSize: '1.2rem', mb: 1 }}>
-                Sign in to view your dashboard
+              <Typography component="h2" sx={{ fontFamily: '"Montserrat", sans-serif', fontWeight: 700, fontSize: '1.2rem', mb: 1 }}>
+                {signinCopy.title}
               </Typography>
               <Typography sx={{ color: '#5A5A5A', fontSize: '0.9rem', mb: 3 }}>
-                Use the email address your organisation registered with. Not registered yet? Apply below.
+                {signinCopy.intro}
               </Typography>
               <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'center', flexWrap: 'wrap' }}>
                 <Button variant="contained" size="large" onClick={() => setLoginOpen(true)} sx={{ bgcolor: '#C1440E', px: 4 }}>
@@ -522,8 +542,8 @@ export default function Dashboard() {
           </Alert>
         ) : (
           <Box sx={{ bgcolor: 'white', border: '1px solid #E8E0D5', borderRadius: 2, p: { xs: 3, md: 5 }, textAlign: 'center' }}>
-            <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontWeight: 700, fontSize: '1.2rem', mb: 1 }}>
-              Sign in to view your dashboard
+            <Typography component="h2" sx={{ fontFamily: '"Montserrat", sans-serif', fontWeight: 700, fontSize: '1.2rem', mb: 1 }}>
+              {signinCopy.title}
             </Typography>
             <Typography sx={{ color: '#5A5A5A', fontSize: '0.9rem', mb: 3 }}>
               Organisation <strong>{orgRecord.name}</strong> is verified — sign in with your editor email to continue.
@@ -539,4 +559,16 @@ export default function Dashboard() {
       {snackbar}
     </Layout>
   );
+}
+
+// Page text from Karamoja → Website pages → Partner portal (the dashboard itself loads in the browser).
+export async function getStaticProps() {
+  let pageByLocale = null;
+  try {
+    const pages = await getPageAllLocales('partners');
+    pageByLocale = isPublishedPage(pages?.en) ? pages : null;
+  } catch {
+    /* Core not reachable: the defaults */
+  }
+  return { props: { pageByLocale }, revalidate: 3600 };
 }

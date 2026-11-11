@@ -45,6 +45,8 @@ const withPWA = require('@ducanh2912/next-pwa').default({
   // PWA is off in `next dev` unless NEXT_PUBLIC_PWA_DEV=true (set it in .env.local to test install/offline locally).
   disable: process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_PWA_DEV !== 'true',
   register: true,
+  // A page that isn't saved on the device, opened without a connection, shows /offline (Website pages → Offline page).
+  fallbacks: { document: '/offline' },
   // Keep big/dev-only files out of the install-time precache (they're still served normally).
   publicExcludes: [
     '!noprecache/**/*',
