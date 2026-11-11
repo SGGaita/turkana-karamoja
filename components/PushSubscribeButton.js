@@ -12,24 +12,19 @@ import {
   subscribeToPush,
   unsubscribeFromPush,
 } from '../lib/push-client';
+import { useT } from '../contexts/LanguageContext';
 
-function permissionMessage(code) {
-  switch (code) {
-    case 'PERMISSION_BLOCKED':
-      return 'Notifications are blocked for this site. Desktop: click the icon left of the address bar → Site settings → Notifications → Allow, then reload. Android Chrome: ⋮ → Settings → Site settings → Notifications → allow this site.';
-    case 'PERMISSION_DENIED':
-      return 'Please click Allow when your browser asks to send notifications.';
-    case 'INSECURE':
-      return 'Notifications need a secure connection. This page was opened over plain http (e.g. an IP address), so the browser blocks them automatically. Use the https:// site, or http://localhost:3000 when developing.';
-    case 'SW_TIMEOUT':
-      return 'The app\'s background service could not start. Reload the page and try again.';
-    case 'IOS_INSTALL':
-      return 'On iPhone/iPad, tap Share → Add to Home Screen, open Karamoja from your Home Screen, then turn on alerts there.';
-    case 'UNSUPPORTED':
-      return 'This browser does not support push notifications. Try Chrome, Edge or Firefox.';
-    default:
-      return 'Could not enable notifications.';
-  }
+const MESSAGE_KEYS = {
+  PERMISSION_BLOCKED: 'push.msg_blocked',
+  PERMISSION_DENIED: 'push.msg_denied',
+  INSECURE: 'push.msg_insecure',
+  SW_TIMEOUT: 'push.msg_sw_timeout',
+  IOS_INSTALL: 'push.msg_ios',
+  UNSUPPORTED: 'push.msg_unsupported',
+};
+
+function permissionMessage(code, t) {
+  return t(MESSAGE_KEYS[code] || 'push.msg_failed');
 }
 
 const PLACEHOLDER_SX = (compact) => ({
@@ -39,6 +34,7 @@ const PLACEHOLDER_SX = (compact) => ({
 });
 
 export default function PushSubscribeButton({ compact = false }) {
+  const t = useT();
   const [msg, setMsg] = useState(null);
   const [loading, setLoading] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
@@ -61,7 +57,7 @@ export default function PushSubscribeButton({ compact = false }) {
 
   const handleSubscribe = async () => {
     if (!vapidPublic) {
-      setMsg({ type: 'warning', text: 'Push notifications are not configured yet.' });
+      setMsg({ type: 'warning', text: t('push.msg_not_configured') });
       return;
     }
     if (needsIosHomeScreenInstall()) {
@@ -80,7 +76,7 @@ export default function PushSubscribeButton({ compact = false }) {
     const currentPermission = getNotificationPermission();
     setPermission(currentPermission);
     if (currentPermission === 'denied') {
-      setMsg({ type: 'warning', text: permissionMessage('PERMISSION_BLOCKED') });
+      setMsg({ type: 'warning', text: permissionMessage('PERMISSION_BLOCKED', t) });
       return;
     }
 
@@ -89,13 +85,13 @@ export default function PushSubscribeButton({ compact = false }) {
       await subscribeToPush(vapidPublic);
       setPermission('granted');
       setSubscribed(true);
-      setMsg({ type: 'success', text: 'You will receive alerts when new warnings are published.' });
+      setMsg({ type: 'success', text: t('push.msg_on') });
     } catch (e) {
       const code = e.message;
       setPermission(getNotificationPermission());
       setMsg({
         type: code === 'PERMISSION_DENIED' ? 'info' : 'warning',
-        text: permissionMessage(code),
+        text: permissionMessage(code, t),
       });
     } finally {
       setLoading(false);
@@ -107,9 +103,9 @@ export default function PushSubscribeButton({ compact = false }) {
     try {
       await unsubscribeFromPush();
       setSubscribed(false);
-      setMsg({ type: 'info', text: 'Alert notifications have been turned off.' });
+      setMsg({ type: 'info', text: t('push.msg_off') });
     } catch (e) {
-      setMsg({ type: 'error', text: e.message || 'Could not turn off notifications.' });
+      setMsg({ type: 'error', text: t('push.msg_off_failed') });
     } finally {
       setLoading(false);
     }
@@ -130,14 +126,14 @@ export default function PushSubscribeButton({ compact = false }) {
   const insecure = permission === 'insecure';
   const blocked = permission === 'denied';
   const label = loading
-    ? 'Please wait…'
+    ? t('push.wait')
     : subscribed
-      ? 'Alerts enabled'
+      ? t('push.enabled')
       : insecure
-        ? 'Alerts need HTTPS'
+        ? t('push.needs_https')
         : blocked
-          ? 'Notifications blocked'
-          : 'Get alert notifications';
+          ? t('push.blocked')
+          : t('push.subscribe');
 
   return (
     <>

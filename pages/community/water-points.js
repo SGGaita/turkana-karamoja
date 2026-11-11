@@ -22,7 +22,7 @@ const DEFAULT_COPY = {
 };
 
 export default function WaterPointsPage({ source = 'legacy', waterPoints: legacyPoints, itemsByLocale, pageByLocale, apiStale }) {
-  const { locale } = useLanguage();
+  const { locale, t } = useLanguage();
   const cms = source === 'cms';
   const waterPoints = (cms ? pickLocale(itemsByLocale, locale) : legacyPoints) || [];
   const { copy, hero } = pageCopy(cms ? pageByLocale : null, locale, DEFAULT_COPY);
@@ -46,21 +46,21 @@ export default function WaterPointsPage({ source = 'legacy', waterPoints: legacy
         <IntroBox title={copy('intro').title} text={copy('intro').text} />
 
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 4 }}>
-          <StatChip value={waterPoints.length} label="Total water points" color="#2E7BB4" />
-          <StatChip value={statusCounts.functional || 0} label="Functional" color="#2E8B57" />
-          <StatChip value={(statusCounts.partial || 0) + (statusCounts.trucking || 0)} label="Partial / Trucking" color="#E87010" />
-          <StatChip value={statusCounts.non_functional || 0} label="Non-functional" color="#D63030" />
+          <StatChip value={waterPoints.length} label={t('community.total_water_points')} color="#2E7BB4" />
+          <StatChip value={statusCounts.functional || 0} label={t('community.functional')} color="#2E8B57" />
+          <StatChip value={(statusCounts.partial || 0) + (statusCounts.trucking || 0)} label={t('community.partial_trucking')} color="#E87010" />
+          <StatChip value={statusCounts.non_functional || 0} label={t('community.non_functional')} color="#D63030" />
         </Box>
 
         <Box sx={{ mb: 5 }}>
           <CommunityServiceMap
             markers={markers}
             apiStale={apiStale}
-            emptyMessage="No water points with GPS coordinates published yet. Add Water Points in WordPress admin."
+            emptyMessage={t('community.no_points_on_map')}
           />
         </Box>
 
-        <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontSize: '1.2rem', fontWeight: 700, mb: 2 }}>All Water Points</Typography>
+        <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontSize: '1.2rem', fontWeight: 700, mb: 2 }}>{t('community.all_water_points')}</Typography>
         {!waterPoints.length && !apiStale && <EmptyNote text={copy('empty').text} />}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
           {waterPoints.map((wp) => {
@@ -76,7 +76,7 @@ export default function WaterPointsPage({ source = 'legacy', waterPoints: legacy
                 <Typography sx={{ fontSize: '0.82rem', color: '#5A5A5A', lineHeight: 1.6 }}>{wp.desc}</Typography>
                 {wp.lastUpdated && (
                   <Typography sx={{ fontSize: '0.68rem', color: wp.stale ? '#B85C00' : '#9A9A9A', mt: 1 }}>
-                    Last updated: {wp.lastUpdated}{wp.stale ? ' · may be out of date' : ''}
+                    {t('common.last_updated', { date: wp.lastUpdated })}{wp.stale ? ` · ${t('common.out_of_date')}` : ''}
                   </Typography>
                 )}
               </Box>

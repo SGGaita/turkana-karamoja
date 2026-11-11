@@ -18,7 +18,7 @@ import AlertLevelLegend from '../../components/AlertLevelLegend';
 import { getAlertById, getAlertLegend } from '../../lib/wordpress';
 import { buildSlugPath, extractIdFromSlugPath } from '../../lib/slug';
 import { getAlert, getPageAllLocales, inAllLocales, isPublishedPage } from '../../lib/cms';
-import { alertFromCms, pickLocale } from '../../lib/cms-alerts';
+import { alertFromCms, pickLocale, levelLabel, validityLabel } from '../../lib/cms-alerts';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 const HERO_IMAGE = 'https://images.unsplash.com/photo-1504608524841-42584120d693?w=1400&q=70';
@@ -37,7 +37,7 @@ const panelCardSx = {
 
 export default function AdvisoryDetail({ alert: legacyAlert, alertLegend, apiStale, alertByLocale, pageByLocale }) {
   const router = useRouter();
-  const { locale } = useLanguage();
+  const { locale, t } = useLanguage();
   // Karamoja Core: the alert in the reader's language (English where not translated).
   const alert = alertByLocale ? alertFromCms(pickLocale(alertByLocale, locale)) : legacyAlert;
   const sections = pickLocale(pageByLocale, locale)?.sections || null;
@@ -45,10 +45,10 @@ export default function AdvisoryDetail({ alert: legacyAlert, alertLegend, apiSta
 
   if (router.isFallback) {
     return (
-      <Layout title="Loading advisory…">
+      <Layout title={t('alerts.loading')}>
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 12 }}>
           <CircularProgress sx={{ color: '#C1440E', mb: 2 }} />
-          <Typography sx={{ color: '#9A9A9A', fontSize: '0.9rem' }}>Loading advisory…</Typography>
+          <Typography sx={{ color: '#9A9A9A', fontSize: '0.9rem' }}>{t('alerts.loading')}</Typography>
         </Box>
       </Layout>
     );
@@ -78,7 +78,7 @@ export default function AdvisoryDetail({ alert: legacyAlert, alertLegend, apiSta
           startIcon={<ArrowBackIcon />}
           sx={{ color: '#2E7BB4', mb: 3, textTransform: 'none' }}
         >
-          All early warnings
+          {t('alerts.all')}
         </Button>
 
         <Box
@@ -103,7 +103,7 @@ export default function AdvisoryDetail({ alert: legacyAlert, alertLegend, apiSta
           >
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2, alignItems: 'center' }}>
               <Chip
-                label={`${alert.level} ALERT`}
+                label={levelLabel(alert.level, t)}
                 size="small"
                 sx={{ bgcolor: alert.color, color: 'white', fontWeight: 700, fontSize: '0.7rem' }}
               />
@@ -135,7 +135,7 @@ export default function AdvisoryDetail({ alert: legacyAlert, alertLegend, apiSta
                   <PlaceOutlinedIcon sx={{ fontSize: 18, color: '#C1440E', mt: '2px' }} />
                   <Box>
                     <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                      Area affected
+                      {t('alerts.area_affected')}
                     </Typography>
                     <Typography sx={{ fontSize: '0.88rem', color: '#3D2B1F', fontWeight: 600 }}>{alert.area}</Typography>
                   </Box>
@@ -146,7 +146,7 @@ export default function AdvisoryDetail({ alert: legacyAlert, alertLegend, apiSta
                   <SourceOutlinedIcon sx={{ fontSize: 18, color: '#C1440E', mt: '2px' }} />
                   <Box>
                     <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                      Source
+                      {t('alerts.source')}
                     </Typography>
                     <Typography sx={{ fontSize: '0.88rem', color: '#2E7BB4', fontWeight: 600 }}>{alert.source}</Typography>
                   </Box>
@@ -157,16 +157,16 @@ export default function AdvisoryDetail({ alert: legacyAlert, alertLegend, apiSta
                   <ScheduleOutlinedIcon sx={{ fontSize: 18, color: '#C1440E', mt: '2px' }} />
                   <Box>
                     <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                      Validity
+                      {t('alerts.validity')}
                     </Typography>
                     <Typography sx={{ fontSize: '0.85rem', color: '#3D2B1F' }}>
-                      {alert.issued ? `Issued ${alert.issued}` : ''}
-                      {alert.issued && alert.valid ? ' · ' : ''}
-                      {alert.valid || ''}
+                      {alert.issued ? t('alerts.issued_date', { date: alert.issued }) : ''}
+                      {alert.issued && validityLabel(alert, t) ? ' · ' : ''}
+                      {validityLabel(alert, t)}
                     </Typography>
                     {alert.updated && (
                       <Typography sx={{ fontSize: '0.75rem', color: '#6B5E52', mt: 0.25 }}>
-                        Last updated {alert.updated}
+                        {t('alerts.updated_date', { date: alert.updated })}
                       </Typography>
                     )}
                   </Box>
@@ -177,13 +177,13 @@ export default function AdvisoryDetail({ alert: legacyAlert, alertLegend, apiSta
             {alertByLocale && !alert.active && (
               <Box role="status" sx={{ bgcolor: '#F4F1EE', border: '1px solid #D9D2CA', borderRadius: 2, p: 2, mb: 3 }}>
                 <Typography sx={{ fontWeight: 700, color: '#3D2B1F', fontSize: '0.9rem' }}>
-                  {alert.cancelled ? 'This warning was cancelled.' : 'This warning is no longer active.'}
+                  {alert.cancelled ? t('alerts.was_cancelled') : t('alerts.no_longer_active')}
                 </Typography>
                 {alert.cancelled && alert.cancelReason && (
                   <Typography sx={{ color: '#5A5A5A', fontSize: '0.85rem', mt: 0.5 }}>{alert.cancelReason}</Typography>
                 )}
                 <Typography component={Link} href="/early-warnings" sx={{ color: '#2E7BB4', fontSize: '0.85rem' }}>
-                  See the active warnings
+                  {t('alerts.see_active')}
                 </Typography>
               </Box>
             )}
@@ -195,7 +195,7 @@ export default function AdvisoryDetail({ alert: legacyAlert, alertLegend, apiSta
             <Divider sx={{ borderColor: `${alert.color}25`, mb: 3 }} />
 
             <Typography sx={{ fontWeight: 700, fontSize: '0.95rem', color: '#3D2B1F', mb: 1.25 }}>
-              Situation
+              {t('alerts.situation')}
             </Typography>
             {alert.bodyHtml ? (
               // Sanitised by Karamoja Core (strict allow-list: paragraphs, lists, emphasis, links).
@@ -277,7 +277,7 @@ export default function AdvisoryDetail({ alert: legacyAlert, alertLegend, apiSta
             {alert.targetGroups?.length > 0 && (
               <Box sx={panelCardSx}>
                 <Typography sx={{ fontWeight: 700, fontSize: '0.78rem', color: '#3D2B1F', mb: 1.25, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  Target groups
+                  {t('alerts.target_groups')}
                 </Typography>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.8 }}>
                   {alert.targetGroups.map((g) => (
@@ -303,7 +303,7 @@ export default function AdvisoryDetail({ alert: legacyAlert, alertLegend, apiSta
                   }}
                 >
                   <DescriptionOutlinedIcon sx={{ fontSize: 18, color: '#C1440E' }} />
-                  Documents
+                  {t('common.documents')}
                 </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                   {files.map((file) => (
@@ -335,7 +335,7 @@ export default function AdvisoryDetail({ alert: legacyAlert, alertLegend, apiSta
                       }}
                     >
                       <Box component="span" sx={{ minWidth: 0, flex: 1 }}>
-                        {file.filename || file.label || 'Download document'}
+                        {file.filename || file.label || t('common.download_document')}
                         {file.size && (
                           <Box component="span" sx={{ display: 'block', color: '#9A9A9A', fontSize: '0.72rem', mt: 0.25 }}>
                             {file.size}
@@ -364,7 +364,7 @@ export default function AdvisoryDetail({ alert: legacyAlert, alertLegend, apiSta
                   }}
                 >
                   <LocalOfferOutlinedIcon sx={{ fontSize: 18, color: '#C1440E' }} />
-                  Tags
+                  {t('common.tags')}
                 </Typography>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.8 }}>
                   {keywords.map((k) => (

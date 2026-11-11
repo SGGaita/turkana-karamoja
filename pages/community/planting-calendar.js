@@ -22,7 +22,7 @@ const DEFAULT_COPY = {
 };
 
 export default function PlantingCalendarPage({ source = 'legacy', advisories: legacyAdvisories, itemsByLocale, pageByLocale, apiStale }) {
-  const { locale } = useLanguage();
+  const { locale, t } = useLanguage();
   const cms = source === 'cms';
   const advisories = (cms ? pickLocale(itemsByLocale, locale) : legacyAdvisories) || [];
   const { copy, hero } = pageCopy(cms ? pageByLocale : null, locale, DEFAULT_COPY);
@@ -50,7 +50,7 @@ export default function PlantingCalendarPage({ source = 'legacy', advisories: le
         {cms && <IntroBox title={copy('intro').title} text={copy('intro').text} color="#2E8B57" />}
         {!cms && (
         <Box sx={{ bgcolor: 'white', border: '1px solid #2E8B57', borderLeft: '4px solid #2E8B57', borderRadius: 2, p: 3, mb: 4 }}>
-          <Typography sx={{ fontWeight: 700, fontSize: '0.9rem', color: '#3D2B1F', mb: 1 }}>Season Outlook</Typography>
+          <Typography sx={{ fontWeight: 700, fontSize: '0.9rem', color: '#3D2B1F', mb: 1 }}>{t('community.season_outlook')}</Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
             {seasonalOutlook.map((row) => (
               <Box key={row.label} sx={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #E8E0D5', pb: 0.8 }}>
@@ -68,7 +68,9 @@ export default function PlantingCalendarPage({ source = 'legacy', advisories: le
             <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontSize: '1.2rem', fontWeight: 700, mb: 2 }}>{season}</Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
               {rows.map((row) => {
-                const status = PLANTING_STATUS[row.status] || { label: row.status, color: '#9A9A9A' };
+                const status = PLANTING_STATUS[row.status]
+                  ? { label: t(`community.planting_${row.status}`), color: PLANTING_STATUS[row.status].color }
+                  : { label: row.status, color: '#9A9A9A' };
                 return (
                   <Box key={row.id} sx={{ flex: '1 1 calc(50% - 8px)', minWidth: { xs: '100%', md: 'calc(50% - 8px)' }, bgcolor: 'white', border: '1px solid #E8E0D5', borderRadius: 2, p: 2.5 }}>
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 1 }}>
@@ -77,11 +79,11 @@ export default function PlantingCalendarPage({ source = 'legacy', advisories: le
                     </Box>
                     <Typography sx={{ fontSize: '0.78rem', color: '#9A9A9A', mb: 1 }}>{row.region}</Typography>
                     <Typography sx={{ fontSize: '0.8rem', color: '#3D2B1F', fontWeight: 600, mb: 1 }}>
-                      Planting window: {formatDateRange(row.windowStart, row.windowEnd)}
+                      {t('community.planting_window', { range: formatDateRange(row.windowStart, row.windowEnd) })}
                     </Typography>
                     <Typography sx={{ fontSize: '0.82rem', color: '#5A5A5A', lineHeight: 1.65, mb: 1.5 }}>{row.desc}</Typography>
                     {row.agroDealer && (
-                      <Typography sx={{ fontSize: '0.75rem', color: '#2E8B57', fontWeight: 600 }}>Agro-dealer: {row.agroDealer}</Typography>
+                      <Typography sx={{ fontSize: '0.75rem', color: '#2E8B57', fontWeight: 600 }}>{t('community.agro_dealer', { name: row.agroDealer })}</Typography>
                     )}
                     {row.langs?.length > 0 && (
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.6, mt: 1.5 }}>

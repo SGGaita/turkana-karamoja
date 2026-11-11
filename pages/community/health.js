@@ -8,7 +8,7 @@ import { CommunityBackLink, IntroBox } from '../../components/CommunityServiceLa
 import { getHealthAlerts } from '../../lib/wordpress';
 import { buildSlugPath } from '../../lib/slug';
 import { listCmsProps, pageCopy, healthAlertFromCms, telParts } from '../../lib/cms-community';
-import { pickLocale } from '../../lib/cms-alerts';
+import { pickLocale, levelLabel } from '../../lib/cms-alerts';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 const ORDER = { RED: 0, ORANGE: 1, YELLOW: 2, GREEN: 3 };
@@ -28,7 +28,7 @@ const DEFAULT_COPY = {
 };
 
 export default function HealthAlertsPage({ source = 'legacy', alerts: legacyAlerts, itemsByLocale, pageByLocale, apiStale }) {
-  const { locale } = useLanguage();
+  const { locale, t } = useLanguage();
   const cms = source === 'cms';
   const alerts = cms
     ? [...(pickLocale(itemsByLocale, locale) || [])].sort((a, b) => ORDER[a.level] - ORDER[b.level])
@@ -58,7 +58,7 @@ export default function HealthAlertsPage({ source = 'legacy', alerts: legacyAler
         {alerts.length === 0 ? (
           <Typography sx={{ fontSize: '0.85rem', color: '#5A5A5A' }}>
             {copy('empty').text}{' '}
-            <Link href="/early-warnings" style={{ color: '#C1440E' }}>Early Warnings</Link>
+            <Link href="/early-warnings" style={{ color: '#C1440E' }}>{t('alerts.link_early_warnings')}</Link>
           </Typography>
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -85,29 +85,29 @@ export default function HealthAlertsPage({ source = 'legacy', alerts: legacyAler
                   }}
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, px: 3, py: 2, flexWrap: 'wrap' }}>
-                    <Chip label={`${a.level} ALERT`} size="small" sx={{ bgcolor: a.color, color: 'white', fontWeight: 700, fontSize: '0.65rem' }} />
+                    <Chip label={levelLabel(a.level, t)} size="small" sx={{ bgcolor: a.color, color: 'white', fontWeight: 700, fontSize: '0.65rem' }} />
                     {a.advisoryType && (
                       <Chip label={a.advisoryType} size="small" variant="outlined" sx={{ fontSize: '0.65rem', borderColor: `${a.color}60`, color: '#5A5A5A' }} />
                     )}
                     <Typography sx={{ fontWeight: 700, fontSize: '1rem', color: '#3D2B1F', flex: 1 }}>{a.title}</Typography>
                     {href && (
                       <Button size="small" variant="outlined" endIcon={<ArrowForwardIcon />} component="span" sx={{ borderColor: a.color, color: a.color, fontSize: '0.72rem', textTransform: 'none', pointerEvents: 'none' }}>
-                        View advisory
+                        {t('alerts.view')}
                       </Button>
                     )}
                   </Box>
                   <Divider sx={{ borderColor: `${a.color}20` }} />
                   <Box sx={{ px: 3, py: 2.5 }}>
-                    <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: '#6B4226', mb: 0.5 }}>Area Affected</Typography>
+                    <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: '#6B4226', mb: 0.5 }}>{t('alerts.area_affected')}</Typography>
                     <Typography sx={{ fontSize: '0.82rem', color: '#3D2B1F', mb: 2, fontWeight: 500 }}>{a.area}</Typography>
                     <Typography sx={{ fontSize: '0.82rem', color: '#5A5A5A', lineHeight: 1.7 }}>{bodyPreview}</Typography>
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, mt: 2 }}>
                       <Box>
-                        <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A' }}>SOURCE</Typography>
+                        <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A', textTransform: 'uppercase' }}>{t('alerts.source')}</Typography>
                         <Typography sx={{ fontSize: '0.78rem', color: '#2E7BB4', fontWeight: 500 }}>{a.source}</Typography>
                       </Box>
                       <Box>
-                        <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A' }}>ISSUED</Typography>
+                        <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A', textTransform: 'uppercase' }}>{t('alerts.issued')}</Typography>
                         <Typography sx={{ fontSize: '0.78rem', color: '#3D2B1F', fontWeight: 500 }}>{a.issued}</Typography>
                       </Box>
                     </Box>

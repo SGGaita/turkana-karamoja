@@ -44,7 +44,9 @@ async function fetchGlobals(base) {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       // eslint-disable-next-line no-await-in-loop
       const g = await res.json();
-      if (!g || !g.sections || !g.updated_at) return null; // Not saved yet: the website keeps the old header/footer.
+      // Kept even before Site settings are saved: the interface text (ui_strings) is used from day one; the header and
+      // footer still wait for the first save (shellFromGlobals checks updated_at).
+      if (!g || (!g.sections && !g.ui_strings)) return null;
       out[locale] = g;
     } finally {
       clearTimeout(timer);

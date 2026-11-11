@@ -70,7 +70,7 @@ function SidePanelSection({ icon: Icon, title, children }) {
 
 export default function ReportDetail({ report: legacyReport, apiStale, reportByLocale, pageByLocale }) {
   const router = useRouter();
-  const { locale } = useLanguage();
+  const { locale, t } = useLanguage();
   // Karamoja Core: the report in the reader's language (English where not translated).
   const cmsReport = reportByLocale ? reportFromCms(pickLocale(reportByLocale, locale)) : null;
   const report = cmsReport || legacyReport;
@@ -85,10 +85,10 @@ export default function ReportDetail({ report: legacyReport, apiStale, reportByL
 
   if (router.isFallback) {
     return (
-      <Layout title="Loading report…">
+      <Layout title={t('reports.loading')}>
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 12 }}>
           <CircularProgress sx={{ color: '#C1440E', mb: 2 }} />
-          <Typography sx={{ color: '#9A9A9A', fontSize: '0.9rem' }}>Loading report…</Typography>
+          <Typography sx={{ color: '#9A9A9A', fontSize: '0.9rem' }}>{t('reports.loading')}</Typography>
         </Box>
       </Layout>
     );
@@ -122,7 +122,7 @@ export default function ReportDetail({ report: legacyReport, apiStale, reportByL
         <StaleContentBanner show={apiStale} />
 
         <Button component={Link} href="/reports" startIcon={<ArrowBackIcon />} sx={{ color: '#2E7BB4', mb: 3, textTransform: 'none' }}>
-          All reports
+          {t('reports.all')}
         </Button>
 
         <Box
@@ -149,8 +149,8 @@ export default function ReportDetail({ report: legacyReport, apiStale, reportByL
               {(current.categories?.length ? current.categories : [current.tag]).filter(Boolean).map((c) => (
                 <Chip key={c} label={c} size="small" sx={{ bgcolor: current.tagColor, color: 'white', fontWeight: 600, fontSize: '0.68rem' }} />
               ))}
-              {current.isNew && <Chip label="NEW" size="small" sx={{ bgcolor: '#C1440E', color: 'white', fontWeight: 700, fontSize: '0.65rem' }} />}
-              {current.isUpdated && <Chip label="UPDATED" size="small" sx={{ bgcolor: '#2E7BB4', color: 'white', fontWeight: 700, fontSize: '0.65rem' }} />}
+              {current.isNew && <Chip label={t('reports.new')} size="small" sx={{ bgcolor: '#C1440E', color: 'white', fontWeight: 700, fontSize: '0.65rem' }} />}
+              {current.isUpdated && <Chip label={t('reports.updated')} size="small" sx={{ bgcolor: '#2E7BB4', color: 'white', fontWeight: 700, fontSize: '0.65rem' }} />}
             </Box>
 
             <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontWeight: 700, fontSize: { xs: '1.3rem', md: '1.6rem' }, color: '#3D2B1F', mb: 1.5 }}>
@@ -187,12 +187,12 @@ export default function ReportDetail({ report: legacyReport, apiStale, reportByL
                 alignSelf: 'flex-start',
               }}
             >
-              <SidePanelSection icon={ShareOutlinedIcon} title="Share">
+              <SidePanelSection icon={ShareOutlinedIcon} title={t('reports.share')}>
                 <ShareLinks title={current.title} path={reportPath} size="medium" />
               </SidePanelSection>
 
               {orgHref && (
-                <SidePanelSection icon={BusinessOutlinedIcon} title="Organisation">
+                <SidePanelSection icon={BusinessOutlinedIcon} title={t('reports.organisation')}>
                   {current.orgs?.[0] && (
                     <Typography sx={{ fontSize: '0.88rem', color: '#3D2B1F', fontWeight: 600, mb: 1.5 }}>
                       {current.orgs[0]}
@@ -214,7 +214,7 @@ export default function ReportDetail({ report: legacyReport, apiStale, reportByL
                       '&:hover': { bgcolor: '#C1440E', boxShadow: 'none' },
                     }}
                   >
-                    View organisation profile
+                    {t('reports.view_org')}
                   </Button>
                 </SidePanelSection>
               )}
@@ -231,7 +231,7 @@ export default function ReportDetail({ report: legacyReport, apiStale, reportByL
               )}
 
               {keywords.length > 0 && (
-                <SidePanelSection icon={LocalOfferOutlinedIcon} title="Tags">
+                <SidePanelSection icon={LocalOfferOutlinedIcon} title={t('common.tags')}>
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.8 }}>
                     {keywords.map((k) => (
                       <Chip

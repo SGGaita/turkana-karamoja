@@ -4,7 +4,8 @@ import { getHomeSections, getSiteHeader } from '../lib/wordpress';
 import { mapSiteHeader } from '../lib/wp-mappers';
 import siteHeaderSnapshot from '../lib/site-header.snapshot.json';
 import { cmsLocale, getGlobals } from '../lib/cms';
-import { isPublishedGlobals, shellFromGlobals } from '../lib/cms-globals';
+import { shellFromGlobals } from '../lib/cms-globals';
+import { translate } from '../lib/ui-strings';
 
 export const LANG_COOKIE = 'tk_hub_lang';
 export const SUPPORTED_LOCALES = ['en', 'sw', 'tu', 'pk', 'ng'];
@@ -87,7 +88,8 @@ const homeSectionsLoader = createCmsLoader('tk_hub_home_sections_v1', getHomeSec
 // Karamoja → Site settings: checked once per visit so edits show on the next page load (cheap: ETag / 304).
 const globalsLoader = createCmsLoader(
   'kc_globals_v1',
-  (loc) => getGlobals(loc).then((data) => ({ data, apiStale: !isPublishedGlobals(data) })),
+  // Kept before Site settings are saved too: interface text works from day one (the shell checks the save itself).
+  (loc) => getGlobals(loc).then((data) => ({ data, apiStale: !data || typeof data !== 'object' })),
   { refreshEachVisit: true },
 );
 // Saved into the build by scripts/fetch-site-header.js, so the first paint already has the CMS header and footer.
@@ -116,6 +118,7 @@ const SNAPSHOT_SITE_HEADER = Object.fromEntries(
 );
 
 const LanguageContext = createContext({
+  t: (key, vars) => translate(null, key, vars),
   locale: 'en',
   setLocale: () => {},
   siteHeaderByLocale: { en: fallbackSiteHeader, sw: fallbackSiteHeader },
@@ -170,11 +173,14 @@ export function LanguageProvider({
     const allowed = !offered || offered.some((l) => l.code === activeLocale || l.cms === cmsLoc);
     const effective = allowed ? activeLocale : 'en';
     const legacyHeader = headers[effective] || headers.en || fallbackSiteHeader;
-    const shell = shellFromGlobals(globalsFor(cmsLocale(effective)), legacyHeader);
+    const effectiveGlobals = globalsFor(cmsLocale(effective));
+    const shell = shellFromGlobals(effectiveGlobals, legacyHeader);
+    const uiStrings = effectiveGlobals?.ui_strings || null; // Interface text: works before Site settings are saved.
     return {
       locale: effective,
       setLocale,
       shell,
+      t: (key, vars) => translate(uiStrings, key, vars),
       siteHeaderByLocale: shell ? { ...headers, [effective]: shell.header } : headers,
       homeSectionsByLocale: {
         en: fallbackHomeSections,
@@ -226,4 +232,11 @@ export function useVocabLabel(list, fallback = {}) {
     const builtIn = typeof fromFallback === 'object' && fromFallback ? fromFallback.label : fromFallback;
     return (vocab && vocab[code]) || builtIn || code || '';
   };
+}
+
+/**
+ * Interface text in the reader's language (Karamoja → Interface text), English fallback: `const t = useT(); t('alerts.source')`.
+ */
+export function useT() {
+  return useLanguage().t;
 }

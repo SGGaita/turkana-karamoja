@@ -1,7 +1,9 @@
 import { Alert } from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { useT } from '../contexts/LanguageContext';
 
 export default function StaleContentBanner({ show }) {
+  const t = useT();
   if (!show) return null;
   return (
     <Alert
@@ -14,7 +16,7 @@ export default function StaleContentBanner({ show }) {
         '& .MuiAlert-icon': { color: '#2E7BB4' },
       }}
     >
-      Showing cached content - live CMS updates are temporarily unavailable.
+      {t('common.stale_banner')}
     </Alert>
   );
 }

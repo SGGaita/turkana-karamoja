@@ -40,7 +40,7 @@ const richTextSx = {
 
 export default function CommunityInitiativeDetail({ article: legacyArticle, related: legacyRelated, apiStale, articleByLocale, relatedByLocale, pageByLocale }) {
   const router = useRouter();
-  const { locale } = useLanguage();
+  const { locale, t } = useLanguage();
   const cms = Boolean(articleByLocale);
   const article = cms ? pickLocale(articleByLocale, locale) : legacyArticle;
   const related = (cms ? pickLocale(relatedByLocale, locale) : legacyRelated) || [];
@@ -48,10 +48,10 @@ export default function CommunityInitiativeDetail({ article: legacyArticle, rela
 
   if (router.isFallback || !article) {
     return (
-      <Layout title="Loading article…">
+      <Layout title={t('community.loading_article')}>
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 12 }}>
           <CircularProgress sx={{ color: '#C1440E', mb: 2 }} />
-          <Typography sx={{ color: '#9A9A9A', fontSize: '0.9rem' }}>Loading article…</Typography>
+          <Typography sx={{ color: '#9A9A9A', fontSize: '0.9rem' }}>{t('community.loading_article')}</Typography>
         </Box>
       </Layout>
     );
@@ -78,7 +78,7 @@ export default function CommunityInitiativeDetail({ article: legacyArticle, rela
           startIcon={<ArrowBackIcon />}
           sx={{ color: '#C1440E', mb: 3, textTransform: 'none' }}
         >
-          All community initiatives
+          {t('community.all_initiatives')}
         </Button>
 
         <Box
@@ -141,7 +141,7 @@ export default function CommunityInitiativeDetail({ article: legacyArticle, rela
                   }}
                 >
                   <DescriptionOutlinedIcon sx={{ fontSize: 18, color: '#C1440E' }} />
-                  Documents
+                  {t('common.documents')}
                 </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                   {files.map((file) => (
@@ -173,7 +173,7 @@ export default function CommunityInitiativeDetail({ article: legacyArticle, rela
                       }}
                     >
                       <Box component="span" sx={{ minWidth: 0, flex: 1 }}>
-                        {file.filename || file.label || 'Download document'}
+                        {file.filename || file.label || t('common.download_document')}
                         {file.size && (
                           <Box component="span" sx={{ display: 'block', color: '#9A9A9A', fontSize: '0.72rem', mt: 0.25 }}>
                             {file.size}
@@ -195,7 +195,7 @@ export default function CommunityInitiativeDetail({ article: legacyArticle, rela
         {related.length > 0 && (
           <Box sx={{ mt: 6 }}>
             <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontSize: '1.4rem', fontWeight: 700, mb: 3 }}>
-              Related Articles
+              {t('community.related')}
             </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
               {related.map((item) => (

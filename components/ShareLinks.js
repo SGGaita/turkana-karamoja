@@ -5,6 +5,7 @@ import XIcon from '@mui/icons-material/X';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import LinkIcon from '@mui/icons-material/Link';
+import { useT } from '../contexts/LanguageContext';
 
 function buildShareUrl(path, origin) {
   const base = (origin || '').replace(/\/$/, '');
@@ -13,6 +14,7 @@ function buildShareUrl(path, origin) {
 }
 
 export default function ShareLinks({ title, path, size = 'small' }) {
+  const t = useT();
   const [copied, setCopied] = useState(false);
 
   const handleShare = (platform, event) => {
@@ -45,7 +47,7 @@ export default function ShareLinks({ title, path, size = 'small' }) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      window.prompt('Copy this link:', url);
+      window.prompt(t('share.copy'), url);
     }
   };
 
@@ -56,30 +58,30 @@ export default function ShareLinks({ title, path, size = 'small' }) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
       <Typography sx={{ fontSize: '0.72rem', color: '#9A9A9A', fontWeight: 600, mr: 0.5 }}>
-        Share
+        {t('share.label')}
       </Typography>
-      <Tooltip title="Share on Facebook">
-        <IconButton size="small" sx={iconSx} onClick={(e) => handleShare('facebook', e)} aria-label="Share on Facebook">
+      <Tooltip title={t('share.facebook')}>
+        <IconButton size="small" sx={iconSx} onClick={(e) => handleShare('facebook', e)} aria-label={t('share.facebook')}>
           <FacebookIcon sx={{ fontSize: 16 }} />
         </IconButton>
       </Tooltip>
-      <Tooltip title="Share on X">
-        <IconButton size="small" sx={iconSx} onClick={(e) => handleShare('twitter', e)} aria-label="Share on X">
+      <Tooltip title={t('share.x')}>
+        <IconButton size="small" sx={iconSx} onClick={(e) => handleShare('twitter', e)} aria-label={t('share.x')}>
           <XIcon sx={{ fontSize: 16 }} />
         </IconButton>
       </Tooltip>
-      <Tooltip title="Share on LinkedIn">
-        <IconButton size="small" sx={iconSx} onClick={(e) => handleShare('linkedin', e)} aria-label="Share on LinkedIn">
+      <Tooltip title={t('share.linkedin')}>
+        <IconButton size="small" sx={iconSx} onClick={(e) => handleShare('linkedin', e)} aria-label={t('share.linkedin')}>
           <LinkedInIcon sx={{ fontSize: 16 }} />
         </IconButton>
       </Tooltip>
-      <Tooltip title="Share on WhatsApp">
-        <IconButton size="small" sx={iconSx} onClick={(e) => handleShare('whatsapp', e)} aria-label="Share on WhatsApp">
+      <Tooltip title={t('share.whatsapp')}>
+        <IconButton size="small" sx={iconSx} onClick={(e) => handleShare('whatsapp', e)} aria-label={t('share.whatsapp')}>
           <WhatsAppIcon sx={{ fontSize: 16 }} />
         </IconButton>
       </Tooltip>
-      <Tooltip title={copied ? 'Link copied!' : 'Copy link'}>
-        <IconButton size="small" sx={iconSx} onClick={handleCopy} aria-label="Copy link">
+      <Tooltip title={copied ? t('share.copied') : t('share.copy')}>
+        <IconButton size="small" sx={iconSx} onClick={handleCopy} aria-label={t('share.copy')}>
           <LinkIcon sx={{ fontSize: 16 }} />
         </IconButton>
       </Tooltip>
