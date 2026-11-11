@@ -8,6 +8,7 @@ import LocalOfferOutlinedIcon from '@mui/icons-material/LocalOfferOutlined';
 import PublicOutlinedIcon from '@mui/icons-material/PublicOutlined';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import { HUB_COUNTRIES, getCountryLabel } from '../lib/countries';
+import { useT } from '../contexts/LanguageContext';
 
 export const FILTER_SIDEBAR_WIDTH = 300;
 
@@ -80,6 +81,7 @@ export default function ReportsFilterPanel({
   onClear,
   onSearchClear,
 }) {
+  const t = useT();
   const activeCount = [
     search ? 1 : 0,
     filterOrg ? 1 : 0,
@@ -118,7 +120,7 @@ export default function ReportsFilterPanel({
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
             <FilterAltOutlinedIcon sx={{ fontSize: 18, color: '#F0D9B0' }} />
             <Typography sx={{ fontWeight: 700, fontSize: '0.92rem', color: '#fff' }}>
-              Filters
+              {t('reports.filters')}
             </Typography>
             {activeCount > 0 && (
               <Box
@@ -141,7 +143,7 @@ export default function ReportsFilterPanel({
             )}
           </Box>
           <Typography sx={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.72)', mt: 0.4, pl: 3.2 }}>
-            Narrow the reports library
+            {t('reports.filters_hint')}
           </Typography>
         </Box>
         <Button
@@ -159,14 +161,14 @@ export default function ReportsFilterPanel({
             '&.Mui-disabled': { color: 'rgba(255,255,255,0.28)' },
           }}
         >
-          Clear
+          {t('reports.clear')}
         </Button>
       </Box>
 
       <Box sx={{ p: 2.25, display: 'flex', flexDirection: 'column', gap: 2.25 }}>
-        <FilterField icon={SearchIcon} label="Search" accent="#6B4226">
+        <FilterField icon={SearchIcon} label={t('reports.search')} accent="#6B4226">
           <TextField
-            placeholder="Title, description, or tag…"
+            placeholder={t('reports.search_placeholder')}
             value={search}
             onChange={onSearchChange}
             size="small"
@@ -182,7 +184,7 @@ export default function ReportsFilterPanel({
           />
         </FilterField>
 
-        <FilterField icon={CategoryOutlinedIcon} label="Category" accent="#2E7BB4">
+        <FilterField icon={CategoryOutlinedIcon} label={t('reports.category')} accent="#2E7BB4">
           <Autocomplete
             multiple
             size="small"
@@ -195,14 +197,14 @@ export default function ReportsFilterPanel({
             renderInput={(params) => (
               <TextField
                 {...params}
-                placeholder={filterCategories.length ? '' : 'Choose a report type…'}
+                placeholder={filterCategories.length ? '' : t('reports.category_placeholder')}
                 sx={fieldSx}
               />
             )}
           />
         </FilterField>
 
-        <FilterField icon={BusinessOutlinedIcon} label="Organisation" accent="#C1440E">
+        <FilterField icon={BusinessOutlinedIcon} label={t('reports.organisation')} accent="#C1440E">
           <Autocomplete
             size="small"
             options={orgs}
@@ -211,14 +213,14 @@ export default function ReportsFilterPanel({
             renderInput={(params) => (
               <TextField
                 {...params}
-                placeholder="Choose an organisation…"
+                placeholder={t('reports.organisation_placeholder')}
                 sx={fieldSx}
               />
             )}
           />
         </FilterField>
 
-        <FilterField icon={LocalOfferOutlinedIcon} label="Keyword" accent="#6D28D9">
+        <FilterField icon={LocalOfferOutlinedIcon} label={t('reports.keyword')} accent="#6D28D9">
           <Autocomplete
             multiple
             size="small"
@@ -228,18 +230,18 @@ export default function ReportsFilterPanel({
             disableCloseOnSelect
             limitTags={0}
             getLimitTagsText={(more) => `${more} selected`}
-            noOptionsText={keywords.length ? 'No matching keywords' : 'No extra keywords beyond categories'}
+            noOptionsText={keywords.length ? t('reports.keyword_none') : t('reports.keyword_no_extra')}
             renderInput={(params) => (
               <TextField
                 {...params}
-                placeholder={filterKeywords.length ? '' : 'Topic tags only…'}
+                placeholder={filterKeywords.length ? '' : t('reports.keyword_placeholder')}
                 sx={fieldSx}
               />
             )}
           />
         </FilterField>
 
-        <FilterField icon={PublicOutlinedIcon} label="Country" accent="#2E7040">
+        <FilterField icon={PublicOutlinedIcon} label={t('reports.country')} accent="#2E7040">
           <Autocomplete
             multiple
             size="small"
@@ -253,19 +255,19 @@ export default function ReportsFilterPanel({
             renderInput={(params) => (
               <TextField
                 {...params}
-                placeholder={filterCountries.length ? '' : 'Kenya, Uganda, or regional…'}
+                placeholder={filterCountries.length ? '' : t('reports.country_placeholder')}
                 sx={fieldSx}
               />
             )}
           />
         </FilterField>
 
-        <FilterField icon={CalendarMonthOutlinedIcon} label="Published between" accent="#B45309">
+        <FilterField icon={CalendarMonthOutlinedIcon} label={t('reports.published_between')} accent="#B45309">
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
             <TextField
               type="date"
               size="small"
-              label="From"
+              label={t('reports.from')}
               fullWidth
               value={dateFrom}
               onChange={onDateFromChange}
@@ -275,7 +277,7 @@ export default function ReportsFilterPanel({
             <TextField
               type="date"
               size="small"
-              label="To"
+              label={t('reports.to')}
               fullWidth
               value={dateTo}
               onChange={onDateToChange}
@@ -290,12 +292,12 @@ export default function ReportsFilterPanel({
         <Box sx={{ px: 2.25, pb: 2.25 }}>
           <Box sx={{ borderTop: '1px dashed #D4C4B0', pt: 1.75 }}>
             <Typography sx={{ fontSize: '0.65rem', fontWeight: 700, color: '#8A7058', letterSpacing: '0.06em', textTransform: 'uppercase', mb: 1 }}>
-              Active filters
+              {t('reports.active_filters')}
             </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.7 }}>
               {search && (
                 <Chip
-                  label={`Search: “${search}”`}
+                  label={t('reports.chip_search', { q: search })}
                   onDelete={onSearchClear}
                   size="small"
                   sx={{ bgcolor: '#EDE4D8', color: '#6B4226', fontSize: '0.68rem', fontWeight: 600 }}
@@ -304,7 +306,7 @@ export default function ReportsFilterPanel({
               {filterCategories.map((c) => (
                 <Chip
                   key={`cat-${c}`}
-                  label={`Category: ${c}`}
+                  label={t('reports.chip_category', { v: c })}
                   onDelete={() => onCategoriesChange(filterCategories.filter((x) => x !== c))}
                   size="small"
                   sx={{ bgcolor: '#E0EFF8', color: '#2E7BB4', fontSize: '0.68rem', fontWeight: 600 }}
@@ -312,7 +314,7 @@ export default function ReportsFilterPanel({
               ))}
               {filterOrg && (
                 <Chip
-                  label={`Org: ${filterOrg}`}
+                  label={t('reports.chip_org', { v: filterOrg })}
                   onDelete={() => onOrgChange('')}
                   size="small"
                   sx={{ bgcolor: '#FDE8DC', color: '#C1440E', fontSize: '0.68rem', fontWeight: 600 }}
@@ -321,7 +323,7 @@ export default function ReportsFilterPanel({
               {filterKeywords.map((k) => (
                 <Chip
                   key={`kw-${k}`}
-                  label={`Keyword: ${k}`}
+                  label={t('reports.chip_keyword', { v: k })}
                   onDelete={() => onKeywordsChange(filterKeywords.filter((x) => x !== k))}
                   size="small"
                   sx={{ bgcolor: '#EDE7F6', color: '#6D28D9', fontSize: '0.68rem', fontWeight: 600 }}
@@ -330,7 +332,7 @@ export default function ReportsFilterPanel({
               {filterCountries.map((code) => (
                 <Chip
                   key={`co-${code}`}
-                  label={`Country: ${getCountryLabel(code)}`}
+                  label={t('reports.chip_country', { v: getCountryLabel(code) })}
                   onDelete={() => onCountriesChange(filterCountries.filter((x) => x !== code))}
                   size="small"
                   sx={{ bgcolor: '#EAF3EC', color: '#2E7040', fontSize: '0.68rem', fontWeight: 600 }}
@@ -338,7 +340,7 @@ export default function ReportsFilterPanel({
               ))}
               {(dateFrom || dateTo) && (
                 <Chip
-                  label={`Dates: ${dateFrom || '…'} → ${dateTo || '…'}`}
+                  label={t('reports.chip_dates', { v: `${dateFrom || '…'} → ${dateTo || '…'}` })}
                   onDelete={() => {
                     onDateFromChange({ target: { value: '' } });
                     onDateToChange({ target: { value: '' } });

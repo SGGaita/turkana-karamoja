@@ -22,25 +22,27 @@ const DEFAULT_COPY = {
   empty: { text: 'No assistance sites have been published yet.' },
 };
 
+// Built-in filter chips (labels from Interface text) until Site settings → Lists has the site types.
 const FILTER_TYPES = [
-  { key: 'all', label: 'All sites' },
-  { key: 'food_distribution', label: 'Food' },
-  { key: 'nfi', label: 'NFI' },
-  { key: 'cash_transfer', label: 'Cash transfer' },
-  { key: 'registration', label: 'Registration' },
+  { key: 'all', labelKey: 'community.all_sites' },
+  { key: 'food_distribution', labelKey: 'community.filter_food' },
+  { key: 'nfi', labelKey: 'community.filter_nfi' },
+  { key: 'cash_transfer', labelKey: 'community.filter_cash' },
+  { key: 'registration', labelKey: 'community.filter_registration' },
 ];
 
 export default function AssistancePage({ source = 'legacy', assistanceSites: legacySites, itemsByLocale, pageByLocale, apiStale }) {
-  const { locale } = useLanguage();
+  const { locale, t } = useLanguage();
   const cms = source === 'cms';
   const assistanceSites = (cms ? pickLocale(itemsByLocale, locale) : legacySites) || [];
   const { copy, hero } = pageCopy(cms ? pageByLocale : null, locale, DEFAULT_COPY);
   const typeLabel = useVocabLabel('site_types', ASSISTANCE_SITE_TYPES);
   // Filter chips: the site types from Site settings → Lists once saved, else the built-in short labels.
   const vocabTypes = useShell()?.vocabularies?.site_types;
-  const filterTypes = vocabTypes && Object.keys(vocabTypes).length
+  const filterTypes = (vocabTypes && Object.keys(vocabTypes).length
     ? [FILTER_TYPES[0], ...Object.entries(vocabTypes).map(([key, label]) => ({ key, label }))]
-    : FILTER_TYPES;
+    : FILTER_TYPES
+  ).map((f) => ({ key: f.key, label: f.label || t(f.labelKey) }));
   const [filter, setFilter] = useState('all');
   const filtered = filter === 'all' ? assistanceSites : assistanceSites.filter((s) => s.siteType === filter);
   const markers = filtered.map((s) => toServiceMapMarker(s, 'assistance')).filter(Boolean);
@@ -61,8 +63,8 @@ export default function AssistancePage({ source = 'legacy', assistanceSites: leg
         <IntroBox title={copy('intro').title} text={copy('intro').text} color="#E87010" />
 
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 3 }}>
-          <StatChip value={assistanceSites.length} label="Active sites" color="#E87010" />
-          <StatChip value={agencies.length} label="Partner agencies" color="#3D2B1F" />
+          <StatChip value={assistanceSites.length} label={t('community.active_sites')} color="#E87010" />
+          <StatChip value={agencies.length} label={t('community.partner_agencies')} color="#3D2B1F" />
         </Box>
 
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 3 }}>
@@ -86,11 +88,11 @@ export default function AssistancePage({ source = 'legacy', assistanceSites: leg
           <CommunityServiceMap
             markers={markers}
             apiStale={apiStale}
-            emptyMessage="No assistance sites with GPS coordinates published yet."
+            emptyMessage={t('community.no_sites_on_map')}
           />
         </Box>
 
-        <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontSize: '1.2rem', fontWeight: 700, mb: 2 }}>Distribution & Registration Sites</Typography>
+        <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontSize: '1.2rem', fontWeight: 700, mb: 2 }}>{t('community.sites_heading')}</Typography>
         {!assistanceSites.length && !apiStale && <EmptyNote text={copy('empty').text} />}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
           {filtered.map((site) => (
@@ -102,11 +104,11 @@ export default function AssistancePage({ source = 'legacy', assistanceSites: leg
               </Box>
               <Typography sx={{ fontSize: '0.78rem', color: '#9A9A9A', mb: 0.5 }}>{site.region}{site.locationLabel ? ` · ${site.locationLabel}` : ''}</Typography>
               <Typography sx={{ fontSize: '0.82rem', color: '#5A5A5A', lineHeight: 1.6, mb: 1 }}>{site.desc}</Typography>
-              {site.schedule && <Typography sx={{ fontSize: '0.75rem', color: '#3D2B1F' }}><strong>Schedule:</strong> {site.schedule}</Typography>}
-              {site.contact && <Typography sx={{ fontSize: '0.75rem', color: '#5A5A5A', mt: 0.5 }}><strong>Contact:</strong> {site.contact}</Typography>}
+              {site.schedule && <Typography sx={{ fontSize: '0.75rem', color: '#3D2B1F' }}><strong>{t('community.schedule')}</strong> {site.schedule}</Typography>}
+              {site.contact && <Typography sx={{ fontSize: '0.75rem', color: '#5A5A5A', mt: 0.5 }}><strong>{t('community.contact')}</strong> {site.contact}</Typography>}
               {site.lastUpdated && (
                 <Typography sx={{ fontSize: '0.68rem', color: site.stale ? '#B85C00' : '#9A9A9A', mt: 1 }}>
-                  Last updated: {site.lastUpdated}{site.stale ? ' · may be out of date' : ''}
+                  {t('common.last_updated', { date: site.lastUpdated })}{site.stale ? ` · ${t('common.out_of_date')}` : ''}
                 </Typography>
               )}
             </Box>

@@ -68,7 +68,7 @@ export default function Community({
   communityPage,
   apiStale,
 }) {
-  const { locale } = useLanguage();
+  const { locale, t } = useLanguage();
   const cms = source === 'cms';
   const { copy, shown, hero } = pageCopy(cms ? pageByLocale : null, locale, DEFAULT_COPY);
   // Karamoja Core: the items picked in the page's sections, in that order (all published items until something is picked).
@@ -190,7 +190,7 @@ export default function Community({
           </Box>
         ) : (
           <Typography sx={{ fontSize: '0.85rem', color: '#5A5A5A', mb: 6 }}>
-            No community initiatives published yet.
+            {t('community.no_initiatives')}
           </Typography>
         )}
         </>

@@ -29,7 +29,7 @@ import {
 
 export default function Reports({ initialReports = null, source = 'legacy', reportsByLocale = null, pageByLocale = null }) {
   const cms = source === 'cms';
-  const { locale } = useLanguage();
+  const { locale, t } = useLanguage();
   const sections = cms ? pickLocale(pageByLocale, locale)?.sections || null : null;
   const hero = sections?.hero || DEFAULT_HERO;
   const intro = sections?.intro?.enabled !== false ? sections?.intro : null;
@@ -239,21 +239,18 @@ export default function Reports({ initialReports = null, source = 'legacy', repo
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, flexWrap: 'wrap', gap: 2 }}>
               <Box>
                 <Typography sx={{ fontSize: '0.82rem', color: '#9A9A9A' }}>
-                  {loading ? 'Loading reports…' : (
+                  {loading ? t('reports.loading_list') : (
                     <>
-                      Showing <strong style={{ color: '#3D2B1F' }}>{filtered.length}</strong> of{' '}
-                      <strong style={{ color: '#3D2B1F' }}>{reports.length}</strong> reports
-                      {viewMode === 'by-org' && orgGroups.length > 0 && (
-                        <> · <strong style={{ color: '#3D2B1F' }}>{orgGroups.length}</strong> organisations</>
-                      )}
+                      {t('reports.showing', { shown: filtered.length, total: reports.length })}
+                      {viewMode === 'by-org' && orgGroups.length > 0 && ` · ${t('reports.organisations', { n: orgGroups.length })}`}
                     </>
                   )}
                 </Typography>
                 {!loading && filtered.length > 0 && (
                   <Typography sx={{ fontSize: '0.72rem', color: '#B0A090', mt: 0.3 }}>
                     {viewMode === 'list'
-                      ? `Page ${page} of ${totalPages} · reports ${pageStart}–${pageEnd}`
-                      : `Page ${page} of ${totalPages} · organisation groups ${pageStart}–${pageEnd}`}
+                      ? t('reports.page_reports', { page, pages: totalPages, from: pageStart, to: pageEnd })
+                      : t('reports.page_groups', { page, pages: totalPages, from: pageStart, to: pageEnd })}
                   </Typography>
                 )}
               </Box>
@@ -285,11 +282,11 @@ export default function Reports({ initialReports = null, source = 'legacy', repo
               >
                 <ToggleButton value="list">
                   <ViewListIcon sx={{ fontSize: 16, mr: 0.6 }} />
-                  List
+                  {t('reports.view_list')}
                 </ToggleButton>
                 <ToggleButton value="by-org">
                   <AccountTreeIcon sx={{ fontSize: 16, mr: 0.6 }} />
-                  By organisation
+                  {t('reports.view_by_org')}
                 </ToggleButton>
               </ToggleButtonGroup>
             </Box>
@@ -304,14 +301,14 @@ export default function Reports({ initialReports = null, source = 'legacy', repo
             ) : loadError ? (
               <Box sx={{ bgcolor: 'white', border: '1px solid #E8E0D5', borderRadius: 2, p: 5, textAlign: 'center' }}>
                 <Typography sx={{ color: '#B91C1C', fontSize: '0.9rem', mb: 2 }}>{loadError}</Typography>
-                <Button size="small" onClick={() => load()} startIcon={<RefreshIcon />} sx={{ color: '#C1440E', textTransform: 'none' }}>Try again</Button>
+                <Button size="small" onClick={() => load()} startIcon={<RefreshIcon />} sx={{ color: '#C1440E', textTransform: 'none' }}>{t('common.try_again')}</Button>
               </Box>
             ) : filtered.length === 0 ? (
               <Box sx={{ bgcolor: 'white', border: '1px solid #E8E0D5', borderRadius: 2, p: 5, textAlign: 'center' }}>
                 <Typography sx={{ color: '#9A9A9A', fontSize: '0.9rem', mb: 1 }}>
-                  {!reports.length && sections?.empty?.text ? sections.empty.text : 'No reports found matching your filters.'}
+                  {!reports.length && sections?.empty?.text ? sections.empty.text : t('reports.none_found')}
                 </Typography>
-                <Button size="small" onClick={clearFilters} sx={{ color: '#C1440E', textTransform: 'none' }}>Clear filters</Button>
+                <Button size="small" onClick={clearFilters} sx={{ color: '#C1440E', textTransform: 'none' }}>{t('reports.clear_filters')}</Button>
               </Box>
             ) : viewMode === 'list' ? (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 4 }}>

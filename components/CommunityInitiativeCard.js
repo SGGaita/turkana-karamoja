@@ -2,8 +2,10 @@ import Link from 'next/link';
 import { Box, Typography, Button, Card, CardMedia, CardContent, Chip } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ShareLinks from './ShareLinks';
+import { useT } from '../contexts/LanguageContext';
 
 export default function CommunityInitiativeCard({ item, compact = false }) {
+  const t = useT();
   const href = `/community/${item.slugPath}`;
 
   return (
@@ -73,7 +75,7 @@ export default function CommunityInitiativeCard({ item, compact = false }) {
             endIcon={<ArrowForwardIcon sx={{ fontSize: 14 }} />}
             sx={{ alignSelf: 'flex-start', color: '#C1440E', fontWeight: 600, p: 0, textTransform: 'none' }}
           >
-            Read More
+            {t('common.read_more')}
           </Button>
         </Box>
       </CardContent>

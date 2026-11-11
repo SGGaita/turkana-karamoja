@@ -8,8 +8,10 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import DownloadIcon from '@mui/icons-material/Download';
 import { canEmbedPreview, isPdfUrl, getReportFiles } from '../lib/report-utils';
 import { trackReportDownload } from '../lib/wordpress';
+import { useT } from '../contexts/LanguageContext';
 
 export default function ReportPreviewDialog({ report, file, open, onClose, onDownloadTracked }) {
+  const t = useT();
   const [embedFailed, setEmbedFailed] = useState(false);
   const [activeFile, setActiveFile] = useState(file);
 
@@ -70,7 +72,7 @@ export default function ReportPreviewDialog({ report, file, open, onClose, onDow
             </Box>
           )}
         </Box>
-        <IconButton onClick={handleClose} size="small" aria-label="Close preview">
+        <IconButton onClick={handleClose} size="small" aria-label={t('reports.preview_close')}>
           <CloseIcon />
         </IconButton>
       </DialogTitle>
@@ -79,7 +81,7 @@ export default function ReportPreviewDialog({ report, file, open, onClose, onDow
         {!url ? (
           <Box sx={{ p: 4, textAlign: 'center' }}>
             <Typography sx={{ color: '#5A5A5A', fontSize: '0.9rem' }}>
-              No file is attached to this report yet.
+              {t('reports.no_file')}
             </Typography>
           </Box>
         ) : embeddable ? (
@@ -107,18 +109,18 @@ export default function ReportPreviewDialog({ report, file, open, onClose, onDow
           <Box sx={{ p: 4, textAlign: 'center' }}>
             <Typography sx={{ color: '#5A5A5A', fontSize: '0.9rem', mb: 1, lineHeight: 1.6 }}>
               {embedFailed
-                ? 'Inline preview could not load (often due to browser security on cross-site files).'
-                : 'This file type cannot be previewed in the browser.'}
+                ? t('reports.preview_failed')
+                : t('reports.preview_unsupported')}
             </Typography>
             <Typography sx={{ color: '#9A9A9A', fontSize: '0.8rem' }}>
-              Use Open in new tab or Download to view Word, Excel, and other documents.
+              {t('reports.preview_hint')}
             </Typography>
           </Box>
         )}
       </DialogContent>
 
       <DialogActions sx={{ px: 2.5, py: 1.5, gap: 1, flexWrap: 'wrap' }}>
-        <Button onClick={handleClose} sx={{ color: '#5A5A5A' }}>Close</Button>
+        <Button onClick={handleClose} sx={{ color: '#5A5A5A' }}>{t('common.close')}</Button>
         {url && (
           <>
             <Button
@@ -129,7 +131,7 @@ export default function ReportPreviewDialog({ report, file, open, onClose, onDow
               startIcon={<OpenInNewIcon />}
               sx={{ color: '#2E7BB4' }}
             >
-              Open in new tab
+              {t('common.open_new_tab')}
             </Button>
             <Button
               component="a"
@@ -140,7 +142,7 @@ export default function ReportPreviewDialog({ report, file, open, onClose, onDow
               startIcon={<DownloadIcon />}
               sx={{ bgcolor: '#3D2B1F', '&:hover': { bgcolor: '#C1440E' } }}
             >
-              Download
+              {t('common.download')}
             </Button>
           </>
         )}

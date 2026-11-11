@@ -12,8 +12,8 @@ import { getAlerts, getMapAdvisories, getAlertLegend } from '../../lib/wordpress
 import { toMapAdvisoryMarker } from '../../lib/wp-mappers';
 import { buildSlugPath } from '../../lib/slug';
 import { getCollection, getPageAllLocales, inAllLocales, isPublishedPage } from '../../lib/cms';
-import { pickLocale, splitAlerts } from '../../lib/cms-alerts';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { pickLocale, splitAlerts, levelLabel, validityLabel } from '../../lib/cms-alerts';
+import { useLanguage, useT } from '../../contexts/LanguageContext';
 
 const HERO_IMAGE = 'https://images.unsplash.com/photo-1504608524841-42584120d693?w=1400&q=70';
 
@@ -29,6 +29,7 @@ const DEFAULT_COPY = {
 };
 
 function AlertCard({ a, ended = false }) {
+  const t = useT();
   const href = a.id != null ? `/early-warnings/${buildSlugPath(a.title, a.id)}` : null;
   const bodyPreview = a.body && a.body.length > 220 ? `${a.body.slice(0, 217)}…` : a.body;
 
@@ -49,9 +50,9 @@ function AlertCard({ a, ended = false }) {
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, px: 3, py: 2, flexWrap: 'wrap' }}>
-        <Chip label={`${a.level} ALERT`} size="small" sx={{ bgcolor: a.color, color: 'white', fontWeight: 700, fontSize: '0.65rem' }} />
+        <Chip label={levelLabel(a.level, t)} size="small" sx={{ bgcolor: a.color, color: 'white', fontWeight: 700, fontSize: '0.65rem' }} />
         {ended && (
-          <Chip label={a.cancelled ? 'CANCELLED' : 'ENDED'} size="small" sx={{ bgcolor: '#5A5A5A', color: 'white', fontWeight: 700, fontSize: '0.65rem' }} />
+          <Chip label={a.cancelled ? t('alerts.cancelled') : t('alerts.ended')} size="small" sx={{ bgcolor: '#5A5A5A', color: 'white', fontWeight: 700, fontSize: '0.65rem' }} />
         )}
         <Typography
           component={href ? Link : 'span'}
@@ -76,7 +77,7 @@ function AlertCard({ a, ended = false }) {
             href={href}
             sx={{ borderColor: a.color, color: a.color, fontSize: '0.72rem', textTransform: 'none' }}
           >
-            View full advisory
+            {t('alerts.view_full')}
           </Button>
         )}
       </Box>
@@ -85,29 +86,29 @@ function AlertCard({ a, ended = false }) {
         <Box sx={{ flex: '2 1 320px' }}>
           {a.area && (
             <>
-              <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: '#6B4226', mb: 0.5 }}>Area Affected</Typography>
+              <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: '#6B4226', mb: 0.5 }}>{t('alerts.area_affected')}</Typography>
               <Typography sx={{ fontSize: '0.82rem', color: '#3D2B1F', mb: 2, fontWeight: 500 }}>{a.area}</Typography>
             </>
           )}
           <Typography sx={{ fontSize: '0.82rem', color: '#5A5A5A', lineHeight: 1.7 }}>{bodyPreview}</Typography>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, mt: 2 }}>
             <Box>
-              <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A', fontFamily: '"Montserrat", sans-serif' }}>SOURCE</Typography>
+              <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A', fontFamily: '"Montserrat", sans-serif', textTransform: 'uppercase' }}>{t('alerts.source')}</Typography>
               <Typography sx={{ fontSize: '0.78rem', color: '#2E7BB4', fontWeight: 500 }}>{a.source}</Typography>
             </Box>
             <Box>
-              <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A', fontFamily: '"Montserrat", sans-serif' }}>ISSUED</Typography>
+              <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A', fontFamily: '"Montserrat", sans-serif', textTransform: 'uppercase' }}>{t('alerts.issued')}</Typography>
               <Typography sx={{ fontSize: '0.78rem', color: '#3D2B1F', fontWeight: 500 }}>{a.issued}</Typography>
             </Box>
             <Box>
-              <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A', fontFamily: '"Montserrat", sans-serif' }}>VALID</Typography>
-              <Typography sx={{ fontSize: '0.78rem', color: '#3D2B1F', fontWeight: 500 }}>{a.valid}</Typography>
+              <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A', fontFamily: '"Montserrat", sans-serif', textTransform: 'uppercase' }}>{t('alerts.valid')}</Typography>
+              <Typography sx={{ fontSize: '0.78rem', color: '#3D2B1F', fontWeight: 500 }}>{validityLabel(a, t)}</Typography>
             </Box>
           </Box>
         </Box>
         {a.actions?.length > 0 && (
           <Box sx={{ flex: '1 1 200px', bgcolor: 'rgba(255,255,255,0.6)', border: `1px solid ${a.color}30`, borderRadius: 2, p: 2 }}>
-            <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, color: '#3D2B1F', textTransform: 'uppercase', mb: 1.5 }}>Recommended Actions</Typography>
+            <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, color: '#3D2B1F', textTransform: 'uppercase', mb: 1.5 }}>{t('alerts.recommended_actions')}</Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               {a.actions.slice(0, 3).map((act) => (
                 <Box key={act} sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
@@ -117,7 +118,7 @@ function AlertCard({ a, ended = false }) {
               ))}
               {a.actions.length > 3 && (
                 <Typography sx={{ fontSize: '0.72rem', color: a.color, fontWeight: 600, mt: 0.5 }}>
-                  +{a.actions.length - 3} more on full advisory
+                  {t('alerts.more_actions', { n: a.actions.length - 3 })}
                 </Typography>
               )}
             </Box>
@@ -134,7 +135,7 @@ function AlertCard({ a, ended = false }) {
 }
 
 export default function EarlyWarnings({ source = 'legacy', alerts, mapAdvisories, alertLegend, apiStale, alertsByLocale, pageByLocale }) {
-  const { locale } = useLanguage();
+  const { locale, t } = useLanguage();
   const cms = source === 'cms';
   // Karamoja Core: alerts in the reader's language, active ones first; ended ones listed after.
   const { active, recent } = cms ? splitAlerts(pickLocale(alertsByLocale, locale)) : { active: alerts || [], recent: [] };
@@ -177,9 +178,9 @@ export default function EarlyWarnings({ source = 'legacy', alerts, mapAdvisories
             id="early-warnings-map"
             mapAdvisories={markers}
             apiStale={apiStale}
-            eyebrow="Live map"
-            title="Advisory coverage map"
-            subtitle="Published advisories with pinned locations appear on the map below. Use the layer filters to switch between alerts and communities."
+            eyebrow={t('alerts.map_eyebrow')}
+            title={t('alerts.map_title')}
+            subtitle={t('alerts.map_subtitle')}
           />
         </Box>
 
@@ -191,17 +192,17 @@ export default function EarlyWarnings({ source = 'legacy', alerts, mapAdvisories
         )}
 
         <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontSize: '1.4rem', fontWeight: 700, color: '#3D2B1F', mb: 3 }}>
-          {cms ? `Active advisories (${active.length})` : 'Active & Recent Advisories'}
+          {cms ? t('alerts.active_heading', { n: active.length }) : t('alerts.active_recent_heading')}
         </Typography>
 
         {!active.length ? (
           <Box sx={{ bgcolor: 'white', border: '1px solid #E8E0D5', borderRadius: 2, p: { xs: 3, md: 4 }, textAlign: 'center' }}>
             <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontWeight: 700, fontSize: '1.1rem', color: '#3D2B1F', mb: 1 }}>
-              No advisories published right now
+              {t('alerts.none_title')}
             </Typography>
             <Typography sx={{ fontSize: '0.9rem', color: '#5A5A5A', lineHeight: 1.7, maxWidth: 560, mx: 'auto' }}>
               {apiStale
-                ? 'Advisory data could not be loaded from WordPress. Please try again shortly.'
+                ? t('alerts.load_failed')
                 : (shown('empty') && copy('empty').text) || DEFAULT_COPY.empty.text}
             </Typography>
           </Box>
@@ -214,7 +215,7 @@ export default function EarlyWarnings({ source = 'legacy', alerts, mapAdvisories
         {recent.length > 0 && (
           <>
             <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontSize: '1.15rem', fontWeight: 700, color: '#5A5A5A', mt: 6, mb: 2 }}>
-              Ended and earlier advisories
+              {t('alerts.ended_heading')}
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {recent.slice(0, 10).map((a) => <AlertCard key={a.id} a={a} ended />)}

@@ -5,8 +5,10 @@ import ReportFileLanguages from './ReportFileLanguages';
 import ReportDownloadStat from './ReportDownloadStat';
 import ShareLinks from './ShareLinks';
 import { buildSlugPath, slugify } from '../lib/slug';
+import { useT } from '../contexts/LanguageContext';
 
 export default function ReportCard({ report, onPreview, onDownloadTracked, compact = false }) {
+  const t = useT();
   const files = getReportFiles(report);
   const reportPath = `/reports/${buildSlugPath(report.title, report.id)}`;
 
@@ -26,8 +28,8 @@ export default function ReportCard({ report, onPreview, onDownloadTracked, compa
         {report.orgs?.map((o) => (
           <Chip key={o} label={o} size="small" sx={{ bgcolor: '#F0D9B0', color: '#6B4226', fontSize: '0.62rem', height: 20 }} />
         ))}
-        {report.isNew && <Chip label="NEW" size="small" sx={{ bgcolor: '#C1440E', color: 'white', fontWeight: 700, fontSize: '0.6rem', height: 20 }} />}
-        {report.isUpdated && <Chip label="UPDATED" size="small" sx={{ bgcolor: '#2E7BB4', color: 'white', fontWeight: 700, fontSize: '0.6rem', height: 20 }} />}
+        {report.isNew && <Chip label={t('reports.new')} size="small" sx={{ bgcolor: '#C1440E', color: 'white', fontWeight: 700, fontSize: '0.6rem', height: 20 }} />}
+        {report.isUpdated && <Chip label={t('reports.updated')} size="small" sx={{ bgcolor: '#2E7BB4', color: 'white', fontWeight: 700, fontSize: '0.6rem', height: 20 }} />}
         {report.keywords?.map((keyword) => (
           <Chip
             key={keyword}
@@ -37,7 +39,7 @@ export default function ReportCard({ report, onPreview, onDownloadTracked, compa
           />
         ))}
         {files.length > 1 && (
-          <Chip label={`${files.length} languages`} size="small" sx={{ bgcolor: '#E8E0D5', color: '#3D2B1F', fontSize: '0.6rem', height: 20 }} />
+          <Chip label={t('reports.languages', { n: files.length })} size="small" sx={{ bgcolor: '#E8E0D5', color: '#3D2B1F', fontSize: '0.6rem', height: 20 }} />
         )}
       </Box>
 
@@ -85,7 +87,7 @@ export default function ReportCard({ report, onPreview, onDownloadTracked, compa
           href={reportPath}
           sx={{ fontSize: '0.72rem', color: '#2E7BB4', fontWeight: 600, textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
         >
-          Read more →
+          {t('common.read_more_arrow')}
         </Typography>
       </Box>
 
@@ -99,6 +101,7 @@ export default function ReportCard({ report, onPreview, onDownloadTracked, compa
 }
 
 export function OrgGroupHeader({ group }) {
+  const t = useT();
   const profileHref = group.organizationId ? `/organizations/${slugify(group.name)}` : null;
 
   return (
@@ -119,7 +122,7 @@ export function OrgGroupHeader({ group }) {
           {group.name}
         </Typography>
         <Typography sx={{ fontSize: '0.75rem', color: '#9A9A9A' }}>
-          {group.items.length} report{group.items.length === 1 ? '' : 's'}
+          {t('reports.count', { n: group.items.length })}
         </Typography>
       </Box>
       {profileHref && (
@@ -129,7 +132,7 @@ export function OrgGroupHeader({ group }) {
           size="small"
           sx={{ color: '#2E7BB4', fontSize: '0.75rem', textTransform: 'none' }}
         >
-          View organisation profile
+          {t('reports.view_org')}
         </Button>
       )}
     </Box>

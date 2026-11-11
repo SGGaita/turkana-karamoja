@@ -2,8 +2,10 @@ import { Box, Typography, Chip, Button } from '@mui/material';
 import Link from 'next/link';
 import { toStripAlert } from '../lib/wp-mappers';
 import PushSubscribeButton from './PushSubscribeButton';
+import { useT } from '../contexts/LanguageContext';
 
 export default function WarningsStrip({ alerts: alertsProp = [], apiStale = false }) {
+  const t = useT();
   const source = Array.isArray(alertsProp) ? alertsProp : [];
   const stripAlerts = source.slice(0, 4).map(toStripAlert);
   const activeCount = source.filter((a) => a.level === 'RED' || a.level === 'ORANGE').length;
@@ -16,10 +18,10 @@ export default function WarningsStrip({ alerts: alertsProp = [], apiStale = fals
           <Box sx={{ width: 4, height: 36, bgcolor: '#C1440E', borderRadius: 2, flexShrink: 0 }} />
           <Box sx={{ flex: 1, minWidth: 200 }}>
             <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, color: '#C1440E', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-              Early Warning System
+              {t('home.warnings_eyebrow')}
             </Typography>
             <Typography variant="h2" sx={{ fontSize: { xs: '1.6rem', md: '2rem' }, color: '#3D2B1F' }}>
-              Active Climate Alerts
+              {t('home.warnings_title')}
             </Typography>
           </Box>
           <PushSubscribeButton compact />
@@ -44,8 +46,8 @@ export default function WarningsStrip({ alerts: alertsProp = [], apiStale = fals
             <Box sx={{ width: 7, height: 7, bgcolor: hasAlerts && activeCount ? '#D63030' : '#2E8B57', borderRadius: '50%' }} />
             <Typography sx={{ color: hasAlerts && activeCount ? '#D63030' : '#2E8B57', fontSize: '0.75rem', fontWeight: 700 }}>
               {hasAlerts
-                ? `${activeCount} Active Alert${activeCount !== 1 ? 's' : ''}`
-                : 'No active alerts'}
+                ? t('home.active_alerts', { n: activeCount })
+                : t('home.no_active_alerts')}
             </Typography>
           </Box>
         </Box>
@@ -77,7 +79,7 @@ export default function WarningsStrip({ alerts: alertsProp = [], apiStale = fals
                 <Typography sx={{ fontSize: '0.75rem', color: '#6B4226', fontWeight: 500, mb: 0.8 }}>{a.area}</Typography>
                 <Typography sx={{ fontSize: '0.8rem', color: '#5A5A5A', lineHeight: 1.55, mb: 1.2 }}>{a.desc}</Typography>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', fontFamily: '"Montserrat", sans-serif', fontSize: '0.65rem', color: '#9A9A9A' }}>
-                  <span>Issued: {a.issued}</span>
+                  <span>{t('alerts.issued_on', { date: a.issued })}</span>
                   <span>{a.valid}</span>
                 </Box>
               </Box>
@@ -95,12 +97,12 @@ export default function WarningsStrip({ alerts: alertsProp = [], apiStale = fals
             }}
           >
             <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontWeight: 700, fontSize: '1.05rem', color: '#3D2B1F', mb: 1 }}>
-              No advisories at this time
+              {t('home.no_advisories')}
             </Typography>
             <Typography sx={{ fontSize: '0.88rem', color: '#5A5A5A', lineHeight: 1.7, maxWidth: 520, mx: 'auto' }}>
               {apiStale
-                ? 'Live advisory data is temporarily unavailable. Please check again shortly, or visit Early Warnings for the latest updates.'
-                : 'There are currently no published climate advisories. When a new warning is issued by verified partners, it will appear here.'}
+                ? t('home.warnings_unavailable')
+                : t('home.warnings_empty')}
             </Typography>
           </Box>
         )}
@@ -112,7 +114,7 @@ export default function WarningsStrip({ alerts: alertsProp = [], apiStale = fals
             variant="outlined"
             sx={{ borderColor: '#C1440E', color: '#C1440E', '&:hover': { bgcolor: '#FFF0EC', borderColor: '#E8622A' } }}
           >
-            View All Early Warnings →
+            {t('home.view_all_warnings')}
           </Button>
         </Box>
       </Box>

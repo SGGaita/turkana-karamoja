@@ -2,19 +2,26 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { Box, Typography, Button } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useT } from '../contexts/LanguageContext';
+
+function MapLoading() {
+  const t = useT();
+  return (
+    <Box sx={{ height: { xs: 380, md: 520 }, bgcolor: '#F5F0E8', borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #E8E0D5' }}>
+      <Typography sx={{ color: '#9A9A9A', fontSize: '0.85rem' }}>{t('common.loading_map')}</Typography>
+    </Box>
+  );
+}
 
 const CommunityServiceMap = dynamic(() => import('./CommunityServiceMap'), {
   ssr: false,
-  loading: () => (
-    <Box sx={{ height: { xs: 380, md: 520 }, bgcolor: '#F5F0E8', borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #E8E0D5' }}>
-      <Typography sx={{ color: '#9A9A9A', fontSize: '0.85rem' }}>Loading map…</Typography>
-    </Box>
-  ),
+  loading: MapLoading,
 });
 
 export { CommunityServiceMap };
 
-export function CommunityBackLink({ label = 'Back to Community' }) {
+export function CommunityBackLink({ label }) {
+  const t = useT();
   return (
     <Button
       component={Link}
@@ -22,7 +29,7 @@ export function CommunityBackLink({ label = 'Back to Community' }) {
       startIcon={<ArrowBackIcon />}
       sx={{ color: '#6B4226', fontWeight: 600, textTransform: 'none', mb: 3, px: 0 }}
     >
-      {label}
+      {label || t('community.back')}
     </Button>
   );
 }
