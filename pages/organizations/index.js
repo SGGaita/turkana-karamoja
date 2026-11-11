@@ -4,7 +4,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Layout from '../../components/Layout';
 import PageHero from '../../components/PageHero';
 import StaleContentBanner from '../../components/StaleContentBanner';
-import { organizationPortals, partnerTypeColors } from '../../lib/fallback-data';
+import { partnerTypeColors } from '../../lib/fallback-data';
 import { getOrganizations } from '../../lib/wordpress';
 import { APP_NAME } from '../../lib/branding';
 import { slugify } from '../../lib/slug';
@@ -147,13 +147,13 @@ function LegacyOrganizations({ organizations, apiStale }) {
         </Typography>
 
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 6 }}>
-          {organizationPortals.map((p) => (
+          {DEFAULT_COPY.groups.items.map((p, i) => (
             <Box key={p.title} sx={{ flex: '1 1 260px', bgcolor: 'white', border: '1px solid #E8E0D5', borderRadius: 2, overflow: 'hidden' }}>
-              <Box sx={{ background: p.bg, px: 2, py: 1.5 }}>
+              <Box sx={{ background: GROUP_BG[i % GROUP_BG.length], px: 2, py: 1.5 }}>
                 <Typography sx={{ fontWeight: 700, fontSize: '0.85rem', color: '#3D2B1F' }}>{p.title}</Typography>
               </Box>
               <Box sx={{ p: 2 }}>
-                <Typography sx={{ fontSize: '0.78rem', color: '#5A5A5A', lineHeight: 1.6 }}>{p.desc}</Typography>
+                <Typography sx={{ fontSize: '0.78rem', color: '#5A5A5A', lineHeight: 1.6 }}>{p.text}</Typography>
               </Box>
             </Box>
           ))}

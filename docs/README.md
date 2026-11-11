@@ -6,7 +6,7 @@ This folder contains the canonical documentation for the Climate Hub platform. T
 
 | Document | Audience | Web Route |
 |----------|----------|-----------|
-| [User Guide](./user-guide-frontend.md) | Community members, end users | `/help/user-guide` |
+| User Guide | Community members, end users | `/help/user-guide` — written in wp-admin → Karamoja → Help (no copy in the repo) |
 | [Admin Guide](./developer/admin-guide.md) | WordPress administrators, content managers | **Not public.** Moving into wp-admin › Karamoja › Help |
 | [Technical Documentation](./developer/technical-documentation.md) | Developers, DevOps | **Not public** (repo only) |
 | [Hosting Requirements](./hosting-requirements.md) | DevOps, hosting, infrastructure | — |

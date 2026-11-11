@@ -187,5 +187,5 @@ Contact form submissions from the frontend are sent to `POST /wp-json/tk/v1/cont
 
 ## Related Documentation
 
-- [Frontend User Guide](./user-guide-frontend.md) — Public website and partner portal usage
+- Frontend User Guide and Partner Guide — on the website at `/help`, written in wp-admin → Karamoja → Help
 - [Technical Documentation](./technical-documentation.md) — Architecture, API reference, and deployment

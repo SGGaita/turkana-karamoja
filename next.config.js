@@ -36,6 +36,7 @@ const nextConfig = {
       // Legacy routes, previously redirected in client-side JS.
       { source: '/dashboard', destination: '/partners-stakeholders', permanent: true },
       { source: '/submit', destination: '/partners-stakeholders', permanent: true },
+      { source: '/contact-us', destination: '/contact', permanent: true },
     ];
   },
 };

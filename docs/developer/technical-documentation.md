@@ -260,5 +260,5 @@ curl "BASE/wp-json/tk/v1/my-submissions" \
 
 ## Related Documentation
 
-- [Frontend User Guide](./user-guide-frontend.md) — Public website and partner portal usage
+- Frontend User Guide and Partner Guide — on the website at `/help`, written in wp-admin → Karamoja → Help
 - [Backend & Admin Guide](./admin-guide.md) — WordPress administration and content publishing
