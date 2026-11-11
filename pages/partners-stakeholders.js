@@ -31,6 +31,7 @@ import {
   saveOrgSession, loadOrgSession, clearOrgSession, isOrgApproved,
   TOKEN_KEY, USER_EMAIL_KEY,
 } from '../lib/org-session';
+import HelpStepLink from '../components/HelpStepLink';
 
 const STAT_CARDS = [
   { key: 'total', label: 'Total submissions', color: '#3D2B1F' },
@@ -287,6 +288,7 @@ export default function Dashboard() {
           <Typography sx={{ fontSize: '0.85rem', color: '#5A5A5A', mb: 2 }}>
             Sign in with the email address from your organisation registration.
           </Typography>
+          <HelpStepLink article="partner-sign-in" sx={{ mb: 2 }} />
           {loginError && <Alert severity="error" sx={{ mb: 2 }}>{loginError}</Alert>}
           <TextField label="Email" type="email" autoComplete="username" fullWidth required value={loginForm.username} onChange={(e) => setLoginForm((f) => ({ ...f, username: e.target.value }))} sx={{ mb: 2 }} size="small" />
           <TextField label="Password" type="password" autoComplete="current-password" fullWidth required value={loginForm.password} onChange={(e) => setLoginForm((f) => ({ ...f, password: e.target.value }))} size="small" />

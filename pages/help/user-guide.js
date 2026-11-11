@@ -1,15 +1,13 @@
-import DocLayout from '../../components/DocLayout';
-import { userGuideFrontendSections } from '../../lib/docs/user-guide-frontend';
-import { APP_NAME } from '../../lib/branding';
+import HelpGuidePage from '../../components/HelpGuidePage';
+import { helpPageAllLocales, helpStaticProps, topicsAllLocales } from '../../lib/cms-help';
 
-export default function UserGuidePage() {
-  return (
-    <DocLayout
-      title="User Guide"
-      subtitle={`How to use the public ${APP_NAME} website — early warnings, reports, community services, and more`}
-      activeSlug="user-guide"
-      breadcrumbs={['Help', 'User Guide']}
-      sections={userGuideFrontendSections}
-    />
-  );
+export default function UserGuidePage(props) {
+  return <HelpGuidePage slug="user-guide" {...props} />;
+}
+
+export async function getStaticProps() {
+  return helpStaticProps(async () => {
+    const [topicsByLocale, pageByLocale] = await Promise.all([topicsAllLocales(), helpPageAllLocales()]);
+    return { topicsByLocale, pageByLocale };
+  });
 }
