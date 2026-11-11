@@ -13,11 +13,10 @@ import DownloadIcon from '@mui/icons-material/Download';
 import Layout from '../../components/Layout';
 import ShareLinks from '../../components/ShareLinks';
 import PageHero from '../../components/PageHero';
-import StaleContentBanner from '../../components/StaleContentBanner';
+import CmsUnavailable from '../../components/CmsUnavailable';
 import AlertLevelLegend from '../../components/AlertLevelLegend';
-import { getAlertById, getAlertLegend } from '../../lib/wordpress';
 import { buildSlugPath, extractIdFromSlugPath } from '../../lib/slug';
-import { getAlert, getPageAllLocales, inAllLocales, isPublishedPage } from '../../lib/cms';
+import { cmsStaticProps, getAlert, getPageAllLocales, inAllLocales, isPublishedPage } from '../../lib/cms';
 import { alertFromCms, pickLocale, levelLabel, validityLabel } from '../../lib/cms-alerts';
 import { useLanguage } from '../../contexts/LanguageContext';
 
@@ -35,11 +34,11 @@ const panelCardSx = {
   overflow: 'hidden',
 };
 
-export default function AdvisoryDetail({ alert: legacyAlert, alertLegend, apiStale, alertByLocale, pageByLocale }) {
+export default function AdvisoryDetail({ unavailable, alertByLocale, pageByLocale }) {
   const router = useRouter();
   const { locale, t } = useLanguage();
-  // Karamoja Core: the alert in the reader's language (English where not translated).
-  const alert = alertByLocale ? alertFromCms(pickLocale(alertByLocale, locale)) : legacyAlert;
+  // The alert in the reader's language (English where not translated).
+  const alert = alertByLocale ? alertFromCms(pickLocale(alertByLocale, locale)) : null;
   const sections = pickLocale(pageByLocale, locale)?.sections || null;
   const label = (section, field, fallback) => (sections?.[section]?.[field] || fallback);
 
@@ -53,6 +52,8 @@ export default function AdvisoryDetail({ alert: legacyAlert, alertLegend, apiSta
       </Layout>
     );
   }
+
+  if (unavailable || !alert) return <CmsUnavailable />;
 
   const files = alert.files || [];
   const keywords = alert.keywords || [];
@@ -70,7 +71,6 @@ export default function AdvisoryDetail({ alert: legacyAlert, alertLegend, apiSta
       />
 
       <Box sx={{ maxWidth: ADVISORY_PAGE_WIDTH, mx: 'auto', px: { xs: 2, md: 4, lg: 5 }, py: { xs: 4, md: 6 } }}>
-        <StaleContentBanner show={apiStale} />
 
         <Button
           component={Link}
@@ -380,7 +380,7 @@ export default function AdvisoryDetail({ alert: legacyAlert, alertLegend, apiSta
               </Box>
             )}
 
-            <AlertLevelLegend title={alertLegend?.title} items={alertLegend?.items} compact />
+            <AlertLevelLegend compact />
           </Box>
         </Box>
       </Box>
@@ -403,44 +403,20 @@ async function cmsProps(id) {
     throw err;
   }
   const pages = await getPageAllLocales('alert-detail').catch(() => null);
-  return { alertByLocale, pageByLocale: isPublishedPage(pages?.en) ? pages : null, apiStale: false };
+  return { alertByLocale, pageByLocale: isPublishedPage(pages?.en) ? pages : null };
 }
 
 export async function getStaticProps({ params }) {
   const id = extractIdFromSlugPath(params.slug);
   if (!/^\d+$/.test(String(id))) return { notFound: true };
-
-  let props = null;
-  let cmsAnswered = false;
-  try {
-    props = await cmsProps(id);
-    cmsAnswered = true;
-  } catch (err) {
-    if (process.env.NODE_ENV === 'development') console.warn('[cms] alert:', err.message);
-  }
-  if (cmsAnswered) {
-    if (!props) return { notFound: true, revalidate: 120 };
+  return cmsStaticProps(async () => {
+    const props = await cmsProps(id);
+    if (!props) return null;
     const en = props.alertByLocale.en;
     const canonical = buildSlugPath(en.title, en.id);
     if (canonical !== params.slug) {
       return { redirect: { destination: `/early-warnings/${canonical}`, permanent: true } };
     }
-    return { props, revalidate: 120 };
-  }
-
-  // Karamoja Core not reachable: the old endpoint, as before.
-  const [{ data, apiStale }, alertLegendRes] = await Promise.all([
-    getAlertById(id),
-    getAlertLegend(),
-  ]);
-  if (!data) {
-    return { notFound: true };
-  }
-
-  const canonical = buildSlugPath(data.title, data.id);
-  if (data.id != null && canonical !== params.slug) {
-    return { redirect: { destination: `/early-warnings/${canonical}`, permanent: true } };
-  }
-
-  return { props: { alert: data, alertLegend: alertLegendRes.data, apiStale: apiStale || alertLegendRes.apiStale }, revalidate: 120 };
+    return props;
+  }, { revalidate: 120, name: 'alert' });
 }

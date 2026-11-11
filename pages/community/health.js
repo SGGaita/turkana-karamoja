@@ -3,10 +3,10 @@ import { Box, Typography, Chip, Button, Divider } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Layout from '../../components/Layout';
 import PageHero from '../../components/PageHero';
-import StaleContentBanner from '../../components/StaleContentBanner';
+import CmsUnavailable from '../../components/CmsUnavailable';
 import { CommunityBackLink, IntroBox } from '../../components/CommunityServiceLayout';
-import { getHealthAlerts } from '../../lib/wordpress';
 import { buildSlugPath } from '../../lib/slug';
+import { cmsStaticProps } from '../../lib/cms';
 import { listCmsProps, pageCopy, healthAlertFromCms, telParts } from '../../lib/cms-community';
 import { pickLocale, levelLabel } from '../../lib/cms-alerts';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -27,13 +27,15 @@ const DEFAULT_COPY = {
   empty: { text: 'No health or nutrition advisories published at this time. Check back later or see Early Warnings for all active alerts.' },
 };
 
-export default function HealthAlertsPage({ source = 'legacy', alerts: legacyAlerts, itemsByLocale, pageByLocale, apiStale }) {
+export default function HealthAlertsPage(props) {
+  if (props.unavailable) return <CmsUnavailable />;
+  return <HealthAlertsPageBody {...props} />;
+}
+
+function HealthAlertsPageBody({ itemsByLocale, pageByLocale }) {
   const { locale, t } = useLanguage();
-  const cms = source === 'cms';
-  const alerts = cms
-    ? [...(pickLocale(itemsByLocale, locale) || [])].sort((a, b) => ORDER[a.level] - ORDER[b.level])
-    : legacyAlerts || [];
-  const { copy, hero } = pageCopy(cms ? pageByLocale : null, locale, DEFAULT_COPY);
+  const alerts = [...(pickLocale(itemsByLocale, locale) || [])].sort((a, b) => ORDER[a.level] - ORDER[b.level]);
+  const { copy, hero } = pageCopy(pageByLocale, locale, DEFAULT_COPY);
   const intro = copy('intro');
 
   return (
@@ -47,7 +49,6 @@ export default function HealthAlertsPage({ source = 'legacy', alerts: legacyAler
 
       <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, md: 4 }, py: { xs: 4, md: 6 } }}>
         <CommunityBackLink />
-        <StaleContentBanner show={apiStale} />
 
         <IntroBox title={intro.title} text={intro.text} color="#D63030" bg="#FFF0F0">
           {intro.text && telParts(intro.text).map((part, i) => (part.tel ? (
@@ -123,11 +124,5 @@ export default function HealthAlertsPage({ source = 'legacy', alerts: legacyAler
 }
 
 export async function getStaticProps() {
-  try {
-    return { props: await listCmsProps('alerts', 'health', healthAlertFromCms), revalidate: 60 };
-  } catch (err) {
-    if (process.env.NODE_ENV === 'development') console.warn('[cms] health alerts:', err.message);
-  }
-  const res = await getHealthAlerts();
-  return { props: { alerts: res.data, apiStale: res.apiStale }, revalidate: 60 };
+  return cmsStaticProps(() => listCmsProps('alerts', 'health', healthAlertFromCms), { revalidate: 60, name: 'health alerts' });
 }

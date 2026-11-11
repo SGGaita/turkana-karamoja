@@ -5,7 +5,6 @@ import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import ScheduleOutlinedIcon from '@mui/icons-material/ScheduleOutlined';
 import { APP_NAME } from '../lib/branding';
 import LanguageOutlinedIcon from '@mui/icons-material/LanguageOutlined';
-import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import XIcon from '@mui/icons-material/X';
@@ -105,92 +104,6 @@ export function RegionalOffices({ offices = [], title = 'Regional Offices', intr
               {office.email}
             </DetailLine>
             <DetailLine icon={ScheduleOutlinedIcon}>{office.hours}</DetailLine>
-          </Box>
-        ))}
-      </Box>
-    </Box>
-  );
-}
-
-export function KeyContacts({ contacts = [] }) {
-  if (!contacts.length) return null;
-
-  return (
-    <Box sx={{ mb: { xs: 5, md: 7 } }}>
-      <Typography sx={sectionTitleSx}>Key Contacts & Partners</Typography>
-      <Typography sx={sectionIntroSx}>
-        Priority offices and organisations supporting climate information, early warning, and resilience across the cluster.
-      </Typography>
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-        {contacts.map((contact) => (
-          <Box
-            key={`${contact.organization}-${contact.email || contact.phone || contact.role}`}
-            sx={{
-              flex: '1 1 calc(50% - 8px)',
-              minWidth: { xs: '100%', md: 'calc(50% - 8px)' },
-              bgcolor: 'white',
-              border: '1px solid #E8E0D5',
-              borderRadius: 3,
-              p: 2.5,
-              display: 'flex',
-              gap: 2,
-              transition: 'box-shadow 0.2s ease, transform 0.2s ease',
-              '&:hover': {
-                boxShadow: '0 12px 28px rgba(61,43,31,0.08)',
-                transform: 'translateY(-2px)',
-              },
-            }}
-          >
-            <Box
-              sx={{
-                width: 44,
-                height: 44,
-                borderRadius: 2,
-                bgcolor: '#3D2B1F',
-                color: '#D4A96A',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}
-            >
-              <BusinessOutlinedIcon sx={{ fontSize: 22 }} />
-            </Box>
-            <Box sx={{ minWidth: 0, flex: 1 }}>
-              <Typography
-                sx={{
-                  fontFamily: '"Montserrat", sans-serif',
-                  fontWeight: 700,
-                  fontSize: '0.98rem',
-                  color: '#3D2B1F',
-                  mb: 0.35,
-                }}
-              >
-                {contact.organization}
-              </Typography>
-              {contact.role && (
-                <Typography sx={{ fontSize: '0.8rem', color: '#6B4226', mb: 1.25, lineHeight: 1.45 }}>
-                  {contact.role}
-                </Typography>
-              )}
-              {contact.country && (
-                <Typography sx={{ fontSize: '0.72rem', color: '#9A9A9A', mb: 1, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                  {contact.country}
-                </Typography>
-              )}
-              {contact.name && (
-                <Typography sx={{ fontSize: '0.85rem', color: '#3D2B1F', mb: 0.5 }}>{contact.name}</Typography>
-              )}
-              <DetailLine icon={PhoneOutlinedIcon} href={contact.phone ? `tel:${contact.phone.replace(/\s/g, '')}` : undefined}>
-                {contact.phone}
-              </DetailLine>
-              <DetailLine icon={EmailOutlinedIcon} href={contact.email ? `mailto:${contact.email}` : undefined}>
-                {contact.email}
-              </DetailLine>
-              <DetailLine icon={LanguageOutlinedIcon} href={contact.website || undefined}>
-                {contact.website}
-              </DetailLine>
-            </Box>
           </Box>
         ))}
       </Box>

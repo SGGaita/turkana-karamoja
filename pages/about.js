@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
 import Layout from '../components/Layout';
 import PageHero from '../components/PageHero';
-import StaleContentBanner from '../components/StaleContentBanner';
+import CmsUnavailable from '../components/CmsUnavailable';
 import AboutHubIntro from '../components/AboutHubIntro';
 import CommissionedBySection from '../components/CommissionedBySection';
 import GeographicCoverageSection from '../components/GeographicCoverageSection';
@@ -9,19 +9,13 @@ import KeyFeaturesCards from '../components/KeyFeaturesCards';
 import HowItWorksStepper from '../components/HowItWorksStepper';
 import Link from 'next/link';
 import { Typography } from '@mui/material';
-import { getAboutPage } from '../lib/wordpress';
-import { getPageAllLocales, isPublishedPage } from '../lib/cms';
+import { cmsStaticProps, getPageAllLocales, isPublishedPage } from '../lib/cms';
 import { pageCopy } from '../lib/cms-community';
 import { fallbackAboutPage } from '../lib/fallback-data';
 import { featuresFromCms, stepsFromCms, partnersFromCms } from '../lib/cms-about-contact';
 import { getCoverageAreas } from '../lib/cms-areas';
 import { useLanguage } from '../contexts/LanguageContext';
 import { APP_NAME } from '../lib/branding';
-import {
-  parseHowItWorksSteps,
-  parseKeyFeatures,
-  splitAboutContent,
-} from '../lib/about-content';
 
 const richTextSx = {
   maxWidth: 1200,
@@ -55,10 +49,10 @@ const richTextSx = {
 
 const headingSx = { fontFamily: '"Montserrat", sans-serif', fontSize: { xs: '1.6rem', md: '2rem' }, fontWeight: 700, color: '#3D2B1F', mb: 1 };
 
-/** About from Karamoja → Website pages → About (once saved). */
+/** About from Karamoja → Website pages → About (built-in title and sections until it is saved). */
 function CmsAbout({ pageByLocale, areas }) {
   const { locale } = useLanguage();
-  const { copy, shown, hero } = pageCopy(pageByLocale, locale, { hero: { image: fallbackAboutPage.featuredImage } });
+  const { copy, shown, hero } = pageCopy(pageByLocale, locale, { hero: { title: `About ${APP_NAME}`, image: fallbackAboutPage.featuredImage } });
   const intro = copy('intro');
   const features = shown('features') ? featuresFromCms(copy('features')) : [];
   const steps = shown('steps') ? stepsFromCms(copy('steps')) : [];
@@ -110,56 +104,14 @@ function CmsAbout({ pageByLocale, areas }) {
   );
 }
 
-export default function About({ source = 'legacy', pageByLocale, page, apiStale, areas = null }) {
-  if (source === 'cms') return <CmsAbout pageByLocale={pageByLocale} areas={areas} />;
-  return <LegacyAbout page={page} apiStale={apiStale} areas={areas} />;
-}
-
-function LegacyAbout({ page, apiStale, areas }) {
-  const { outro, hasFeatures, hasStepper } = splitAboutContent(page.content);
-  const features = parseKeyFeatures(page.content);
-  const steps = parseHowItWorksSteps(page.content);
-
-  return (
-    <Layout title={`About ${APP_NAME}`}>
-      <PageHero
-        title={page.title}
-        subtitle={page.subtitle}
-        image={page.featuredImage}
-        breadcrumbs={[`About ${APP_NAME}`]}
-      />
-
-      <StaleContentBanner show={apiStale} />
-
-      <AboutHubIntro excludeCommissionedHighlight />
-
-      <CommissionedBySection />
-
-      <GeographicCoverageSection areas={areas} />
-
-      {hasFeatures && <KeyFeaturesCards features={features} />}
-
-      {hasStepper && <HowItWorksStepper steps={steps} />}
-
-      {outro && (
-        <Box sx={{ ...richTextSx, pt: hasStepper || hasFeatures ? 0 : undefined }} dangerouslySetInnerHTML={{ __html: outro }} />
-      )}
-    </Layout>
-  );
+export default function About({ unavailable, pageByLocale, areas = null }) {
+  if (unavailable) return <CmsUnavailable />;
+  return <CmsAbout pageByLocale={pageByLocale} areas={areas} />;
 }
 
 export async function getStaticProps() {
-  const areas = await getCoverageAreas();
-  try {
-    const pageByLocale = await getPageAllLocales('about');
-    if (isPublishedPage(pageByLocale.en)) return { props: { source: 'cms', pageByLocale, areas }, revalidate: 3600 };
-  } catch (err) {
-    if (process.env.NODE_ENV === 'development') console.warn('[cms] about:', err.message);
-  }
-  // Until Website pages → About is saved (or Karamoja Core can't be reached): the old WordPress page.
-  const { data, apiStale } = await getAboutPage();
-  return {
-    props: { page: data, apiStale, areas },
-    revalidate: 3600,
-  };
+  return cmsStaticProps(async () => {
+    const [pageByLocale, areas] = await Promise.all([getPageAllLocales('about'), getCoverageAreas()]);
+    return { pageByLocale: isPublishedPage(pageByLocale.en) ? pageByLocale : null, areas };
+  }, { revalidate: 3600, name: 'about' });
 }

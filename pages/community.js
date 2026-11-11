@@ -2,13 +2,12 @@ import Link from 'next/link';
 import { Box, Typography, Divider, Chip } from '@mui/material';
 import Layout from '../components/Layout';
 import PageHero from '../components/PageHero';
-import StaleContentBanner from '../components/StaleContentBanner';
+import CmsUnavailable from '../components/CmsUnavailable';
 import CommunityInitiativeCard from '../components/CommunityInitiativeCard';
 import TollFreeLines from '../components/TollFreeLines';
 import { IntroBox } from '../components/CommunityServiceLayout';
-import { getProgrammes, getCommunityInitiatives, getCommunityPage } from '../lib/wordpress';
 import { groupCommunityByCountryRegion } from '../lib/regions';
-import { getAll, getPageAllLocales, inAllLocales, isPublishedPage } from '../lib/cms';
+import { cmsStaticProps, getAll, getPageAllLocales, inAllLocales, isPublishedPage } from '../lib/cms';
 import { chosen, initiativeFromCms, pageCopy, programmeFromCms, sameSlugs } from '../lib/cms-community';
 import { pickLocale } from '../lib/cms-alerts';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -23,7 +22,11 @@ const DEFAULT_COPY = {
   intro: {},
   services: { title: 'Community Services' },
   initiatives: { title: 'Community Initiatives' },
+  outreach: {},
+  radio: { title: 'Partner Radio Stations' },
 };
+
+const listOf = (v) => (Array.isArray(v) ? v : []);
 
 function RegionBadge({ country, region }) {
   if (!country && !region) return null;
@@ -51,55 +54,45 @@ function RadioCard({ station }) {
   return (
     <Box sx={{ flex: '1 1 calc(50% - 8px)', minWidth: { xs: '100%', sm: 'calc(50% - 8px)' }, bgcolor: '#3D2B1F', borderRadius: 2, p: 2.5 }}>
       <Typography sx={{ fontFamily: '"Montserrat", sans-serif', color: '#D4A96A', fontSize: '1.1rem', fontWeight: 700 }}>{station.name}</Typography>
-      <Typography sx={{ color: '#F0D9B0', fontSize: '1.5rem', fontWeight: 700, fontFamily: '"Montserrat", sans-serif' }}>{station.freq}</Typography>
-      <Typography sx={{ color: '#9A9A9A', fontSize: '0.75rem' }}>{station.lang}</Typography>
+      <Typography sx={{ color: '#F0D9B0', fontSize: '1.5rem', fontWeight: 700, fontFamily: '"Montserrat", sans-serif' }}>{station.frequency}</Typography>
+      <Typography sx={{ color: '#9A9A9A', fontSize: '0.75rem' }}>{station.languages}</Typography>
       <Typography sx={{ color: '#9A9A9A', fontSize: '0.75rem' }}>{station.times}</Typography>
     </Box>
   );
 }
 
-export default function Community({
-  source = 'legacy',
-  programmes: legacyProgrammes,
-  communityInitiatives: legacyInitiatives,
-  programmesByLocale,
-  initiativesByLocale,
-  pageByLocale,
-  communityPage,
-  apiStale,
-}) {
+export default function Community({ unavailable, programmesByLocale, initiativesByLocale, pageByLocale }) {
   const { locale, t } = useLanguage();
-  const cms = source === 'cms';
-  const { copy, shown, hero } = pageCopy(cms ? pageByLocale : null, locale, DEFAULT_COPY);
-  // Karamoja Core: the items picked in the page's sections, in that order (all published items until something is picked).
-  const programmes = cms ? chosen(copy('services').items, pickLocale(programmesByLocale, locale) || []) : legacyProgrammes || [];
-  const communityInitiatives = cms
-    ? chosen(copy('initiatives').items, pickLocale(initiativesByLocale, locale) || [])
-    : legacyInitiatives || [];
-  const outreachItems = communityPage?.outreach?.items || [];
-  const { clusterWide, grouped: groupedOutreach } = groupCommunityByCountryRegion(outreachItems);
-  const radioTitle = communityPage?.radio?.title || 'Partner Radio Stations';
-  const radioRegions = communityPage?.radio?.regions || [];
-
-  const radioByCountry = radioRegions.reduce((acc, group) => {
-    if (!group.country || !group.region || !group.stations?.length) return acc;
-    if (!acc[group.country]) acc[group.country] = [];
-    acc[group.country].push(group);
-    return acc;
-  }, {});
+  if (unavailable) return <CmsUnavailable />;
+  const { copy, shown, hero } = pageCopy(pageByLocale, locale, DEFAULT_COPY);
+  // The items picked in the page's sections, in that order (all published items until something is picked).
+  const programmes = chosen(copy('services').items, pickLocale(programmesByLocale, locale) || []);
+  const communityInitiatives = chosen(copy('initiatives').items, pickLocale(initiativesByLocale, locale) || []);
+  // Karamoja → Website pages → Community → How we reach people / Partner radio stations.
+  const outreach = shown('outreach') ? copy('outreach') : {};
+  const { clusterWide, grouped: groupedOutreach } = groupCommunityByCountryRegion(listOf(outreach.items).filter((i) => i.label));
+  const radio = shown('radio') ? copy('radio') : {};
+  const { clusterWide: radioAnywhere, grouped: radioGrouped } = groupCommunityByCountryRegion(listOf(radio.stations).filter((s) => s.name));
+  const radioByCountry = radioGrouped.map(({ country, regions }) => ({
+    country,
+    regions: regions.map(({ region, items }) => ({ region: region === 'General' ? '' : region, stations: items })),
+  }));
+  if (radioAnywhere.length) radioByCountry.unshift({ country: '', regions: [{ region: '', stations: radioAnywhere }] });
 
   return (
     <Layout title="Community">
       <PageHero title={hero.title} subtitle={hero.subtitle} image={hero.image} breadcrumbs={['Community']} />
 
       <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, md: 4 }, py: { xs: 4, md: 6 } }}>
-        <StaleContentBanner show={apiStale} />
         <IntroBox title={copy('intro').title} text={copy('intro').text} color="#C1440E" />
 
         <TollFreeLines sx={{ mb: 5 }} />
 
         {(clusterWide.length > 0 || groupedOutreach.length > 0) && (
           <Box sx={{ mb: 5 }}>
+            {outreach.title && (
+              <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontSize: '1.4rem', fontWeight: 700, mb: 3 }}>{outreach.title}</Typography>
+            )}
             {clusterWide.length > 0 && (
               <Box sx={{ bgcolor: '#FDF6EC', border: '1px solid #D4A96A', borderRadius: 2, p: 3, mb: groupedOutreach.length ? 3 : 0, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                 {clusterWide.map((item) => (
@@ -196,18 +189,18 @@ export default function Community({
         </>
         )}
 
-        {radioRegions.length > 0 && (
+        {radioByCountry.length > 0 && (
           <>
             <Divider sx={{ mb: 5 }} />
 
-            <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontSize: '1.4rem', fontWeight: 700, mb: 3 }}>{radioTitle}</Typography>
+            <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontSize: '1.4rem', fontWeight: 700, mb: 3 }}>{radio.title || DEFAULT_COPY.radio.title}</Typography>
 
-            {Object.entries(radioByCountry).map(([country, regions]) => (
-              <Box key={country} sx={{ mb: 4 }}>
-                <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontWeight: 700, fontSize: '1.05rem', color: '#3D2B1F', mb: 2 }}>{country}</Typography>
+            {radioByCountry.map(({ country, regions }) => (
+              <Box key={country || 'all'} sx={{ mb: 4 }}>
+                {country && <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontWeight: 700, fontSize: '1.05rem', color: '#3D2B1F', mb: 2 }}>{country}</Typography>}
                 {regions.map((group) => (
                   <Box key={`${country}-${group.region}`} sx={{ mb: 3 }}>
-                    <Typography sx={{ fontWeight: 700, fontSize: '0.82rem', color: '#6B4226', mb: 1.5, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{group.region}</Typography>
+                    {group.region && <Typography sx={{ fontWeight: 700, fontSize: '0.82rem', color: '#6B4226', mb: 1.5, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{group.region}</Typography>}
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
                       {group.stations.map((station) => (
                         <RadioCard key={station.id || station.name} station={station} />
@@ -235,7 +228,6 @@ async function cmsProps() {
     Object.entries(byLocale).map(([l, rows]) => [l, (Array.isArray(rows) ? rows : []).map(fn).filter(Boolean)])
   );
   return {
-    source: 'cms',
     programmesByLocale: map(programmes, programmeFromCms),
     initiativesByLocale: sameSlugs(map(initiatives, initiativeFromCms)),
     pageByLocale: isPublishedPage(pages?.en) ? pages : null,
@@ -243,30 +235,5 @@ async function cmsProps() {
 }
 
 export async function getStaticProps() {
-  // Outreach and radio stations still come from the old Community page settings (moved in a later step).
-  const communityPageRes = await getCommunityPage();
-  try {
-    const cms = await cmsProps();
-    return {
-      props: { ...cms, communityPage: communityPageRes.data, apiStale: Boolean(communityPageRes.apiStale) },
-      revalidate: 60,
-    };
-  } catch (err) {
-    if (process.env.NODE_ENV === 'development') console.warn('[cms] community:', err.message);
-  }
-
-  const [programmesRes, initiativesRes] = await Promise.all([
-    getProgrammes(),
-    getCommunityInitiatives(),
-  ]);
-
-  return {
-    props: {
-      programmes: programmesRes.data,
-      communityInitiatives: initiativesRes.data,
-      communityPage: communityPageRes.data,
-      apiStale: programmesRes.apiStale || initiativesRes.apiStale || communityPageRes.apiStale,
-    },
-    revalidate: 60,
-  };
+  return cmsStaticProps(cmsProps, { revalidate: 120, name: 'community' });
 }

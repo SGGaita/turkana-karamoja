@@ -9,13 +9,12 @@ import LocalOfferOutlinedIcon from '@mui/icons-material/LocalOfferOutlined';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
 import Layout from '../../components/Layout';
 import PageHero from '../../components/PageHero';
-import StaleContentBanner from '../../components/StaleContentBanner';
+import CmsUnavailable from '../../components/CmsUnavailable';
 import ReportPreviewDialog from '../../components/ReportPreviewDialog';
 import ReportFileLanguages from '../../components/ReportFileLanguages';
 import ReportDownloadStat from '../../components/ReportDownloadStat';
 import ShareLinks from '../../components/ShareLinks';
-import { getReportById } from '../../lib/wordpress';
-import { getReport, getPageAllLocales, inAllLocales, isPublishedPage } from '../../lib/cms';
+import { cmsStaticProps, getReport, getPageAllLocales, inAllLocales, isPublishedPage } from '../../lib/cms';
 import { pickLocale } from '../../lib/cms-alerts';
 import { reportFromCms } from '../../lib/cms-reports';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -68,12 +67,16 @@ function SidePanelSection({ icon: Icon, title, children }) {
   );
 }
 
-export default function ReportDetail({ report: legacyReport, apiStale, reportByLocale, pageByLocale }) {
+export default function ReportDetail(props) {
+  if (props.unavailable) return <CmsUnavailable />;
+  return <ReportPage {...props} />;
+}
+
+function ReportPage({ reportByLocale, pageByLocale }) {
   const router = useRouter();
   const { locale, t } = useLanguage();
-  // Karamoja Core: the report in the reader's language (English where not translated).
-  const cmsReport = reportByLocale ? reportFromCms(pickLocale(reportByLocale, locale)) : null;
-  const report = cmsReport || legacyReport;
+  // The report in the reader's language (English where not translated).
+  const report = reportByLocale ? reportFromCms(pickLocale(reportByLocale, locale)) : null;
   const sections = pickLocale(pageByLocale, locale)?.sections || null;
   const [preview, setPreview] = useState(null);
   const [liveReport, setLiveReport] = useState(report);
@@ -81,7 +84,7 @@ export default function ReportDetail({ report: legacyReport, apiStale, reportByL
   useEffect(() => {
     // Keep download counts already updated on this page when the language changes.
     if (report) setLiveReport((prev) => (prev && prev.id === report.id ? { ...report, downloadCount: Math.max(report.downloadCount || 0, prev.downloadCount || 0), downloadCounts: prev.downloadCounts?.length ? prev.downloadCounts : report.downloadCounts } : report));
-  }, [locale, reportByLocale, legacyReport]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [locale, reportByLocale]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (router.isFallback) {
     return (
@@ -119,7 +122,6 @@ export default function ReportDetail({ report: legacyReport, apiStale, reportByL
       />
 
       <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, md: 4 }, py: { xs: 4, md: 6 } }}>
-        <StaleContentBanner show={apiStale} />
 
         <Button component={Link} href="/reports" startIcon={<ArrowBackIcon />} sx={{ color: '#2E7BB4', mb: 3, textTransform: 'none' }}>
           {t('reports.all')}
@@ -274,42 +276,20 @@ async function cmsProps(id) {
     throw err;
   }
   const pages = await getPageAllLocales('report-detail').catch(() => null);
-  return { reportByLocale, pageByLocale: isPublishedPage(pages?.en) ? pages : null, apiStale: false };
+  return { reportByLocale, pageByLocale: isPublishedPage(pages?.en) ? pages : null };
 }
 
 export async function getStaticProps({ params }) {
   const id = extractIdFromSlugPath(params.slug);
   if (!/^\d+$/.test(String(id))) return { notFound: true };
-
-  let props = null;
-  let cmsAnswered = false;
-  try {
-    props = await cmsProps(id);
-    cmsAnswered = true;
-  } catch (err) {
-    if (process.env.NODE_ENV === 'development') console.warn('[cms] report:', err.message);
-  }
-  if (cmsAnswered) {
-    if (!props) return { notFound: true, revalidate: 300 };
+  return cmsStaticProps(async () => {
+    const props = await cmsProps(id);
+    if (!props) return null;
+    // One address per report: old bare-id links and stale slugs (after a title edit) redirect.
     const canonical = buildSlugPath(props.reportByLocale.en.title, props.reportByLocale.en.id);
     if (canonical !== params.slug) {
       return { redirect: { destination: `/reports/${canonical}`, permanent: true } };
     }
-    return { props, revalidate: 300 };
-  }
-
-  // Karamoja Core not reachable: the old endpoint, as before.
-  const { data, apiStale } = await getReportById(id);
-  if (!data) {
-    return { notFound: true };
-  }
-
-  // Canonicalise: redirect old bare-id links (or a stale slug after a title edit)
-  // to the current slug so there's exactly one indexable URL per report.
-  const canonical = buildSlugPath(data.title, data.id);
-  if (canonical !== params.slug) {
-    return { redirect: { destination: `/reports/${canonical}`, permanent: true } };
-  }
-
-  return { props: { report: data, apiStale }, revalidate: 300 };
+    return props;
+  }, { revalidate: 300, name: 'report' });
 }

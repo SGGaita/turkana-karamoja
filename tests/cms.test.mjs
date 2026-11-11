@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { cmsGet, cmsLocale, getPageAllLocales, isPublishedPage, CmsError } from '../lib/cms';
+import { cmsGet, cmsLocale, cmsStaticProps, getPageAllLocales, isPublishedPage, CmsError } from '../lib/cms';
 
 const ok = (body) => Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve(body) });
 const fail = (status) => Promise.resolve({ ok: false, status, json: () => Promise.resolve({}) });
@@ -47,5 +47,37 @@ describe('cms client', () => {
     expect(isPublishedPage({ sections: {}, updated_at: '2026-11-10T08:00:00+00:00' })).toBe(true);
     expect(isPublishedPage({ sections: {}, updated_at: null })).toBe(false);
     expect(isPublishedPage(null)).toBe(false);
+  });
+});
+
+describe('cmsStaticProps', () => {
+  const phase = process.env.NEXT_PHASE;
+  const env = process.env.NODE_ENV;
+  const restore = () => { process.env.NEXT_PHASE = phase; process.env.NODE_ENV = env; };
+
+  it('passes props, null → 404, redirects through', async () => {
+    expect(await cmsStaticProps(async () => ({ a: 1 }), { revalidate: 60 })).toEqual({ props: { a: 1, unavailable: false }, revalidate: 60 });
+    expect(await cmsStaticProps(async () => null)).toEqual({ notFound: true, revalidate: 300 });
+    const redirect = { destination: '/x', permanent: true };
+    expect(await cmsStaticProps(async () => ({ redirect }))).toEqual({ redirect });
+  });
+
+  it('a missing item is a 404; Core missing (no route) is not', async () => {
+    expect(await cmsStaticProps(async () => { throw new CmsError('gone', 404, 'karamoja_not_found'); })).toEqual({ notFound: true, revalidate: 300 });
+    process.env.NEXT_PHASE = 'phase-production-build';
+    const res = await cmsStaticProps(async () => { throw new CmsError('no route', 404, 'rest_no_route'); });
+    restore();
+    expect(res).toEqual({ props: { unavailable: true }, revalidate: 60 });
+  });
+
+  it('Core down: a short page during the build, the last good page afterwards', async () => {
+    const down = async () => { throw new CmsError('CMS unreachable'); };
+    process.env.NEXT_PHASE = 'phase-production-build';
+    const built = await cmsStaticProps(down, { name: 'test' });
+    process.env.NEXT_PHASE = '';
+    process.env.NODE_ENV = 'production';
+    await expect(cmsStaticProps(down)).rejects.toThrow('CMS unreachable');
+    restore();
+    expect(built).toEqual({ props: { unavailable: true }, revalidate: 60 });
   });
 });

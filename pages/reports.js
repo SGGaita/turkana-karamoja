@@ -2,20 +2,16 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   Box, Typography, Button,
   Pagination, ToggleButton, ToggleButtonGroup,
-  CircularProgress,
 } from '@mui/material';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import Layout from '../components/Layout';
 import PageHero from '../components/PageHero';
-import StaleContentBanner from '../components/StaleContentBanner';
-import SkeletonCard from '../components/SkeletonCard';
+import CmsUnavailable from '../components/CmsUnavailable';
 import ReportCard, { OrgGroupHeader } from '../components/ReportCard';
 import ReportPreviewDialog from '../components/ReportPreviewDialog';
 import ReportsFilterPanel from '../components/ReportsFilterPanel';
-import { getReports } from '../lib/wordpress';
-import { getAll, getPageAllLocales, inAllLocales, isPublishedPage } from '../lib/cms';
+import { cmsStaticProps, getAll, getPageAllLocales, inAllLocales, isPublishedPage } from '../lib/cms';
 import { pickLocale } from '../lib/cms-alerts';
 import { reportFromCms } from '../lib/cms-reports';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -27,23 +23,21 @@ import {
   applyReportDownloadStats, uniqueLabels,
 } from '../lib/report-utils';
 
-export default function Reports({ initialReports = null, source = 'legacy', reportsByLocale = null, pageByLocale = null }) {
-  const cms = source === 'cms';
+export default function Reports(props) {
+  if (props.unavailable) return <CmsUnavailable />;
+  return <ReportsLibrary {...props} />;
+}
+
+function ReportsLibrary({ reportsByLocale = null, pageByLocale = null }) {
   const { locale, t } = useLanguage();
-  const sections = cms ? pickLocale(pageByLocale, locale)?.sections || null : null;
+  const sections = pickLocale(pageByLocale, locale)?.sections || null;
   const hero = sections?.hero || DEFAULT_HERO;
   const intro = sections?.intro?.enabled !== false ? sections?.intro : null;
-  // Reports are pre-rendered (ISR) so the page shows instantly; the client only shows a
-  // spinner when the build-time fetch failed and there is nothing to show yet.
-  const [reports, setReports] = useState(cms ? pickLocale(reportsByLocale, 'en') || [] : initialReports || []);
-  const [apiStale, setApiStale] = useState(false);
-  const [loading, setLoading] = useState(!cms && !initialReports);
-
-  // Karamoja Core: reports in the reader's language (kept fresh by ISR and instant updates, no browser refresh).
+  // Reports are pre-rendered (ISR) in every language and kept fresh by instant updates; no browser fetch.
+  const [reports, setReports] = useState(pickLocale(reportsByLocale, 'en') || []);
   useEffect(() => {
-    if (cms) setReports(pickLocale(reportsByLocale, locale) || []);
-  }, [cms, reportsByLocale, locale]);
-  const [loadError, setLoadError] = useState('');
+    setReports(pickLocale(reportsByLocale, locale) || []);
+  }, [reportsByLocale, locale]);
 
   const [search, setSearch] = useState('');
   const [filterOrg, setFilterOrg] = useState('');
@@ -55,29 +49,6 @@ export default function Reports({ initialReports = null, source = 'legacy', repo
   const [page, setPage] = useState(1);
   const [viewMode, setViewMode] = useState('list');
   const [preview, setPreview] = useState(null);
-
-  const load = useCallback(async ({ background = false } = {}) => {
-    if (!background) setLoading(true);
-    setLoadError('');
-    try {
-      const { data, apiStale: stale } = await getReports();
-      // A background refresh that only got fallback data must not replace live reports.
-      if (background && stale) return;
-      setReports(data || []);
-      setApiStale(stale);
-    } catch (err) {
-      if (!background) setLoadError(err.message || 'Could not load reports.');
-    } finally {
-      if (!background) setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (cms) return;
-    // Pre-rendered data is shown immediately; refresh quietly in the background so newly
-    // approved reports appear without waiting for the next revalidation.
-    load({ background: Boolean(initialReports) });
-  }, [cms, load, initialReports]);
 
   const handleDownloadTracked = useCallback((reportId, stats) => {
     setReports((prev) => prev.map((item) => (
@@ -201,8 +172,6 @@ export default function Reports({ initialReports = null, source = 'legacy', repo
       />
 
       <Box sx={{ maxWidth: 1300, mx: 'auto', px: { xs: 2, md: 4 }, py: { xs: 4, md: 6 } }}>
-        <StaleContentBanner show={apiStale} />
-
         {intro && (intro.title || intro.text) && (
           <Box sx={{ bgcolor: 'white', border: '1px solid #E8E0D5', borderLeft: '4px solid #2E7BB4', borderRadius: 2, p: 2.5, mb: 3 }}>
             {intro.title && <Typography sx={{ fontWeight: 700, color: '#3D2B1F', mb: 0.5 }}>{intro.title}</Typography>}
@@ -239,14 +208,10 @@ export default function Reports({ initialReports = null, source = 'legacy', repo
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, flexWrap: 'wrap', gap: 2 }}>
               <Box>
                 <Typography sx={{ fontSize: '0.82rem', color: '#9A9A9A' }}>
-                  {loading ? t('reports.loading_list') : (
-                    <>
-                      {t('reports.showing', { shown: filtered.length, total: reports.length })}
-                      {viewMode === 'by-org' && orgGroups.length > 0 && ` · ${t('reports.organisations', { n: orgGroups.length })}`}
-                    </>
-                  )}
+                  {t('reports.showing', { shown: filtered.length, total: reports.length })}
+                  {viewMode === 'by-org' && orgGroups.length > 0 && ` · ${t('reports.organisations', { n: orgGroups.length })}`}
                 </Typography>
-                {!loading && filtered.length > 0 && (
+                {filtered.length > 0 && (
                   <Typography sx={{ fontSize: '0.72rem', color: '#B0A090', mt: 0.3 }}>
                     {viewMode === 'list'
                       ? t('reports.page_reports', { page, pages: totalPages, from: pageStart, to: pageEnd })
@@ -260,7 +225,6 @@ export default function Reports({ initialReports = null, source = 'legacy', repo
                 exclusive
                 onChange={handleViewModeChange}
                 size="small"
-                disabled={loading}
                 sx={{
                   bgcolor: 'white',
                   border: '1px solid #E8E0D5',
@@ -291,19 +255,7 @@ export default function Reports({ initialReports = null, source = 'legacy', repo
               </ToggleButtonGroup>
             </Box>
 
-            {loading ? (
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
-                  <CircularProgress size={28} sx={{ color: '#C1440E' }} />
-                </Box>
-                {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} height={70} />)}
-              </Box>
-            ) : loadError ? (
-              <Box sx={{ bgcolor: 'white', border: '1px solid #E8E0D5', borderRadius: 2, p: 5, textAlign: 'center' }}>
-                <Typography sx={{ color: '#B91C1C', fontSize: '0.9rem', mb: 2 }}>{loadError}</Typography>
-                <Button size="small" onClick={() => load()} startIcon={<RefreshIcon />} sx={{ color: '#C1440E', textTransform: 'none' }}>{t('common.try_again')}</Button>
-              </Box>
-            ) : filtered.length === 0 ? (
+            {filtered.length === 0 ? (
               <Box sx={{ bgcolor: 'white', border: '1px solid #E8E0D5', borderRadius: 2, p: 5, textAlign: 'center' }}>
                 <Typography sx={{ color: '#9A9A9A', fontSize: '0.9rem', mb: 1 }}>
                   {!reports.length && sections?.empty?.text ? sections.empty.text : t('reports.none_found')}
@@ -331,7 +283,7 @@ export default function Reports({ initialReports = null, source = 'legacy', repo
               </Box>
             )}
 
-            {!loading && filtered.length > 0 && totalPages > 1 && (
+            {filtered.length > 0 && totalPages > 1 && (
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, mt: 2, mb: 4 }}>
                 <Pagination
                   count={totalPages}
@@ -378,21 +330,9 @@ async function cmsProps() {
   Object.entries(lists).forEach(([l, items]) => {
     reportsByLocale[l] = items.map((r) => reportFromCms(r, { slim: true })).filter(Boolean);
   });
-  return { source: 'cms', reportsByLocale, pageByLocale: isPublishedPage(pages?.en) ? pages : null };
+  return { reportsByLocale, pageByLocale: isPublishedPage(pages?.en) ? pages : null };
 }
 
 export async function getStaticProps() {
-  try {
-    return { props: await cmsProps(), revalidate: 300 };
-  } catch (err) {
-    if (process.env.NODE_ENV === 'development') console.warn('[cms] reports:', err.message);
-  }
-  const { data, apiStale } = await getReports();
-  return {
-    props: {
-      // null => client fetches on mount (CMS was unreachable at build/revalidate time).
-      initialReports: apiStale ? null : data,
-    },
-    revalidate: apiStale ? 60 : 300,
-  };
+  return cmsStaticProps(cmsProps, { revalidate: 300, name: 'reports' });
 }

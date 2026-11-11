@@ -1,11 +1,11 @@
 import { Box, Typography } from '@mui/material';
 import Layout from '../../components/Layout';
 import PageHero from '../../components/PageHero';
-import StaleContentBanner from '../../components/StaleContentBanner';
+import CmsUnavailable from '../../components/CmsUnavailable';
 import { CommunityServiceMap, CommunityBackLink, StatusPill, StatChip, IntroBox, EmptyNote } from '../../components/CommunityServiceLayout';
-import { getWaterPoints } from '../../lib/wordpress';
 import { toServiceMapMarker } from '../../lib/wp-mappers';
 import { WATER_POINT_STATUS, WATER_POINT_TYPES, countByStatus } from '../../lib/community-services';
+import { cmsStaticProps } from '../../lib/cms';
 import { listCmsProps, pageCopy, waterPointFromCms } from '../../lib/cms-community';
 import { pickLocale } from '../../lib/cms-alerts';
 import { useLanguage, useVocabLabel } from '../../contexts/LanguageContext';
@@ -21,11 +21,15 @@ const DEFAULT_COPY = {
   empty: { text: 'No water points have been published yet.' },
 };
 
-export default function WaterPointsPage({ source = 'legacy', waterPoints: legacyPoints, itemsByLocale, pageByLocale, apiStale }) {
+export default function WaterPointsPage(props) {
+  if (props.unavailable) return <CmsUnavailable />;
+  return <WaterPointsPageBody {...props} />;
+}
+
+function WaterPointsPageBody({ itemsByLocale, pageByLocale }) {
   const { locale, t } = useLanguage();
-  const cms = source === 'cms';
-  const waterPoints = (cms ? pickLocale(itemsByLocale, locale) : legacyPoints) || [];
-  const { copy, hero } = pageCopy(cms ? pageByLocale : null, locale, DEFAULT_COPY);
+  const waterPoints = pickLocale(itemsByLocale, locale) || [];
+  const { copy, hero } = pageCopy(pageByLocale, locale, DEFAULT_COPY);
   const typeLabel = useVocabLabel('water_point_types', WATER_POINT_TYPES);
   const statusLabel = useVocabLabel('water_point_statuses', WATER_POINT_STATUS);
   const markers = waterPoints.map((wp) => toServiceMapMarker(wp, 'water')).filter(Boolean);
@@ -42,7 +46,6 @@ export default function WaterPointsPage({ source = 'legacy', waterPoints: legacy
 
       <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, md: 4 }, py: { xs: 4, md: 6 } }}>
         <CommunityBackLink />
-        <StaleContentBanner show={apiStale} />
         <IntroBox title={copy('intro').title} text={copy('intro').text} />
 
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 4 }}>
@@ -55,13 +58,12 @@ export default function WaterPointsPage({ source = 'legacy', waterPoints: legacy
         <Box sx={{ mb: 5 }}>
           <CommunityServiceMap
             markers={markers}
-            apiStale={apiStale}
             emptyMessage={t('community.no_points_on_map')}
           />
         </Box>
 
         <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontSize: '1.2rem', fontWeight: 700, mb: 2 }}>{t('community.all_water_points')}</Typography>
-        {!waterPoints.length && !apiStale && <EmptyNote text={copy('empty').text} />}
+        {!waterPoints.length && <EmptyNote text={copy('empty').text} />}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
           {waterPoints.map((wp) => {
             const status = { label: statusLabel(wp.status), color: WATER_POINT_STATUS[wp.status]?.color || '#9A9A9A' };
@@ -89,11 +91,5 @@ export default function WaterPointsPage({ source = 'legacy', waterPoints: legacy
 }
 
 export async function getStaticProps() {
-  try {
-    return { props: await listCmsProps('water-points', 'water-points', waterPointFromCms), revalidate: 60 };
-  } catch (err) {
-    if (process.env.NODE_ENV === 'development') console.warn('[cms] water points:', err.message);
-  }
-  const res = await getWaterPoints();
-  return { props: { waterPoints: res.data, apiStale: res.apiStale }, revalidate: 60 };
+  return cmsStaticProps(() => listCmsProps('water-points', 'water-points', waterPointFromCms), { revalidate: 60, name: 'water points' });
 }

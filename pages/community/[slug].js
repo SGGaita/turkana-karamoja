@@ -6,12 +6,11 @@ import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import DownloadIcon from '@mui/icons-material/Download';
 import Layout from '../../components/Layout';
 import PageHero from '../../components/PageHero';
-import StaleContentBanner from '../../components/StaleContentBanner';
+import CmsUnavailable from '../../components/CmsUnavailable';
 import ShareLinks from '../../components/ShareLinks';
 import CommunityInitiativeCard from '../../components/CommunityInitiativeCard';
-import { getCommunityInitiativeById, getCommunityInitiatives } from '../../lib/wordpress';
-import { buildSlugPath, extractIdFromSlugPath } from '../../lib/slug';
-import { getCollection, getInitiative, getPageAllLocales, inAllLocales, isPublishedPage } from '../../lib/cms';
+import { extractIdFromSlugPath } from '../../lib/slug';
+import { cmsStaticProps, getCollection, getInitiative, getPageAllLocales, inAllLocales, isPublishedPage } from '../../lib/cms';
 import { initiativeFromCms, sameSlugs } from '../../lib/cms-community';
 import { pickLocale } from '../../lib/cms-alerts';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -38,14 +37,14 @@ const richTextSx = {
   '& strong': { color: '#3D2B1F' },
 };
 
-export default function CommunityInitiativeDetail({ article: legacyArticle, related: legacyRelated, apiStale, articleByLocale, relatedByLocale, pageByLocale }) {
+export default function CommunityInitiativeDetail({ unavailable, articleByLocale, relatedByLocale, pageByLocale }) {
   const router = useRouter();
   const { locale, t } = useLanguage();
-  const cms = Boolean(articleByLocale);
-  const article = cms ? pickLocale(articleByLocale, locale) : legacyArticle;
-  const related = (cms ? pickLocale(relatedByLocale, locale) : legacyRelated) || [];
+  const article = pickLocale(articleByLocale, locale);
+  const related = pickLocale(relatedByLocale, locale) || [];
   const heroCopy = pickLocale(pageByLocale, locale)?.sections?.hero || {};
 
+  if (unavailable) return <CmsUnavailable />;
   if (router.isFallback || !article) {
     return (
       <Layout title={t('community.loading_article')}>
@@ -70,7 +69,6 @@ export default function CommunityInitiativeDetail({ article: legacyArticle, rela
       />
 
       <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, md: 4 }, py: { xs: 4, md: 6 } }}>
-        <StaleContentBanner show={apiStale} />
 
         <Button
           component={Link}
@@ -251,56 +249,19 @@ async function cmsProps(id) {
     articleByLocale,
     relatedByLocale,
     pageByLocale: isPublishedPage(pages?.en) ? pages : null,
-    apiStale: false,
   };
 }
 
 export async function getStaticProps({ params }) {
   const id = extractIdFromSlugPath(params.slug);
   if (!/^\d+$/.test(String(id))) return { notFound: true };
-
-  let props = null;
-  let cmsAnswered = false;
-  try {
-    props = await cmsProps(id);
-    cmsAnswered = true;
-  } catch (err) {
-    if (process.env.NODE_ENV === 'development') console.warn('[cms] initiative:', err.message);
-  }
-  if (cmsAnswered) {
-    if (!props?.articleByLocale?.en) return { notFound: true, revalidate: 60 };
+  return cmsStaticProps(async () => {
+    const props = await cmsProps(id);
+    if (!props?.articleByLocale?.en) return null;
     const canonical = props.articleByLocale.en.slugPath;
     if (canonical !== params.slug) {
       return { redirect: { destination: `/community/${canonical}`, permanent: true } };
     }
-    return { props, revalidate: 300 };
-  }
-
-  // Karamoja Core not reachable: the old endpoints, as before.
-  const [{ data: article, apiStale }, { data: allInitiatives }] = await Promise.all([
-    getCommunityInitiativeById(id),
-    getCommunityInitiatives(),
-  ]);
-
-  if (!article) {
-    return { notFound: true };
-  }
-
-  const canonical = buildSlugPath(article.title, article.id);
-  if (canonical !== params.slug) {
-    return { redirect: { destination: `/community/${canonical}`, permanent: true } };
-  }
-
-  const related = (allInitiatives || [])
-    .filter((item) => String(item.id) !== String(article.id))
-    .slice(0, 3);
-
-  return {
-    props: {
-      article,
-      related,
-      apiStale,
-    },
-    revalidate: 60,
-  };
+    return props;
+  }, { revalidate: 300, name: 'initiative' });
 }
