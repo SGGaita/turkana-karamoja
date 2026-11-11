@@ -109,7 +109,7 @@ function FeatureCard({ feature, index }) {
   );
 }
 
-export default function KeyFeaturesCards({ features }) {
+export default function KeyFeaturesCards({ features, title = 'Key Features & Services' }) {
   const items = features?.length ? features : [];
 
   return (
@@ -131,7 +131,7 @@ export default function KeyFeaturesCards({ features }) {
             mb: 1,
           }}
         >
-          Key Features &amp; Services
+          {title}
         </Typography>
         <Box sx={{ width: 64, height: 4, bgcolor: '#C1440E', borderRadius: 2 }} />
       </Box>

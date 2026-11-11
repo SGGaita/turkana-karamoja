@@ -51,15 +51,13 @@ function socialIcon(network) {
   return LanguageOutlinedIcon;
 }
 
-export function RegionalOffices({ offices = [] }) {
+export function RegionalOffices({ offices = [], title = 'Regional Offices', intro = 'Coordination desks across Turkana, North Pokot, Moroto, Amudat and Napak serving pastoral and agropastoral communities.' }) {
   if (!offices.length) return null;
 
   return (
     <Box sx={{ mb: { xs: 5, md: 7 } }}>
-      <Typography sx={sectionTitleSx}>Regional Offices</Typography>
-      <Typography sx={sectionIntroSx}>
-        Coordination desks across Turkana, North Pokot, Moroto, Amudat and Napak serving pastoral and agropastoral communities.
-      </Typography>
+      {title && <Typography sx={sectionTitleSx}>{title}</Typography>}
+      {intro && <Typography sx={sectionIntroSx}>{intro}</Typography>}
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2.5 }}>
         {offices.map((office) => (
           <Box
@@ -200,16 +198,14 @@ export function KeyContacts({ contacts = [] }) {
   );
 }
 
-export function SocialLinks({ social = [] }) {
+export function SocialLinks({ social = [], title = 'Social Media', intro = `Follow ${APP_NAME} updates and partner announcements on our official channels.` }) {
   const items = social.filter((s) => s.network);
   if (!items.length) return null;
 
   return (
     <Box>
-      <Typography sx={sectionTitleSx}>Social Media</Typography>
-      <Typography sx={sectionIntroSx}>
-        Follow {APP_NAME} updates and partner announcements on our official channels.
-      </Typography>
+      {title && <Typography sx={sectionTitleSx}>{title}</Typography>}
+      {intro && <Typography sx={sectionIntroSx}>{intro}</Typography>}
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
         {items.map((item) => {
           const Icon = socialIcon(item.network);
