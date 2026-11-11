@@ -99,7 +99,7 @@ export default function ContactForm({ title, intro }) {
 
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2 }}>
         <TextField
-          label="Full name *"
+          label="Full name"
           required
           value={form.name}
           onChange={handleChange('name')}
@@ -107,7 +107,7 @@ export default function ContactForm({ title, intro }) {
           size="small"
         />
         <TextField
-          label="Email *"
+          label="Email"
           type="email"
           required
           value={form.email}
@@ -144,7 +144,7 @@ export default function ContactForm({ title, intro }) {
       />
 
       <TextField
-        label="Message *"
+        label="Message"
         required
         multiline
         minRows={5}

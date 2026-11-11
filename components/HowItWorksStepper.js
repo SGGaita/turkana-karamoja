@@ -127,7 +127,7 @@ function StepCard({ item, index, total }) {
   );
 }
 
-export default function HowItWorksStepper({ steps }) {
+export default function HowItWorksStepper({ steps, title = 'How the Hub Works' }) {
   const items = steps?.length ? steps : [];
 
   return (
@@ -148,7 +148,7 @@ export default function HowItWorksStepper({ steps }) {
           mb: 3,
         }}
       >
-        How the Hub Works
+        {title}
       </Typography>
 
       <Box
