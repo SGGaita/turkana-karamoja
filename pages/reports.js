@@ -15,17 +15,34 @@ import ReportCard, { OrgGroupHeader } from '../components/ReportCard';
 import ReportPreviewDialog from '../components/ReportPreviewDialog';
 import ReportsFilterPanel from '../components/ReportsFilterPanel';
 import { getReports } from '../lib/wordpress';
+import { getAll, getPageAllLocales, inAllLocales, isPublishedPage } from '../lib/cms';
+import { pickLocale } from '../lib/cms-alerts';
+import { reportFromCms } from '../lib/cms-reports';
+import { useLanguage } from '../contexts/LanguageContext';
+
+const HERO_IMAGE = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1400&q=70';
+const DEFAULT_HERO = { title: 'Reports & Resources', subtitle: 'Published situation reports, assessments, and monitoring documents' };
 import {
   REPORT_PAGE_SIZE, ORG_GROUP_PAGE_SIZE, groupReportsByOrg, getReportDate,
   applyReportDownloadStats, uniqueLabels,
 } from '../lib/report-utils';
 
-export default function Reports({ initialReports = null }) {
+export default function Reports({ initialReports = null, source = 'legacy', reportsByLocale = null, pageByLocale = null }) {
+  const cms = source === 'cms';
+  const { locale } = useLanguage();
+  const sections = cms ? pickLocale(pageByLocale, locale)?.sections || null : null;
+  const hero = sections?.hero || DEFAULT_HERO;
+  const intro = sections?.intro?.enabled !== false ? sections?.intro : null;
   // Reports are pre-rendered (ISR) so the page shows instantly; the client only shows a
   // spinner when the build-time fetch failed and there is nothing to show yet.
-  const [reports, setReports] = useState(initialReports || []);
+  const [reports, setReports] = useState(cms ? pickLocale(reportsByLocale, 'en') || [] : initialReports || []);
   const [apiStale, setApiStale] = useState(false);
-  const [loading, setLoading] = useState(!initialReports);
+  const [loading, setLoading] = useState(!cms && !initialReports);
+
+  // Karamoja Core: reports in the reader's language (kept fresh by ISR and instant updates, no browser refresh).
+  useEffect(() => {
+    if (cms) setReports(pickLocale(reportsByLocale, locale) || []);
+  }, [cms, reportsByLocale, locale]);
   const [loadError, setLoadError] = useState('');
 
   const [search, setSearch] = useState('');
@@ -56,10 +73,11 @@ export default function Reports({ initialReports = null }) {
   }, []);
 
   useEffect(() => {
+    if (cms) return;
     // Pre-rendered data is shown immediately; refresh quietly in the background so newly
     // approved reports appear without waiting for the next revalidation.
     load({ background: Boolean(initialReports) });
-  }, [load, initialReports]);
+  }, [cms, load, initialReports]);
 
   const handleDownloadTracked = useCallback((reportId, stats) => {
     setReports((prev) => prev.map((item) => (
@@ -174,16 +192,23 @@ export default function Reports({ initialReports = null }) {
   );
 
   return (
-    <Layout title="Reports & Resources">
+    <Layout title={hero.title || DEFAULT_HERO.title}>
       <PageHero
-        title="Reports & Resources"
-        subtitle="Published situation reports, assessments, and monitoring documents"
-        image="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1400&q=70"
+        title={hero.title || DEFAULT_HERO.title}
+        subtitle={hero.subtitle}
+        image={hero.image?.url || HERO_IMAGE}
         breadcrumbs={['Reports']}
       />
 
       <Box sx={{ maxWidth: 1300, mx: 'auto', px: { xs: 2, md: 4 }, py: { xs: 4, md: 6 } }}>
         <StaleContentBanner show={apiStale} />
+
+        {intro && (intro.title || intro.text) && (
+          <Box sx={{ bgcolor: 'white', border: '1px solid #E8E0D5', borderLeft: '4px solid #2E7BB4', borderRadius: 2, p: 2.5, mb: 3 }}>
+            {intro.title && <Typography sx={{ fontWeight: 700, color: '#3D2B1F', mb: 0.5 }}>{intro.title}</Typography>}
+            {intro.text && <Typography sx={{ fontSize: '0.88rem', color: '#5A5A5A', lineHeight: 1.7 }}>{intro.text}</Typography>}
+          </Box>
+        )}
 
         <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3, alignItems: 'flex-start' }}>
           <ReportsFilterPanel
@@ -283,7 +308,9 @@ export default function Reports({ initialReports = null }) {
               </Box>
             ) : filtered.length === 0 ? (
               <Box sx={{ bgcolor: 'white', border: '1px solid #E8E0D5', borderRadius: 2, p: 5, textAlign: 'center' }}>
-                <Typography sx={{ color: '#9A9A9A', fontSize: '0.9rem', mb: 1 }}>No reports found matching your filters.</Typography>
+                <Typography sx={{ color: '#9A9A9A', fontSize: '0.9rem', mb: 1 }}>
+                  {!reports.length && sections?.empty?.text ? sections.empty.text : 'No reports found matching your filters.'}
+                </Typography>
                 <Button size="small" onClick={clearFilters} sx={{ color: '#C1440E', textTransform: 'none' }}>Clear filters</Button>
               </Box>
             ) : viewMode === 'list' ? (
@@ -344,12 +371,30 @@ export default function Reports({ initialReports = null }) {
   );
 }
 
+/** Karamoja Core: every report in every language (list fields only) and the page text. */
+async function cmsProps() {
+  const [lists, pages] = await Promise.all([
+    inAllLocales((l) => getAll('reports', {}, l)),
+    getPageAllLocales('reports').catch(() => null),
+  ]);
+  const reportsByLocale = {};
+  Object.entries(lists).forEach(([l, items]) => {
+    reportsByLocale[l] = items.map((r) => reportFromCms(r, { slim: true })).filter(Boolean);
+  });
+  return { source: 'cms', reportsByLocale, pageByLocale: isPublishedPage(pages?.en) ? pages : null };
+}
+
 export async function getStaticProps() {
+  try {
+    return { props: await cmsProps(), revalidate: 300 };
+  } catch (err) {
+    if (process.env.NODE_ENV === 'development') console.warn('[cms] reports:', err.message);
+  }
   const { data, apiStale } = await getReports();
   return {
     props: {
       // null => client fetches on mount (CMS was unreachable at build/revalidate time).
-      initialReports: apiStale ? null : (data || []),
+      initialReports: apiStale ? null : data,
     },
     revalidate: apiStale ? 60 : 300,
   };

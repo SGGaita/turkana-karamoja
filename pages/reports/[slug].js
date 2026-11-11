@@ -14,7 +14,13 @@ import ReportPreviewDialog from '../../components/ReportPreviewDialog';
 import ReportFileLanguages from '../../components/ReportFileLanguages';
 import ReportDownloadStat from '../../components/ReportDownloadStat';
 import ShareLinks from '../../components/ShareLinks';
-import { getReportById, getReports } from '../../lib/wordpress';
+import { getReportById } from '../../lib/wordpress';
+import { getReport, getPageAllLocales, inAllLocales, isPublishedPage } from '../../lib/cms';
+import { pickLocale } from '../../lib/cms-alerts';
+import { reportFromCms } from '../../lib/cms-reports';
+import { useLanguage } from '../../contexts/LanguageContext';
+
+const HERO_IMAGE = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1400&q=70';
 import { getReportFiles, applyReportDownloadStats } from '../../lib/report-utils';
 import { buildSlugPath, extractIdFromSlugPath, slugify } from '../../lib/slug';
 import { getCountryLabel } from '../../lib/countries';
@@ -62,14 +68,20 @@ function SidePanelSection({ icon: Icon, title, children }) {
   );
 }
 
-export default function ReportDetail({ report, apiStale }) {
+export default function ReportDetail({ report: legacyReport, apiStale, reportByLocale, pageByLocale }) {
   const router = useRouter();
+  const { locale } = useLanguage();
+  // Karamoja Core: the report in the reader's language (English where not translated).
+  const cmsReport = reportByLocale ? reportFromCms(pickLocale(reportByLocale, locale)) : null;
+  const report = cmsReport || legacyReport;
+  const sections = pickLocale(pageByLocale, locale)?.sections || null;
   const [preview, setPreview] = useState(null);
   const [liveReport, setLiveReport] = useState(report);
 
   useEffect(() => {
-    if (report) setLiveReport(report);
-  }, [report]);
+    // Keep download counts already updated on this page when the language changes.
+    if (report) setLiveReport((prev) => (prev && prev.id === report.id ? { ...report, downloadCount: Math.max(report.downloadCount || 0, prev.downloadCount || 0), downloadCounts: prev.downloadCounts?.length ? prev.downloadCounts : report.downloadCounts } : report));
+  }, [locale, reportByLocale, legacyReport]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (router.isFallback) {
     return (
@@ -85,9 +97,9 @@ export default function ReportDetail({ report, apiStale }) {
   const current = liveReport || report;
   const files = getReportFiles(current);
   const reportPath = `/reports/${buildSlugPath(current.title, current.id)}`;
-  const orgHref = current.organizationId
+  const orgHref = current.orgHref || (current.organizationId
     ? `/organizations/${slugify(current.orgs?.[0] || 'organisation')}`
-    : null;
+    : null);
   const keywords = current.keywords || [];
 
   const handleDownloadTracked = (_id, stats) => {
@@ -101,8 +113,8 @@ export default function ReportDetail({ report, apiStale }) {
     <Layout title={current.title} description={current.desc}>
       <PageHero
         title={current.title}
-        subtitle={current.orgs?.join(', ') || current.tag}
-        image="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1400&q=70"
+        subtitle={current.orgs?.join(', ') || current.tag || sections?.hero?.fallback_subtitle}
+        image={sections?.hero?.image?.url || HERO_IMAGE}
         breadcrumbs={['Reports', current.tag]}
       />
 
@@ -208,7 +220,7 @@ export default function ReportDetail({ report, apiStale }) {
               )}
 
               {files.length > 0 && (
-                <SidePanelSection icon={DescriptionOutlinedIcon} title="Documents">
+                <SidePanelSection icon={DescriptionOutlinedIcon} title={sections?.download?.title || 'Documents'}>
                   <ReportFileLanguages
                     files={files}
                     report={current}
@@ -248,15 +260,45 @@ export default function ReportDetail({ report, apiStale }) {
 }
 
 export async function getStaticPaths() {
-  const { data } = await getReports();
-  return {
-    paths: (data || []).map((r) => ({ params: { slug: buildSlugPath(r.title, r.id) } })),
-    fallback: true,
-  };
+  // Pages are built on first visit and then kept (ISR); instant updates rebuild them on change.
+  return { paths: [], fallback: 'blocking' };
+}
+
+/** Karamoja Core: the report in every language and the page text. Null = not found. */
+async function cmsProps(id) {
+  let reportByLocale;
+  try {
+    reportByLocale = await inAllLocales((l) => getReport(id, l));
+  } catch (err) {
+    if (err?.code === 'karamoja_not_found') return null;
+    throw err;
+  }
+  const pages = await getPageAllLocales('report-detail').catch(() => null);
+  return { reportByLocale, pageByLocale: isPublishedPage(pages?.en) ? pages : null, apiStale: false };
 }
 
 export async function getStaticProps({ params }) {
   const id = extractIdFromSlugPath(params.slug);
+  if (!/^\d+$/.test(String(id))) return { notFound: true };
+
+  let props = null;
+  let cmsAnswered = false;
+  try {
+    props = await cmsProps(id);
+    cmsAnswered = true;
+  } catch (err) {
+    if (process.env.NODE_ENV === 'development') console.warn('[cms] report:', err.message);
+  }
+  if (cmsAnswered) {
+    if (!props) return { notFound: true, revalidate: 300 };
+    const canonical = buildSlugPath(props.reportByLocale.en.title, props.reportByLocale.en.id);
+    if (canonical !== params.slug) {
+      return { redirect: { destination: `/reports/${canonical}`, permanent: true } };
+    }
+    return { props, revalidate: 300 };
+  }
+
+  // Karamoja Core not reachable: the old endpoint, as before.
   const { data, apiStale } = await getReportById(id);
   if (!data) {
     return { notFound: true };
