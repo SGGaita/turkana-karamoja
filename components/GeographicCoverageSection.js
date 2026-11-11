@@ -2,6 +2,9 @@ import dynamic from 'next/dynamic';
 import { Box, Typography } from '@mui/material';
 import { COVERAGE_COUNTRIES } from '../lib/cluster-coverage';
 import { COVERAGE_NARRATIVE, COVERAGE_MAP_LEGEND } from '../lib/regions';
+import { areasByCountry } from '../lib/cms-areas';
+import { getCountryLabel } from '../lib/countries';
+import { useShell } from '../contexts/LanguageContext';
 
 const ClusterCoverageMap = dynamic(() => import('./ClusterCoverageMap'), {
   ssr: false,
@@ -70,7 +73,21 @@ function CoverageCard({ area }) {
   );
 }
 
-export default function GeographicCoverageSection() {
+/**
+ * Coverage: text from Site settings → Coverage, cards and map from Karamoja → Coverage areas (`areas`, from
+ * karamoja/v1/areas). Without them, the website's own text and boundary files as before.
+ */
+export default function GeographicCoverageSection({ areas = null }) {
+  const intro = useShell()?.coverage?.intro || COVERAGE_NARRATIVE;
+  const cards = areas && areas.length
+    ? areasByCountry(areas).map((g) => ({
+      id: g.country || 'other',
+      name: getCountryLabel(g.country) || '',
+      areas: g.areas.map((a) => a.name).join(', '),
+      color: g.color,
+    }))
+    : COVERAGE_COUNTRIES;
+
   return (
     <Box
       sx={{
@@ -94,21 +111,23 @@ export default function GeographicCoverageSection() {
         </Typography>
         <Box sx={{ width: 64, height: 4, bgcolor: '#C1440E', borderRadius: 2, mb: 1.5 }} />
         <Typography sx={{ fontSize: '0.92rem', color: '#5A5A5A', lineHeight: 1.7, maxWidth: 720 }}>
-          {COVERAGE_NARRATIVE}
+          {intro}
         </Typography>
       </Box>
 
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, mb: 4 }}>
-        {COVERAGE_COUNTRIES.map((area) => (
+        {cards.map((area) => (
           <CoverageCard key={area.id} area={area} />
         ))}
       </Box>
 
-      <ClusterCoverageMap />
+      <ClusterCoverageMap areas={areas} />
 
-      <Typography sx={{ fontSize: '0.75rem', color: '#9A9A9A', mt: 2, textAlign: 'center' }}>
-        {COVERAGE_MAP_LEGEND}
-      </Typography>
+      {!(areas && areas.length) && (
+        <Typography sx={{ fontSize: '0.75rem', color: '#9A9A9A', mt: 2, textAlign: 'center' }}>
+          {COVERAGE_MAP_LEGEND}
+        </Typography>
+      )}
     </Box>
   );
 }

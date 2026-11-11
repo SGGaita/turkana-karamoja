@@ -6,6 +6,8 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { CLUSTER_REGIONS, CLUSTER_MAP_CENTER, CLUSTER_MAP_ZOOM, MAP_LEGEND, getRegionShapeNames } from '../lib/cluster-coverage';
 import { getCartoTileUrl } from '../lib/map-tiles';
+import { areasByCountry } from '../lib/cms-areas';
+import { getCountryLabel } from '../lib/countries';
 
 function getFeatureCenter(feature) {
   const layer = L.geoJSON(feature);
@@ -43,11 +45,26 @@ function regionStyle(color) {
   };
 }
 
-export default function ClusterCoverageMap() {
-  const [regionFeatures, setRegionFeatures] = useState([]);
-  const [loading, setLoading] = useState(true);
+/**
+ * The cluster map. With `areas` (Karamoja → Coverage areas, karamoja/v1/areas) it draws those outlines; without, the
+ * website's own boundary files as before.
+ */
+export default function ClusterCoverageMap({ areas = null }) {
+  const cmsFeatures = useMemo(
+    () => (areas && areas.length
+      ? areas.map((a) => ({ region: { id: a.id, number: a.number, color: a.color, fill: a.color, centre: a.centre }, feature: a.outline }))
+      : null),
+    [areas],
+  );
+  const [regionFeatures, setRegionFeatures] = useState(cmsFeatures || []);
+  const [loading, setLoading] = useState(!cmsFeatures);
 
   useEffect(() => {
+    if (cmsFeatures) {
+      setRegionFeatures(cmsFeatures);
+      setLoading(false);
+      return undefined;
+    }
     let active = true;
 
     async function loadBoundaries() {
@@ -87,7 +104,7 @@ export default function ClusterCoverageMap() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [cmsFeatures]);
 
   const fitLayers = useMemo(
     () => regionFeatures.map(({ feature }) => L.geoJSON(feature)),
@@ -96,18 +113,27 @@ export default function ClusterCoverageMap() {
 
   const styles = useMemo(
     () => Object.fromEntries(
-      CLUSTER_REGIONS.map((r) => [r.id, regionStyle(r.fill)]),
+      regionFeatures.map(({ region }) => [region.id, regionStyle(region.fill)]),
     ),
-    [],
+    [regionFeatures],
   );
 
   const regionLabels = useMemo(
     () => regionFeatures.map(({ region, feature }) => ({
       region,
-      center: getFeatureCenter(feature),
+      center: region.centre ? { lat: region.centre[0], lng: region.centre[1] } : getFeatureCenter(feature),
     })),
     [regionFeatures],
   );
+
+  const legend = cmsFeatures
+    ? areasByCountry(areas).map((g) => ({
+      country: getCountryLabel(g.country) || '',
+      areas: g.areas.map((a) => a.name).join(', '),
+      numbers: g.areas.map((a) => a.number),
+      color: g.color,
+    }))
+    : MAP_LEGEND;
 
   return (
     <Box
@@ -134,7 +160,7 @@ export default function ClusterCoverageMap() {
         <Typography sx={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#3D2B1F', mb: 1 }}>
           Cluster regions
         </Typography>
-        {MAP_LEGEND.map((group) => (
+        {legend.map((group) => (
           <Box key={group.country} sx={{ mb: 1.25 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.35 }}>
               <Box sx={{ width: 14, height: 14, bgcolor: group.color, flexShrink: 0 }} />
