@@ -4,17 +4,44 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Layout from '../../components/Layout';
 import PageHero from '../../components/PageHero';
 import StaleContentBanner from '../../components/StaleContentBanner';
-import { CommunityBackLink } from '../../components/CommunityServiceLayout';
+import { CommunityBackLink, IntroBox } from '../../components/CommunityServiceLayout';
 import { getHealthAlerts } from '../../lib/wordpress';
 import { buildSlugPath } from '../../lib/slug';
+import { listCmsProps, pageCopy, healthAlertFromCms, telParts } from '../../lib/cms-community';
+import { pickLocale } from '../../lib/cms-alerts';
+import { useLanguage } from '../../contexts/LanguageContext';
 
-export default function HealthAlertsPage({ alerts, apiStale }) {
+const ORDER = { RED: 0, ORANGE: 1, YELLOW: 2, GREEN: 3 };
+
+// What the page showed before Karamoja → Website pages → Health is saved.
+const DEFAULT_COPY = {
+  hero: {
+    title: 'Health & Nutrition Alerts',
+    subtitle: 'Acute malnutrition rates, disease outbreaks, health facility status, and vaccination campaigns',
+    image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1400&q=70',
+  },
+  intro: {
+    title: 'Emergency?',
+    text: 'For immediate health emergencies call the toll-free hotline 1192 (Kenya, 24/7). This page shows verified health and nutrition advisories from partner organisations.',
+  },
+  empty: { text: 'No health or nutrition advisories published at this time. Check back later or see Early Warnings for all active alerts.' },
+};
+
+export default function HealthAlertsPage({ source = 'legacy', alerts: legacyAlerts, itemsByLocale, pageByLocale, apiStale }) {
+  const { locale } = useLanguage();
+  const cms = source === 'cms';
+  const alerts = cms
+    ? [...(pickLocale(itemsByLocale, locale) || [])].sort((a, b) => ORDER[a.level] - ORDER[b.level])
+    : legacyAlerts || [];
+  const { copy, hero } = pageCopy(cms ? pageByLocale : null, locale, DEFAULT_COPY);
+  const intro = copy('intro');
+
   return (
-    <Layout title="Health & Nutrition Alerts">
+    <Layout title={hero.title}>
       <PageHero
-        title="Health & Nutrition Alerts"
-        subtitle="Acute malnutrition rates, disease outbreaks, health facility status, and vaccination campaigns"
-        image="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1400&q=70"
+        title={hero.title}
+        subtitle={hero.subtitle}
+        image={hero.image}
         breadcrumbs={['Community', 'Health & Nutrition']}
       />
 
@@ -22,18 +49,16 @@ export default function HealthAlertsPage({ alerts, apiStale }) {
         <CommunityBackLink />
         <StaleContentBanner show={apiStale} />
 
-        <Box sx={{ bgcolor: '#FFF0F0', border: '1px solid #D6303040', borderLeft: '4px solid #D63030', borderRadius: 2, p: 2.5, mb: 4 }}>
-          <Typography sx={{ fontSize: '0.85rem', color: '#5A5A5A', lineHeight: 1.7 }}>
-            <strong style={{ color: '#3D2B1F' }}>Emergency?</strong> For immediate health emergencies call the toll-free hotline{' '}
-            <Box component="a" href="tel:1192" sx={{ color: '#D63030', fontWeight: 700, textDecoration: 'none' }}>1192</Box>{' '}
-            (Kenya, 24/7). This page shows verified health and nutrition advisories from partner organisations.
-          </Typography>
-        </Box>
+        <IntroBox title={intro.title} text={intro.text} color="#D63030" bg="#FFF0F0">
+          {intro.text && telParts(intro.text).map((part, i) => (part.tel ? (
+            <Box key={i} component="a" href={`tel:${part.tel}`} sx={{ color: '#D63030', fontWeight: 700, textDecoration: 'none' }}>{part.text}</Box>
+          ) : part.text))}
+        </IntroBox>
 
         {alerts.length === 0 ? (
           <Typography sx={{ fontSize: '0.85rem', color: '#5A5A5A' }}>
-            No health or nutrition advisories published at this time. Check back later or visit{' '}
-            <Link href="/early-warnings" style={{ color: '#C1440E' }}>Early Warnings</Link> for all active alerts.
+            {copy('empty').text}{' '}
+            <Link href="/early-warnings" style={{ color: '#C1440E' }}>Early Warnings</Link>
           </Typography>
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -98,6 +123,11 @@ export default function HealthAlertsPage({ alerts, apiStale }) {
 }
 
 export async function getStaticProps() {
+  try {
+    return { props: await listCmsProps('alerts', 'health', healthAlertFromCms), revalidate: 60 };
+  } catch (err) {
+    if (process.env.NODE_ENV === 'development') console.warn('[cms] health alerts:', err.message);
+  }
   const res = await getHealthAlerts();
   return { props: { alerts: res.data, apiStale: res.apiStale }, revalidate: 60 };
 }

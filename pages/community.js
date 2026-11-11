@@ -5,8 +5,25 @@ import PageHero from '../components/PageHero';
 import StaleContentBanner from '../components/StaleContentBanner';
 import CommunityInitiativeCard from '../components/CommunityInitiativeCard';
 import TollFreeLines from '../components/TollFreeLines';
+import { IntroBox } from '../components/CommunityServiceLayout';
 import { getProgrammes, getCommunityInitiatives, getCommunityPage } from '../lib/wordpress';
 import { groupCommunityByCountryRegion } from '../lib/regions';
+import { getAll, getPageAllLocales, inAllLocales, isPublishedPage } from '../lib/cms';
+import { chosen, initiativeFromCms, pageCopy, programmeFromCms, sameSlugs } from '../lib/cms-community';
+import { pickLocale } from '../lib/cms-alerts';
+import { useLanguage } from '../contexts/LanguageContext';
+
+// What the page showed before Karamoja → Website pages → Community is saved.
+const DEFAULT_COPY = {
+  hero: {
+    title: 'Community Information',
+    subtitle: 'Climate advisories, services and initiatives for communities across the Karamoja Cluster',
+    image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1400&q=70',
+  },
+  intro: {},
+  services: { title: 'Community Services' },
+  initiatives: { title: 'Community Initiatives' },
+};
 
 function RegionBadge({ country, region }) {
   if (!country && !region) return null;
@@ -41,7 +58,24 @@ function RadioCard({ station }) {
   );
 }
 
-export default function Community({ programmes, communityInitiatives, communityPage, apiStale }) {
+export default function Community({
+  source = 'legacy',
+  programmes: legacyProgrammes,
+  communityInitiatives: legacyInitiatives,
+  programmesByLocale,
+  initiativesByLocale,
+  pageByLocale,
+  communityPage,
+  apiStale,
+}) {
+  const { locale } = useLanguage();
+  const cms = source === 'cms';
+  const { copy, shown, hero } = pageCopy(cms ? pageByLocale : null, locale, DEFAULT_COPY);
+  // Karamoja Core: the items picked in the page's sections, in that order (all published items until something is picked).
+  const programmes = cms ? chosen(copy('services').items, pickLocale(programmesByLocale, locale) || []) : legacyProgrammes || [];
+  const communityInitiatives = cms
+    ? chosen(copy('initiatives').items, pickLocale(initiativesByLocale, locale) || [])
+    : legacyInitiatives || [];
   const outreachItems = communityPage?.outreach?.items || [];
   const { clusterWide, grouped: groupedOutreach } = groupCommunityByCountryRegion(outreachItems);
   const radioTitle = communityPage?.radio?.title || 'Partner Radio Stations';
@@ -56,10 +90,11 @@ export default function Community({ programmes, communityInitiatives, communityP
 
   return (
     <Layout title="Community">
-      <PageHero title="Community Information" subtitle="Climate advisories, services and initiatives for communities across the Karamoja Cluster" image="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1400&q=70" breadcrumbs={['Community']} />
+      <PageHero title={hero.title} subtitle={hero.subtitle} image={hero.image} breadcrumbs={['Community']} />
 
       <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, md: 4 }, py: { xs: 4, md: 6 } }}>
         <StaleContentBanner show={apiStale} />
+        <IntroBox title={copy('intro').title} text={copy('intro').text} color="#C1440E" />
 
         <TollFreeLines sx={{ mb: 5 }} />
 
@@ -93,7 +128,9 @@ export default function Community({ programmes, communityInitiatives, communityP
           </Box>
         )}
 
-        <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontSize: '1.4rem', fontWeight: 700, mb: 3 }}>Community Services</Typography>
+        {shown('services') && programmes.length > 0 && (
+        <>
+        <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontSize: '1.4rem', fontWeight: 700, mb: 3 }}>{copy('services').title || DEFAULT_COPY.services.title}</Typography>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 6 }}>
           {programmes.map((s) => {
             const isExternal = s.href?.startsWith('tel:');
@@ -137,8 +174,12 @@ export default function Community({ programmes, communityInitiatives, communityP
         </Box>
 
         <Divider sx={{ mb: 5 }} />
+        </>
+        )}
 
-        <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontSize: '1.4rem', fontWeight: 700, mb: 3 }}>Community Initiatives</Typography>
+        {shown('initiatives') && (
+        <>
+        <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontSize: '1.4rem', fontWeight: 700, mb: 3 }}>{copy('initiatives').title || DEFAULT_COPY.initiatives.title}</Typography>
         {communityInitiatives.length ? (
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, mb: 6 }}>
             {communityInitiatives.map((item) => (
@@ -149,8 +190,10 @@ export default function Community({ programmes, communityInitiatives, communityP
           </Box>
         ) : (
           <Typography sx={{ fontSize: '0.85rem', color: '#5A5A5A', mb: 6 }}>
-            No community initiatives published yet. Add posts under the Community Initiatives category in WordPress.
+            No community initiatives published yet.
           </Typography>
+        )}
+        </>
         )}
 
         {radioRegions.length > 0 && (
@@ -181,11 +224,40 @@ export default function Community({ programmes, communityInitiatives, communityP
   );
 }
 
+/** Karamoja Core: programmes and initiatives in every language, and the page's sections once saved. */
+async function cmsProps() {
+  const [programmes, initiatives, pages] = await Promise.all([
+    inAllLocales((l) => getAll('programmes', {}, l)),
+    inAllLocales((l) => getAll('initiatives', {}, l)),
+    getPageAllLocales('community').catch(() => null),
+  ]);
+  const map = (byLocale, fn) => Object.fromEntries(
+    Object.entries(byLocale).map(([l, rows]) => [l, (Array.isArray(rows) ? rows : []).map(fn).filter(Boolean)])
+  );
+  return {
+    source: 'cms',
+    programmesByLocale: map(programmes, programmeFromCms),
+    initiativesByLocale: sameSlugs(map(initiatives, initiativeFromCms)),
+    pageByLocale: isPublishedPage(pages?.en) ? pages : null,
+  };
+}
+
 export async function getStaticProps() {
-  const [programmesRes, initiativesRes, communityPageRes] = await Promise.all([
+  // Outreach and radio stations still come from the old Community page settings (moved in a later step).
+  const communityPageRes = await getCommunityPage();
+  try {
+    const cms = await cmsProps();
+    return {
+      props: { ...cms, communityPage: communityPageRes.data, apiStale: Boolean(communityPageRes.apiStale) },
+      revalidate: 60,
+    };
+  } catch (err) {
+    if (process.env.NODE_ENV === 'development') console.warn('[cms] community:', err.message);
+  }
+
+  const [programmesRes, initiativesRes] = await Promise.all([
     getProgrammes(),
     getCommunityInitiatives(),
-    getCommunityPage(),
   ]);
 
   return {

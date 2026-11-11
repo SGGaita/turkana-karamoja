@@ -3,10 +3,24 @@ import { Box, Typography, Chip } from '@mui/material';
 import Layout from '../../components/Layout';
 import PageHero from '../../components/PageHero';
 import StaleContentBanner from '../../components/StaleContentBanner';
-import { CommunityServiceMap, CommunityBackLink, StatusPill, StatChip } from '../../components/CommunityServiceLayout';
+import { CommunityServiceMap, CommunityBackLink, StatusPill, StatChip, IntroBox, EmptyNote } from '../../components/CommunityServiceLayout';
 import { getAssistanceSites } from '../../lib/wordpress';
 import { toServiceMapMarker } from '../../lib/wp-mappers';
 import { ASSISTANCE_SITE_TYPES } from '../../lib/community-services';
+import { listCmsProps, pageCopy, assistanceSiteFromCms } from '../../lib/cms-community';
+import { pickLocale } from '../../lib/cms-alerts';
+import { useLanguage, useShell, useVocabLabel } from '../../contexts/LanguageContext';
+
+// What the page showed before Karamoja → Website pages → Assistance sites is saved.
+const DEFAULT_COPY = {
+  hero: {
+    title: 'Humanitarian Assistance Locator',
+    subtitle: 'Food distribution, NFI, cash transfer and registration sites across Turkana and Karamoja',
+    image: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=1400&q=70',
+  },
+  intro: {},
+  empty: { text: 'No assistance sites have been published yet.' },
+};
 
 const FILTER_TYPES = [
   { key: 'all', label: 'All sites' },
@@ -16,24 +30,35 @@ const FILTER_TYPES = [
   { key: 'registration', label: 'Registration' },
 ];
 
-export default function AssistancePage({ assistanceSites, apiStale }) {
+export default function AssistancePage({ source = 'legacy', assistanceSites: legacySites, itemsByLocale, pageByLocale, apiStale }) {
+  const { locale } = useLanguage();
+  const cms = source === 'cms';
+  const assistanceSites = (cms ? pickLocale(itemsByLocale, locale) : legacySites) || [];
+  const { copy, hero } = pageCopy(cms ? pageByLocale : null, locale, DEFAULT_COPY);
+  const typeLabel = useVocabLabel('site_types', ASSISTANCE_SITE_TYPES);
+  // Filter chips: the site types from Site settings → Lists once saved, else the built-in short labels.
+  const vocabTypes = useShell()?.vocabularies?.site_types;
+  const filterTypes = vocabTypes && Object.keys(vocabTypes).length
+    ? [FILTER_TYPES[0], ...Object.entries(vocabTypes).map(([key, label]) => ({ key, label }))]
+    : FILTER_TYPES;
   const [filter, setFilter] = useState('all');
   const filtered = filter === 'all' ? assistanceSites : assistanceSites.filter((s) => s.siteType === filter);
   const markers = filtered.map((s) => toServiceMapMarker(s, 'assistance')).filter(Boolean);
   const agencies = [...new Set(assistanceSites.map((s) => s.agency).filter(Boolean))];
 
   return (
-    <Layout title="Humanitarian Assistance Locator">
+    <Layout title={hero.title}>
       <PageHero
-        title="Humanitarian Assistance Locator"
-        subtitle="Food distribution, NFI, cash transfer and registration sites across Turkana and Karamoja"
-        image="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=1400&q=70"
+        title={hero.title}
+        subtitle={hero.subtitle}
+        image={hero.image}
         breadcrumbs={['Community', 'Assistance Locator']}
       />
 
       <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, md: 4 }, py: { xs: 4, md: 6 } }}>
         <CommunityBackLink />
         <StaleContentBanner show={apiStale} />
+        <IntroBox title={copy('intro').title} text={copy('intro').text} color="#E87010" />
 
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 3 }}>
           <StatChip value={assistanceSites.length} label="Active sites" color="#E87010" />
@@ -41,7 +66,7 @@ export default function AssistancePage({ assistanceSites, apiStale }) {
         </Box>
 
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 3 }}>
-          {FILTER_TYPES.map(({ key, label }) => (
+          {filterTypes.map(({ key, label }) => (
             <Chip
               key={key}
               label={label}
@@ -66,18 +91,24 @@ export default function AssistancePage({ assistanceSites, apiStale }) {
         </Box>
 
         <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontSize: '1.2rem', fontWeight: 700, mb: 2 }}>Distribution & Registration Sites</Typography>
+        {!assistanceSites.length && !apiStale && <EmptyNote text={copy('empty').text} />}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
           {filtered.map((site) => (
             <Box key={site.id} sx={{ bgcolor: 'white', border: '1px solid #E8E0D5', borderRadius: 2, p: 2.5 }}>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center', mb: 0.75 }}>
                 <Typography sx={{ fontWeight: 700, fontSize: '0.92rem', color: '#3D2B1F', flex: 1 }}>{site.name}</Typography>
                 {site.agency && <StatusPill label={site.agency} color="#E87010" />}
-                <StatusPill label={ASSISTANCE_SITE_TYPES[site.siteType] || site.siteType} color="#2E7BB4" />
+                {site.siteType && <StatusPill label={typeLabel(site.siteType)} color="#2E7BB4" />}
               </Box>
               <Typography sx={{ fontSize: '0.78rem', color: '#9A9A9A', mb: 0.5 }}>{site.region}{site.locationLabel ? ` · ${site.locationLabel}` : ''}</Typography>
               <Typography sx={{ fontSize: '0.82rem', color: '#5A5A5A', lineHeight: 1.6, mb: 1 }}>{site.desc}</Typography>
               {site.schedule && <Typography sx={{ fontSize: '0.75rem', color: '#3D2B1F' }}><strong>Schedule:</strong> {site.schedule}</Typography>}
               {site.contact && <Typography sx={{ fontSize: '0.75rem', color: '#5A5A5A', mt: 0.5 }}><strong>Contact:</strong> {site.contact}</Typography>}
+              {site.lastUpdated && (
+                <Typography sx={{ fontSize: '0.68rem', color: site.stale ? '#B85C00' : '#9A9A9A', mt: 1 }}>
+                  Last updated: {site.lastUpdated}{site.stale ? ' · may be out of date' : ''}
+                </Typography>
+              )}
             </Box>
           ))}
         </Box>
@@ -87,6 +118,11 @@ export default function AssistancePage({ assistanceSites, apiStale }) {
 }
 
 export async function getStaticProps() {
+  try {
+    return { props: await listCmsProps('assistance-sites', 'assistance', assistanceSiteFromCms), revalidate: 60 };
+  } catch (err) {
+    if (process.env.NODE_ENV === 'development') console.warn('[cms] assistance sites:', err.message);
+  }
   const res = await getAssistanceSites();
   return { props: { assistanceSites: res.data, apiStale: res.apiStale }, revalidate: 60 };
 }

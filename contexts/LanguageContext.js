@@ -214,3 +214,16 @@ export function useLocalizedHero(fallbackHero) {
 export function useShell() {
   return useLanguage().shell;
 }
+
+/**
+ * The label for a code from Site settings → Lists (e.g. useVocabLabel('water_point_types')('borehole')), falling back
+ * to the website's built-in labels until Site settings are saved, then to the code itself.
+ */
+export function useVocabLabel(list, fallback = {}) {
+  const vocab = useShell()?.vocabularies?.[list];
+  return (code) => {
+    const fromFallback = fallback[code];
+    const builtIn = typeof fromFallback === 'object' && fromFallback ? fromFallback.label : fromFallback;
+    return (vocab && vocab[code]) || builtIn || code || '';
+  };
+}

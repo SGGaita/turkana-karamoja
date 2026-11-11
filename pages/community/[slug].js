@@ -11,6 +11,12 @@ import ShareLinks from '../../components/ShareLinks';
 import CommunityInitiativeCard from '../../components/CommunityInitiativeCard';
 import { getCommunityInitiativeById, getCommunityInitiatives } from '../../lib/wordpress';
 import { buildSlugPath, extractIdFromSlugPath } from '../../lib/slug';
+import { getCollection, getInitiative, getPageAllLocales, inAllLocales, isPublishedPage } from '../../lib/cms';
+import { initiativeFromCms, sameSlugs } from '../../lib/cms-community';
+import { pickLocale } from '../../lib/cms-alerts';
+import { useLanguage } from '../../contexts/LanguageContext';
+
+const HERO_IMAGE = 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1400&q=70';
 
 const richTextSx = {
   fontSize: '0.95rem',
@@ -32,10 +38,15 @@ const richTextSx = {
   '& strong': { color: '#3D2B1F' },
 };
 
-export default function CommunityInitiativeDetail({ article, related, apiStale }) {
+export default function CommunityInitiativeDetail({ article: legacyArticle, related: legacyRelated, apiStale, articleByLocale, relatedByLocale, pageByLocale }) {
   const router = useRouter();
+  const { locale } = useLanguage();
+  const cms = Boolean(articleByLocale);
+  const article = cms ? pickLocale(articleByLocale, locale) : legacyArticle;
+  const related = (cms ? pickLocale(relatedByLocale, locale) : legacyRelated) || [];
+  const heroCopy = pickLocale(pageByLocale, locale)?.sections?.hero || {};
 
-  if (router.isFallback) {
+  if (router.isFallback || !article) {
     return (
       <Layout title="Loading article…">
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 12 }}>
@@ -53,8 +64,8 @@ export default function CommunityInitiativeDetail({ article, related, apiStale }
     <Layout title={article.title}>
       <PageHero
         title={article.title}
-        subtitle={article.desc}
-        image={article.img || 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1400&q=70'}
+        subtitle={article.desc || heroCopy.fallback_subtitle || ''}
+        image={article.img || heroCopy.image?.url || HERO_IMAGE}
         breadcrumbs={['Community', article.tag]}
       />
 
@@ -105,6 +116,14 @@ export default function CommunityInitiativeDetail({ article, related, apiStale }
             )}
 
             <Box sx={richTextSx} dangerouslySetInnerHTML={{ __html: article.content || `<p>${article.desc}</p>` }} />
+
+            {(article.freq || article.times) && (
+              <Box sx={{ bgcolor: '#3D2B1F', borderRadius: 2, p: 2.5, mt: 3 }}>
+                {article.freq && <Typography sx={{ color: '#F0D9B0', fontSize: '1.4rem', fontWeight: 700, fontFamily: '"Montserrat", sans-serif' }}>{article.freq}</Typography>}
+                {article.lang && <Typography sx={{ color: '#D4A96A', fontSize: '0.8rem' }}>{article.lang}</Typography>}
+                {article.times && <Typography sx={{ color: '#D4A96A', fontSize: '0.8rem' }}>{article.times}</Typography>}
+              </Box>
+            )}
 
             {files.length > 0 && (
               <Box sx={{ mt: 4, pt: 3, borderTop: '1px solid #E8E0D5' }}>
@@ -196,15 +215,68 @@ export default function CommunityInitiativeDetail({ article, related, apiStale }
 }
 
 export async function getStaticPaths() {
-  const { data } = await getCommunityInitiatives();
+  // Built on first visit and then kept (ISR); instant updates rebuild a page when its initiative changes.
+  return { paths: [], fallback: 'blocking' };
+}
+
+/** Karamoja Core: the initiative and up to three others in every language. Null = not found. */
+async function cmsProps(id) {
+  let byLocale;
+  try {
+    byLocale = await inAllLocales((l) => getInitiative(id, l));
+  } catch (err) {
+    if (err?.code === 'karamoja_not_found') return null;
+    throw err;
+  }
+  const [othersByLocale, pages] = await Promise.all([
+    inAllLocales((l) => getCollection('initiatives', { per_page: 4 }, l)).catch(() => ({})),
+    getPageAllLocales('initiative-detail').catch(() => null),
+  ]);
+  const articleByLocale = {};
+  const relatedByLocale = {};
+  Object.entries(byLocale).forEach(([l, dto]) => {
+    articleByLocale[l] = initiativeFromCms(dto);
+  });
+  Object.entries(othersByLocale).forEach(([l, rows]) => {
+    relatedByLocale[l] = (Array.isArray(rows) ? rows : [])
+      .map(initiativeFromCms)
+      .filter((x) => x && String(x.id) !== String(id))
+      .slice(0, 3);
+  });
+  sameSlugs(relatedByLocale);
+  Object.values(articleByLocale).forEach((a) => {
+    if (a && articleByLocale.en) a.slugPath = articleByLocale.en.slugPath;
+  });
   return {
-    paths: (data || []).map((item) => ({ params: { slug: item.slugPath } })),
-    fallback: true,
+    articleByLocale,
+    relatedByLocale,
+    pageByLocale: isPublishedPage(pages?.en) ? pages : null,
+    apiStale: false,
   };
 }
 
 export async function getStaticProps({ params }) {
   const id = extractIdFromSlugPath(params.slug);
+  if (!/^\d+$/.test(String(id))) return { notFound: true };
+
+  let props = null;
+  let cmsAnswered = false;
+  try {
+    props = await cmsProps(id);
+    cmsAnswered = true;
+  } catch (err) {
+    if (process.env.NODE_ENV === 'development') console.warn('[cms] initiative:', err.message);
+  }
+  if (cmsAnswered) {
+    if (!props?.articleByLocale?.en) return { notFound: true, revalidate: 60 };
+    const canonical = props.articleByLocale.en.slugPath;
+    if (canonical !== params.slug) {
+      return { redirect: { destination: `/community/${canonical}`, permanent: true } };
+    }
+    return { props, revalidate: 300 };
+  }
+
+  // Karamoja Core not reachable: the old endpoints, as before.
   const [{ data: article, apiStale }, { data: allInitiatives }] = await Promise.all([
     getCommunityInitiativeById(id),
     getCommunityInitiatives(),
