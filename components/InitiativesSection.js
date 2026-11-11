@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { Box, Typography, Button, Card, CardMedia, CardContent, Chip } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import { fallbackInitiatives } from '../lib/fallback-data';
 import { useLocalizedHomeSections } from '../contexts/LanguageContext';
 
 function initiativeHref(init) {
@@ -14,7 +13,9 @@ export default function InitiativesSection({ initiatives: initiativesProp }) {
   // From Karamoja → Website pages → Home when the website reads it; the old fixed text otherwise.
   const cms = useLocalizedHomeSections().initiatives;
   // The CMS list is already the editors' choice (up to 6); the old endpoint lists everything, so show 3.
-  const initiatives = (initiativesProp?.length ? initiativesProp : fallbackInitiatives).slice(0, cms ? 6 : 3);
+  const initiatives = (initiativesProp || []).slice(0, cms ? 6 : 3);
+  // No initiatives published: no section (never made-up ones, audit v3 N-16).
+  if (!initiatives.length) return null;
   const copy = cms || {
     eyebrow: 'Leading Initiatives',
     title: null,

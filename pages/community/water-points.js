@@ -14,7 +14,7 @@ import { useLanguage, useVocabLabel } from '../../contexts/LanguageContext';
 const DEFAULT_COPY = {
   hero: {
     title: 'Water Point Status Map',
-    subtitle: 'Real-time status of boreholes, pans, dams and water trucking points across Turkana and Karamoja',
+    subtitle: 'Status of boreholes, pans, dams and water trucking points across Turkana and Karamoja',
     image: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=1400&q=70',
   },
   intro: {},
