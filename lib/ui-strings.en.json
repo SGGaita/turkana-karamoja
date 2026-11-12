@@ -12,6 +12,8 @@
   "common.last_updated": "Last updated: {date}",
   "common.out_of_date": "may be out of date",
   "common.stale_banner": "Showing cached content - live CMS updates are temporarily unavailable.",
+  "common.page_unavailable_title": "This page can't be shown just now",
+  "common.page_unavailable": "The content could not be loaded. Please try again in a minute.",
   "alerts.level_red": "RED ALERT",
   "alerts.level_orange": "ORANGE ALERT",
   "alerts.level_yellow": "YELLOW ALERT",

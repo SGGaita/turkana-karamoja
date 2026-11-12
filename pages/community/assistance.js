@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { Box, Typography, Chip } from '@mui/material';
 import Layout from '../../components/Layout';
 import PageHero from '../../components/PageHero';
-import StaleContentBanner from '../../components/StaleContentBanner';
+import CmsUnavailable from '../../components/CmsUnavailable';
 import { CommunityServiceMap, CommunityBackLink, StatusPill, StatChip, IntroBox, EmptyNote } from '../../components/CommunityServiceLayout';
-import { getAssistanceSites } from '../../lib/wordpress';
 import { toServiceMapMarker } from '../../lib/wp-mappers';
 import { ASSISTANCE_SITE_TYPES } from '../../lib/community-services';
+import { cmsStaticProps } from '../../lib/cms';
 import { listCmsProps, pageCopy, assistanceSiteFromCms } from '../../lib/cms-community';
 import { pickLocale } from '../../lib/cms-alerts';
 import { useLanguage, useShell, useVocabLabel } from '../../contexts/LanguageContext';
@@ -31,11 +31,15 @@ const FILTER_TYPES = [
   { key: 'registration', labelKey: 'community.filter_registration' },
 ];
 
-export default function AssistancePage({ source = 'legacy', assistanceSites: legacySites, itemsByLocale, pageByLocale, apiStale }) {
+export default function AssistancePage(props) {
+  if (props.unavailable) return <CmsUnavailable />;
+  return <AssistancePageBody {...props} />;
+}
+
+function AssistancePageBody({ itemsByLocale, pageByLocale }) {
   const { locale, t } = useLanguage();
-  const cms = source === 'cms';
-  const assistanceSites = (cms ? pickLocale(itemsByLocale, locale) : legacySites) || [];
-  const { copy, hero } = pageCopy(cms ? pageByLocale : null, locale, DEFAULT_COPY);
+  const assistanceSites = pickLocale(itemsByLocale, locale) || [];
+  const { copy, hero } = pageCopy(pageByLocale, locale, DEFAULT_COPY);
   const typeLabel = useVocabLabel('site_types', ASSISTANCE_SITE_TYPES);
   // Filter chips: the site types from Site settings → Lists once saved, else the built-in short labels.
   const vocabTypes = useShell()?.vocabularies?.site_types;
@@ -59,7 +63,6 @@ export default function AssistancePage({ source = 'legacy', assistanceSites: leg
 
       <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, md: 4 }, py: { xs: 4, md: 6 } }}>
         <CommunityBackLink />
-        <StaleContentBanner show={apiStale} />
         <IntroBox title={copy('intro').title} text={copy('intro').text} color="#E87010" />
 
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 3 }}>
@@ -87,13 +90,12 @@ export default function AssistancePage({ source = 'legacy', assistanceSites: leg
         <Box sx={{ mb: 5 }}>
           <CommunityServiceMap
             markers={markers}
-            apiStale={apiStale}
             emptyMessage={t('community.no_sites_on_map')}
           />
         </Box>
 
         <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontSize: '1.2rem', fontWeight: 700, mb: 2 }}>{t('community.sites_heading')}</Typography>
-        {!assistanceSites.length && !apiStale && <EmptyNote text={copy('empty').text} />}
+        {!assistanceSites.length && <EmptyNote text={copy('empty').text} />}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
           {filtered.map((site) => (
             <Box key={site.id} sx={{ bgcolor: 'white', border: '1px solid #E8E0D5', borderRadius: 2, p: 2.5 }}>
@@ -120,11 +122,5 @@ export default function AssistancePage({ source = 'legacy', assistanceSites: leg
 }
 
 export async function getStaticProps() {
-  try {
-    return { props: await listCmsProps('assistance-sites', 'assistance', assistanceSiteFromCms), revalidate: 60 };
-  } catch (err) {
-    if (process.env.NODE_ENV === 'development') console.warn('[cms] assistance sites:', err.message);
-  }
-  const res = await getAssistanceSites();
-  return { props: { assistanceSites: res.data, apiStale: res.apiStale }, revalidate: 60 };
+  return cmsStaticProps(() => listCmsProps('assistance-sites', 'assistance', assistanceSiteFromCms), { revalidate: 60, name: 'assistance sites' });
 }

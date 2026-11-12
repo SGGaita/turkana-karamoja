@@ -3,15 +3,14 @@ import { Box, Typography, Chip, Button, Divider } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Layout from '../../components/Layout';
 import PageHero from '../../components/PageHero';
-import StaleContentBanner from '../../components/StaleContentBanner';
 import PushSubscribeButton from '../../components/PushSubscribeButton';
 import MapSection from '../../components/MapSection';
 import AlertLevelLegend from '../../components/AlertLevelLegend';
 import ShareLinks from '../../components/ShareLinks';
-import { getAlerts, getMapAdvisories, getAlertLegend } from '../../lib/wordpress';
+import CmsUnavailable from '../../components/CmsUnavailable';
 import { toMapAdvisoryMarker } from '../../lib/wp-mappers';
 import { buildSlugPath } from '../../lib/slug';
-import { getCollection, getPageAllLocales, inAllLocales, isPublishedPage } from '../../lib/cms';
+import { cmsStaticProps, getCollection, getPageAllLocales, inAllLocales, isPublishedPage } from '../../lib/cms';
 import { pickLocale, splitAlerts, levelLabel, validityLabel } from '../../lib/cms-alerts';
 import { useLanguage, useT } from '../../contexts/LanguageContext';
 
@@ -134,15 +133,13 @@ function AlertCard({ a, ended = false }) {
   );
 }
 
-export default function EarlyWarnings({ source = 'legacy', alerts, mapAdvisories, alertLegend, apiStale, alertsByLocale, pageByLocale }) {
+export default function EarlyWarnings({ unavailable, alertsByLocale, pageByLocale }) {
   const { locale, t } = useLanguage();
-  const cms = source === 'cms';
-  // Karamoja Core: alerts in the reader's language, active ones first; ended ones listed after.
-  const { active, recent } = cms ? splitAlerts(pickLocale(alertsByLocale, locale)) : { active: alerts || [], recent: [] };
-  const markers = cms
-    ? active.filter((a) => a.onMap).map((a, i) => toMapAdvisoryMarker(a, i)).filter(Boolean)
-    : mapAdvisories;
-  const sections = cms ? pickLocale(pageByLocale, locale)?.sections : null;
+  if (unavailable) return <CmsUnavailable />;
+  // Alerts in the reader's language, active ones first; ended ones listed after.
+  const { active, recent } = splitAlerts(pickLocale(alertsByLocale, locale));
+  const markers = active.filter((a) => a.onMap).map((a, i) => toMapAdvisoryMarker(a, i)).filter(Boolean);
+  const sections = pickLocale(pageByLocale, locale)?.sections || null;
   const copy = (key) => (sections ? sections[key] || {} : DEFAULT_COPY[key]);
   const shown = (key) => !sections || sections[key]?.enabled !== false;
   const hero = copy('hero');
@@ -157,8 +154,6 @@ export default function EarlyWarnings({ source = 'legacy', alerts, mapAdvisories
       />
 
       <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, md: 4 }, py: { xs: 4, md: 6 } }}>
-        <StaleContentBanner show={apiStale} />
-
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
           <PushSubscribeButton />
         </Box>
@@ -177,7 +172,6 @@ export default function EarlyWarnings({ source = 'legacy', alerts, mapAdvisories
             compact
             id="early-warnings-map"
             mapAdvisories={markers}
-            apiStale={apiStale}
             eyebrow={t('alerts.map_eyebrow')}
             title={t('alerts.map_title')}
             subtitle={t('alerts.map_subtitle')}
@@ -187,12 +181,12 @@ export default function EarlyWarnings({ source = 'legacy', alerts, mapAdvisories
         {shown('legend') && (
           <Box sx={{ mb: 5 }}>
             {copy('legend').note && <Typography sx={{ fontSize: '0.85rem', color: '#5A5A5A', mb: 1.5 }}>{copy('legend').note}</Typography>}
-            <AlertLevelLegend title={alertLegend?.title} items={alertLegend?.items} />
+            <AlertLevelLegend />
           </Box>
         )}
 
         <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontSize: '1.4rem', fontWeight: 700, color: '#3D2B1F', mb: 3 }}>
-          {cms ? t('alerts.active_heading', { n: active.length }) : t('alerts.active_recent_heading')}
+          {t('alerts.active_heading', { n: active.length })}
         </Typography>
 
         {!active.length ? (
@@ -201,9 +195,7 @@ export default function EarlyWarnings({ source = 'legacy', alerts, mapAdvisories
               {t('alerts.none_title')}
             </Typography>
             <Typography sx={{ fontSize: '0.9rem', color: '#5A5A5A', lineHeight: 1.7, maxWidth: 560, mx: 'auto' }}>
-              {apiStale
-                ? t('alerts.load_failed')
-                : (shown('empty') && copy('empty').text) || DEFAULT_COPY.empty.text}
+              {(shown('empty') && copy('empty').text) || DEFAULT_COPY.empty.text}
             </Typography>
           </Box>
         ) : (
@@ -227,42 +219,18 @@ export default function EarlyWarnings({ source = 'legacy', alerts, mapAdvisories
   );
 }
 
-/** Karamoja Core when it answers; the old endpoints otherwise (until cut-over). */
+/** Alerts and page text from Karamoja Core. */
 async function cmsProps() {
   const [alertsByLocale, pages] = await Promise.all([
     inAllLocales((l) => getCollection('alerts', { per_page: 50 }, l)),
     getPageAllLocales('early-warnings').catch(() => null),
   ]);
   return {
-    source: 'cms',
     alertsByLocale,
     pageByLocale: isPublishedPage(pages?.en) ? pages : null,
-    apiStale: false,
   };
 }
 
 export async function getStaticProps() {
-  try {
-    return { props: await cmsProps(), revalidate: 120 };
-  } catch (err) {
-    if (process.env.NODE_ENV === 'development') console.warn('[cms] early warnings:', err.message);
-  }
-  const [alertsRes, mapAdvisoriesRes, alertLegendRes] = await Promise.all([
-    getAlerts(),
-    getMapAdvisories(),
-    getAlertLegend(),
-  ]);
-  const mapAdvisories = (mapAdvisoriesRes.data || [])
-    .map((alert, index) => toMapAdvisoryMarker(alert, index))
-    .filter(Boolean);
-  return {
-    props: {
-      source: 'legacy',
-      alerts: alertsRes.data,
-      mapAdvisories,
-      alertLegend: alertLegendRes.data,
-      apiStale: alertsRes.apiStale || mapAdvisoriesRes.apiStale || alertLegendRes.apiStale,
-    },
-    revalidate: 120,
-  };
+  return cmsStaticProps(cmsProps, { revalidate: 120, name: 'early warnings' });
 }

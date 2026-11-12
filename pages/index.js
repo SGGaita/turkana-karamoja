@@ -11,29 +11,24 @@ import InitiativesSection from '../components/InitiativesSection';
 import GetInvolvedSection from '../components/GetInvolvedSection';
 import HomeOverview from '../components/HomeOverview';
 import Footer from '../components/Footer';
-import {
-  getAlerts,
-  getMapAdvisories,
-  getHero,
-  getCommunityInitiatives,
-  getHomeSections,
-} from '../lib/wordpress';
 import { toMapAdvisoryMarker } from '../lib/wp-mappers';
-import { useLocalizedHomeSections } from '../contexts/LanguageContext';
-import { getPageAllLocales, isPublishedPage } from '../lib/cms';
+import CmsUnavailable from '../components/CmsUnavailable';
+import { useLanguage, useLocalizedHomeSections } from '../contexts/LanguageContext';
+import { cmsStaticProps, getCollection, getPageAllLocales, inAllLocales, isPublishedPage } from '../lib/cms';
 import { homeProps } from '../lib/cms-home';
-import { fallbackHomeSections } from '../lib/fallback-data';
+import { pickLocale, splitAlerts } from '../lib/cms-alerts';
+import { initiativeFromCms } from '../lib/cms-community';
+import { fallbackHero, fallbackHomeSections } from '../lib/fallback-data';
 
 // The overview panel shows only from the CMS (no made-up figures, audit E7).
 const ALL_VISIBLE = { hero: true, overview: false, about: true, map: true, warnings: true, initiatives: true, getInvolved: true };
 
-function HomeMapSection({ mapAdvisories, apiStale }) {
+function HomeMapSection({ mapAdvisories }) {
   const homeSections = useLocalizedHomeSections();
   const mapCopy = homeSections.map || {};
   return (
     <MapSection
       mapAdvisories={mapAdvisories}
-      apiStale={apiStale}
       eyebrow={mapCopy.eyebrow}
       title={mapCopy.title}
       subtitle={mapCopy.subtitle}
@@ -41,14 +36,13 @@ function HomeMapSection({ mapAdvisories, apiStale }) {
   );
 }
 
-export default function Home({
-  alerts,
-  mapAdvisories,
-  initiatives,
-  apiStale,
-  homeVisible = ALL_VISIBLE,
-}) {
+export default function Home({ unavailable, alertsByLocale, initiatives, homeVisible = ALL_VISIBLE }) {
+  const { locale } = useLanguage();
+  if (unavailable) return <CmsUnavailable />;
   const show = { ...ALL_VISIBLE, ...(homeVisible || {}) };
+  // Active alerts in the reader's language, most serious first; the map shows those marked for it.
+  const alerts = splitAlerts(pickLocale(alertsByLocale, locale)).active;
+  const mapAdvisories = alerts.filter((a) => a.onMap).map((a, i) => toMapAdvisoryMarker(a, i)).filter(Boolean);
   const topAlert = (alerts || []).find((a) => a.level === 'RED' || a.level === 'ORANGE') || null;
   const urgentBanner = topAlert
     ? {
@@ -71,8 +65,8 @@ export default function Home({
         {show.hero && <Hero />}
         {show.overview && <HomeOverview />}
         {show.about && <ClimateHubSection />}
-        {show.map && <HomeMapSection mapAdvisories={mapAdvisories} apiStale={apiStale} />}
-        {show.warnings && alerts?.length > 0 && <WarningsStrip alerts={alerts} apiStale={apiStale} />}
+        {show.map && <HomeMapSection mapAdvisories={mapAdvisories} />}
+        {show.warnings && alerts.length > 0 && <WarningsStrip alerts={alerts} />}
         {show.initiatives && <InitiativesSection initiatives={initiatives} />}
         {show.getInvolved && <GetInvolvedSection />}
         <Footer />
@@ -82,56 +76,23 @@ export default function Home({
 }
 
 
-export async function getStaticProps() {
-  const [alertsRes, mapAdvisoriesRes, heroEnRes, heroSwRes, initiativesRes, homeEnRes, homeSwRes] = await Promise.all([
-    getAlerts(),
-    getMapAdvisories(),
-    getHero('en'),
-    getHero('sw'),
-    getCommunityInitiatives(),
-    getHomeSections('en'),
-    getHomeSections('sw'),
+/**
+ * Alerts, the latest initiatives and Karamoja → Website pages → Home. Until Home is saved the built-in hero and
+ * sections are shown (no placeholder figures: the overview panel shows only from the CMS, audit E7).
+ */
+async function cmsProps() {
+  const [alertsByLocale, latest, pages] = await Promise.all([
+    inAllLocales((l) => getCollection('alerts', { per_page: 50 }, l)),
+    getCollection('initiatives', { per_page: 6 }, 'en'),
+    getPageAllLocales('home').catch(() => null),
   ]);
+  const initiatives = (Array.isArray(latest) ? latest : []).map(initiativeFromCms).filter(Boolean);
+  const content = isPublishedPage(pages?.en)
+    ? homeProps(pages, { en: fallbackHero }, { en: fallbackHomeSections }, initiatives)
+    : { homeVisible: ALL_VISIBLE, initiatives };
+  return { alertsByLocale, ...content }; // heroByLocale / homeSectionsByLocale go to the shell (_app.js).
+}
 
-  const apiStale =
-    alertsRes.apiStale ||
-    mapAdvisoriesRes.apiStale ||
-    heroEnRes.apiStale ||
-    heroSwRes.apiStale ||
-    initiativesRes.apiStale;
-
-  const mapAdvisories = (mapAdvisoriesRes.data || [])
-    .map((alert, index) => toMapAdvisoryMarker(alert, index))
-    .filter(Boolean);
-
-  const legacyHero = { en: heroEnRes.data, sw: heroSwRes.data };
-  // Only pass legacy copy when it actually loaded, so a failed build-time fetch
-  // doesn't pin fallback text over the client-side refresh.
-  const legacyHome = {
-    ...(homeEnRes.apiStale ? {} : { en: homeEnRes.data }),
-    ...(homeSwRes.apiStale ? {} : { sw: homeSwRes.data }),
-  };
-
-  // Karamoja → Website pages → Home, once it has been saved in wp-admin. Until then (or if Karamoja Core is not
-  // reachable) the legacy hero and home sections are used, as before.
-  let content = { heroByLocale: legacyHero, homeSectionsByLocale: legacyHome, homeVisible: ALL_VISIBLE, homeSource: 'legacy' };
-  try {
-    const pages = await getPageAllLocales('home');
-    if (isPublishedPage(pages.en)) {
-      content = { ...homeProps(pages, legacyHero, { en: fallbackHomeSections, ...legacyHome }, initiativesRes.data || []), homeSource: 'cms' };
-    }
-  } catch (err) {
-    if (process.env.NODE_ENV === 'development') console.warn('[cms] home:', err.message);
-  }
-
-  return {
-    props: {
-      alerts: alertsRes.data,
-      mapAdvisories,
-      initiatives: initiativesRes.data,
-      apiStale,
-      ...content, // CMS: the initiatives chosen in wp-admin.
-    },
-    revalidate: 120,
-  };
+export async function getStaticProps() {
+  return cmsStaticProps(cmsProps, { revalidate: 120, name: 'home' });
 }
