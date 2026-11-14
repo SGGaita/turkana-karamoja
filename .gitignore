@@ -15,3 +15,7 @@ public/fallback-*.js
 *.zip
 .env*
 !.env.example
+
+# Visual check output (FE-03)
+/test-results/
+/playwright-report/
