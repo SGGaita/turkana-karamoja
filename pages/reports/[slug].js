@@ -113,7 +113,7 @@ function ReportPage({ reportByLocale, pageByLocale }) {
   };
 
   return (
-    <Layout title={current.title} description={current.desc}>
+    <Layout title={current.title} description={current.desc} type="article">
       <PageHero
         title={current.title}
         subtitle={current.orgs?.join(', ') || current.tag || sections?.hero?.fallback_subtitle}
