@@ -20,8 +20,14 @@ if (process.env.NEXT_PUBLIC_WP_BASE_URL) {
   }
 }
 
+const { securityHeaders } = require('./lib/security-headers');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // CSP, HSTS (production), no framing, no sniffing, referrer and permissions policies (FE-06).
+  async headers() {
+    return [{ source: '/:path*', headers: securityHeaders() }];
+  },
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },

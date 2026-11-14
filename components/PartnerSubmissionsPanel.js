@@ -94,7 +94,7 @@ export default function PartnerSubmissionsPanel({
     setLoading(true);
     setError('');
     try {
-      const data = await getMySubmissions(token);
+      const data = await getMySubmissions();
       setItems(data.items || []);
     } catch (err) {
       setError(err.message || 'Could not load submissions');
@@ -150,7 +150,7 @@ export default function PartnerSubmissionsPanel({
     setSaving(true);
     try {
       const payload = { title: editForm.title, content: editForm.content };
-      const res = await updateSubmission(editItem.type, editItem.id, payload, token);
+      const res = await updateSubmission(editItem.type, editItem.id, payload);
       onNotify?.(res.message || 'Updated');
       setEditItem(null);
       await load();
@@ -169,7 +169,7 @@ export default function PartnerSubmissionsPanel({
     if (!window.confirm(confirmMsg)) return;
     setSaving(true);
     try {
-      const res = await withdrawSubmission(item.type, item.id, token);
+      const res = await withdrawSubmission(item.type, item.id);
       onNotify?.(res.message || 'Withdrawn');
       await load();
     } catch (err) {
@@ -183,7 +183,7 @@ export default function PartnerSubmissionsPanel({
     if (!addDocsItem || !newDoc.file) return;
     setSaving(true);
     try {
-      const media = await uploadMedia(newDoc.file, token);
+      const media = await uploadMedia(newDoc.file);
       const doc = {
         url: media.source_url || '',
         size: formatFileSize(newDoc.file.size),
@@ -191,7 +191,7 @@ export default function PartnerSubmissionsPanel({
         label: getLanguageLabel(newDoc.language),
         filename: newDoc.file.name,
       };
-      const res = await addReportDocuments(addDocsItem.id, [doc], token);
+      const res = await addReportDocuments(addDocsItem.id, [doc]);
       onNotify?.(res.message || 'Document added');
       setNewDoc({ file: null, language: nextAvailableLanguage(res.files) });
       // Keep the dialog open (it's "Manage documents" now, not a one-shot add) and
@@ -209,7 +209,7 @@ export default function PartnerSubmissionsPanel({
     if (!window.confirm(`Remove "${file.filename || file.label || file.language}" from ${item.reference}?`)) return;
     setSaving(true);
     try {
-      const res = await removeReportDocument(item.id, file.url, token);
+      const res = await removeReportDocument(item.id, file.url);
       onNotify?.(res.message || 'Document removed');
       setAddDocsItem((cur) => (cur && cur.id === item.id ? { ...cur, files: res.files } : cur));
       await load();

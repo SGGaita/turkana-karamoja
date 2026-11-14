@@ -93,7 +93,7 @@ export default function ReportSubmissionForm({
           categories: form.categories,
           countries: form.countries,
         };
-        const res = await updateSubmission('report', submissionId, payload, token);
+        const res = await updateSubmission('report', submissionId, payload);
         onNotify?.(res.message || 'Report updated.');
         onSubmitted?.();
       } catch (err) {
@@ -113,7 +113,7 @@ export default function ReportSubmissionForm({
     }
 
     try {
-      const result = await submitReport(payload, token);
+      const result = await submitReport(payload);
       onNotify?.(`Report uploaded! Reference: WP-RPT-${result.id}. Pending admin review.`);
       setForm(emptyReportForm());
       onSubmitted?.();

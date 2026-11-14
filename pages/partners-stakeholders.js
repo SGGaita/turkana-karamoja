@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
 import {
@@ -25,11 +25,12 @@ function FormLoading() {
     </Box>
   );
 }
-import { getJwtToken, getOrganizationStatus, getWpBaseUrl } from '../lib/wordpress';
-import { coreAuthAvailable, coreLogin, changePassword, passwordHint } from '../lib/partner-auth';
+import { getOrganizationStatus, getWpBaseUrl } from '../lib/wordpress';
+import { coreAuthAvailable, passwordHint } from '../lib/partner-auth';
+import { changePassword, getSession, signIn, signOut, SESSION_EXPIRED_EVENT } from '../lib/portal-client';
 import {
   saveOrgSession, loadOrgSession, clearOrgSession, isOrgApproved,
-  TOKEN_KEY, USER_EMAIL_KEY,
+  USER_EMAIL_KEY, LEGACY_TOKEN_KEY,
 } from '../lib/org-session';
 import HelpStepLink from '../components/HelpStepLink';
 import { getPageAllLocales, isPublishedPage } from '../lib/cms';
@@ -116,7 +117,9 @@ export default function Dashboard({ pageByLocale = null }) {
   const registerCopy = { ...DEFAULT_COPY.register, ...pageText('register') };
   const signinCopy = { ...DEFAULT_COPY.signin, ...pageText('signin') };
   const router = useRouter();
-  const [token, setToken] = useState(null);
+  // Signed in? The CMS token itself stays in an httpOnly cookie on the website's server (FE-06).
+  const [token, setToken] = useState(false);
+  const signedInRef = useRef(false);
   const [userEmail, setUserEmail] = useState('');
   const [orgRecord, setOrgRecord] = useState(null);
   const [checking, setChecking] = useState(true);
@@ -159,7 +162,7 @@ export default function Dashboard({ pageByLocale = null }) {
       return;
     }
     try {
-      const status = await getOrganizationStatus(email, sessionStorage.getItem(TOKEN_KEY));
+      const status = await getOrganizationStatus(email, signedInRef.current);
       if (status.registered) {
         // Signed-out lookups only return { registered, status }; keep the id/name/reference we
         // already know for this email (from registration or an earlier signed-in lookup).
@@ -184,20 +187,39 @@ export default function Dashboard({ pageByLocale = null }) {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const t = sessionStorage.getItem(TOKEN_KEY);
-    const email = sessionStorage.getItem(USER_EMAIL_KEY);
-    setToken(t);
-    if (email) {
-      setUserEmail(email);
-      refreshOrgStatus(email).finally(() => setChecking(false));
-    } else {
-      // No known email for this session — never fall back to whatever organisation
-      // happens to be cached (e.g. from a previous visitor or an earlier registration
-      // on this device). The dashboard must stay organisation-agnostic until someone
-      // actually signs in or registers.
-      setChecking(false);
-    }
+    let live = true;
+    sessionStorage.removeItem(LEGACY_TOKEN_KEY); // A token an older version left readable in the browser.
+    getSession().then((session) => {
+      if (!live) return;
+      // Signed in: the session's email. Registered but not signed in yet: the email kept for this tab.
+      const email = session.signedIn ? session.email : sessionStorage.getItem(USER_EMAIL_KEY);
+      signedInRef.current = Boolean(session.signedIn);
+      setToken(Boolean(session.signedIn));
+      if (email) {
+        setUserEmail(email);
+        refreshOrgStatus(email).finally(() => setChecking(false));
+      } else {
+        // No known email for this session — never fall back to whatever organisation
+        // happens to be cached (e.g. from a previous visitor or an earlier registration
+        // on this device). The dashboard must stay organisation-agnostic until someone
+        // actually signs in or registers.
+        setChecking(false);
+      }
+    });
+    return () => { live = false; };
   }, [refreshOrgStatus]);
+
+  // The CMS stopped accepting the session (expired, password changed elsewhere, organisation suspended).
+  useEffect(() => {
+    const onExpired = () => {
+      signedInRef.current = false;
+      setToken(false);
+      setLoginOpen(true);
+      showSnack('Your session has ended. Please sign in again.', 'warning');
+    };
+    window.addEventListener(SESSION_EXPIRED_EVENT, onExpired);
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, onExpired);
+  }, []);
 
   useEffect(() => {
     const q = router.query.section;
@@ -235,31 +257,16 @@ export default function Dashboard({ pageByLocale = null }) {
     setLoginError('');
 
     try {
-      let jwt;
-      let email;
-      if (coreAuth) {
-        // Karamoja Core: same token format, plus clear messages for locked or not-yet-active accounts.
-        try {
-          const res = await coreLogin(loginForm.username, loginForm.password);
-          jwt = res.token;
-          email = res.user_email;
-        } catch (err) {
-          throw new Error(
-            ['karamoja_locked', 'karamoja_inactive', 'karamoja_rate_limited'].includes(err.code)
-              ? err.message
-              : 'The email or password is incorrect.',
-          );
-        }
-      } else {
-        ({ token: jwt, email } = await getJwtToken(loginForm.username, loginForm.password));
-      }
-      sessionStorage.setItem(TOKEN_KEY, jwt);
-      sessionStorage.setItem(USER_EMAIL_KEY, email || loginForm.username);
-      setToken(jwt);
-      setUserEmail(email || loginForm.username);
+      // The website's server signs in with the CMS and keeps the token in an httpOnly cookie.
+      const { email } = await signIn(loginForm.username, loginForm.password);
+      const signedInAs = email || loginForm.username;
+      sessionStorage.removeItem(USER_EMAIL_KEY);
+      signedInRef.current = true;
+      setToken(true);
+      setUserEmail(signedInAs);
       setLoginOpen(false);
       setLoginForm({ username: '', password: '' });
-      await refreshOrgStatus(email || loginForm.username);
+      await refreshOrgStatus(signedInAs);
     } catch (err) {
       setLoginError(err.message || 'Sign-in failed. Please try again.');
     }
@@ -270,11 +277,7 @@ export default function Dashboard({ pageByLocale = null }) {
     setPwError('');
     setPwSaving(true);
     try {
-      const res = await changePassword(token, pwForm.current, pwForm.next);
-      if (res.token) {
-        sessionStorage.setItem(TOKEN_KEY, res.token);
-        setToken(res.token);
-      }
+      const res = await changePassword(pwForm.current, pwForm.next);
       setPwOpen(false);
       setPwForm({ current: '', next: '' });
       showSnack(res.message || 'Password changed.');
@@ -286,10 +289,11 @@ export default function Dashboard({ pageByLocale = null }) {
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem(TOKEN_KEY);
+    signOut();
     sessionStorage.removeItem(USER_EMAIL_KEY);
     clearOrgSession();
-    setToken(null);
+    signedInRef.current = false;
+    setToken(false);
     setUserEmail('');
     setOrgRecord(null);
   };
