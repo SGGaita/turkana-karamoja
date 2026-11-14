@@ -96,14 +96,19 @@ PUSH_BROADCAST_SECRET=your-secret
 
 ## Local Development Setup
 
-1. Install Node.js 18+ and run `npm install` in the frontend repo.
+1. Install Node.js 20 (`.nvmrc`) and run `npm install` in the frontend repo.
 2. Start XAMPP (Apache + MySQL) and ensure WordPress is accessible.
-3. Copy `.env.example` to `.env.local` and set `NEXT_PUBLIC_WP_BASE_URL`.
-4. Activate required WordPress plugins (see [Backend & Admin Guide](./admin-guide.md)).
+3. Copy `.env.example` to `.env.local` and set `NEXT_PUBLIC_WP_BASE_URL` (and the shared secrets listed there).
+4. Activate Karamoja Core in WordPress (see the `karamoja-wp` repository and the deployment guide).
 5. Run `npm run dev` — frontend starts at `http://localhost:3000`.
-6. Configure CORS on WordPress to allow `http://localhost:3000` with `Authorization` header.
 
-> **Note:** When `NEXT_PUBLIC_WP_BASE_URL` is unset, the frontend uses `fallback-data.js` static content and shows an offline/stale indicator.
+Tests:
+- `npm test`: unit tests (Vitest), also run by CI on every push.
+- `npm run test:visual`: compares every public page, desktop and mobile, with the "before" pictures of the frozen
+  sandbox (Playwright; see `tests/visual/README.md`). Run `npx playwright install chromium` once first.
+
+> **Note:** Without WordPress the public pages can't be built with content: they show "This page can't be shown just
+> now". There is no made-up fallback content.
 
 ---
 

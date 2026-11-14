@@ -7,7 +7,9 @@
     "prebuild": "node scripts/fetch-site-header.js",
     "build": "next build",
     "start": "next start",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:visual": "node tests/visual/run.mjs compare",
+    "test:visual:baseline": "node tests/visual/run.mjs baseline"
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^10.2.9",
@@ -29,6 +31,7 @@
     "web-push": "^3.6.7"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.1",
     "vitest": "^3.2.7"
   },
   "engines": {
