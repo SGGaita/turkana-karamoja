@@ -6,7 +6,7 @@ sandbox** (`https://karamoja-cluster-hub.vercel.app`, Vercel deploys paused on 9
 
 | Command | What it does |
 |---|---|
-| `npx playwright install chromium` | Once per machine: downloads the browser Playwright uses |
+| (nothing to install) | Uses Playwright's Chromium if installed (`npx playwright install chromium`, ~200 MB), otherwise the Google Chrome or Microsoft Edge on the computer. `set PW_CHANNEL=msedge` (or `chrome`) to choose. The browser that took the "before" pictures is saved in `__screenshots__/BROWSER.txt`; compare with the same one |
 | `npm run test:visual:baseline` | Takes the "before" pictures from the sandbox into `tests/visual/__screenshots__/` (commit them) |
 | `npm run test:visual` | Compares `http://localhost:3000` (run `npm run build && npm start` first) with them |
 | `npm run test:visual -- <url>` | Compares another address, e.g. a Vercel preview |

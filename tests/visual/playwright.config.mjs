@@ -5,7 +5,10 @@ import { defineConfig, devices } from '@playwright/test';
  * the frozen sandbox. Run through `npm run test:visual` / `npm run test:visual:baseline` (tests/visual/run.mjs).
  */
 const baseURL = process.env.VISUAL_URL || 'http://localhost:3000';
+// Browser: PW_CHROME_PATH (a chrome executable), or PW_CHANNEL ('chrome' / 'msedge': the one installed on this
+// computer, no download), or Playwright's own Chromium. run.mjs picks one and records it with the pictures.
 const launchOptions = process.env.PW_CHROME_PATH ? { executablePath: process.env.PW_CHROME_PATH } : {};
+const channel = process.env.PW_CHROME_PATH ? undefined : process.env.PW_CHANNEL || undefined;
 
 export default defineConfig({
   testDir: '.',
@@ -35,7 +38,7 @@ export default defineConfig({
     ignoreHTTPSErrors: false,
   },
   projects: [
-    { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } } },
-    { name: 'mobile', use: { ...devices['Pixel 7'], viewport: { width: 390, height: 844 }, browserName: 'chromium' } },
+    { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 }, channel } },
+    { name: 'mobile', use: { ...devices['Pixel 7'], viewport: { width: 390, height: 844 }, browserName: 'chromium', channel } },
   ],
 });
