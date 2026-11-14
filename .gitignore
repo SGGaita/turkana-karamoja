@@ -19,3 +19,6 @@ public/fallback-*.js
 # Visual check output (FE-03)
 /test-results/
 /playwright-report/
+
+# App icons downloaded from the CMS at build time (scripts/fetch-pwa.js, FE-08)
+/public/icons/cms/

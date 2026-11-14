@@ -1,6 +1,8 @@
 import crypto from 'crypto';
 import webpush from 'web-push';
 import { listSubscriptions, pruneSubscriptions } from '../../../lib/push-store';
+import { pushIcons } from '../../../lib/pwa';
+import pwaSnapshot from '../../../lib/pwa.snapshot.json';
 
 // Give Vercel enough time to fan out to many subscribers.
 export const config = { maxDuration: 60 };
@@ -55,6 +57,8 @@ export default async function handler(req, res) {
     state: state === 'cancelled' ? 'cancelled' : 'active',
     alertId: Number.isInteger(alertId) ? alertId : undefined,
     requireInteraction: requireInteraction === true,
+    // Icon and badge from Site settings → Installed app, as downloaded at build time (FE-08).
+    ...pushIcons(pwaSnapshot),
   });
 
   let subs;

@@ -63,7 +63,6 @@ export default function Home({ unavailable, alertsByLocale, initiatives, homeVis
         <meta name="description" content={description} key="description" />
         <meta property="og:title" content={APP_FULL_NAME} key="og:title" />
         <meta property="og:description" content={description} key="og:description" />
-        <meta name="theme-color" content="#C1440E" key="theme-color" />
       </Head>
       <SeoHead jsonLd={siteUrl() ? { '@context': 'https://schema.org', '@type': 'WebSite', name: APP_FULL_NAME, url: `${siteUrl()}/` } : null} />
       <Box sx={{ bgcolor: '#FDF6EC', minHeight: '100vh' }}>
