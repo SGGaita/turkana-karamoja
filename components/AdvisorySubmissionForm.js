@@ -106,7 +106,7 @@ export default function AdvisorySubmissionForm({ token, orgRecord, onNotify, onS
     }
 
     try {
-      const result = await submitAdvisory(payload, token);
+      const result = await submitAdvisory(payload);
       onNotify?.(`Advisory submitted! Reference: WP-${result.id}. Pending admin review.`);
       setForm(emptyAdvisoryForm());
       onSubmitted?.();
