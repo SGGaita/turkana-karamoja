@@ -1,4 +1,6 @@
 import Head from 'next/head';
+import SeoHead from '../components/SeoHead';
+import { siteUrl } from '../lib/seo';
 import { APP_FULL_NAME, APP_META_DESCRIPTION } from '../lib/branding';
 import Box from '@mui/material/Box';
 import Navbar from '../components/Navbar';
@@ -13,7 +15,7 @@ import HomeOverview from '../components/HomeOverview';
 import Footer from '../components/Footer';
 import { toMapAdvisoryMarker } from '../lib/wp-mappers';
 import CmsUnavailable from '../components/CmsUnavailable';
-import { useLanguage, useLocalizedHomeSections } from '../contexts/LanguageContext';
+import { useLanguage, useLocalizedHomeSections, useShell } from '../contexts/LanguageContext';
 import { cmsStaticProps, getCollection, getPageAllLocales, inAllLocales, isPublishedPage } from '../lib/cms';
 import { homeProps } from '../lib/cms-home';
 import { pickLocale, splitAlerts } from '../lib/cms-alerts';
@@ -38,6 +40,7 @@ function HomeMapSection({ mapAdvisories }) {
 
 export default function Home({ unavailable, alertsByLocale, initiatives, homeVisible = ALL_VISIBLE }) {
   const { locale } = useLanguage();
+  const description = useShell()?.seo?.description || APP_META_DESCRIPTION;
   if (unavailable) return <CmsUnavailable />;
   const show = { ...ALL_VISIBLE, ...(homeVisible || {}) };
   // Active alerts in the reader's language, most serious first; the map shows those marked for it.
@@ -57,9 +60,12 @@ export default function Home({ unavailable, alertsByLocale, initiatives, homeVis
     <>
       <Head>
         <title>{`${APP_FULL_NAME} · Kenya · Uganda`}</title>
-        <meta name="description" content={APP_META_DESCRIPTION} />
-        <meta name="theme-color" content="#C1440E" />
+        <meta name="description" content={description} key="description" />
+        <meta property="og:title" content={APP_FULL_NAME} key="og:title" />
+        <meta property="og:description" content={description} key="og:description" />
+        <meta name="theme-color" content="#C1440E" key="theme-color" />
       </Head>
+      <SeoHead jsonLd={siteUrl() ? { '@context': 'https://schema.org', '@type': 'WebSite', name: APP_FULL_NAME, url: `${siteUrl()}/` } : null} />
       <Box sx={{ bgcolor: '#FDF6EC', minHeight: '100vh' }}>
         <Navbar urgentBanner={urgentBanner} />
         {show.hero && <Hero />}

@@ -60,7 +60,7 @@ export default function CommunityInitiativeDetail({ unavailable, articleByLocale
   const files = article.files || [];
 
   return (
-    <Layout title={article.title}>
+    <Layout title={article.title} description={article.desc} type="article" image={article.img}>
       <PageHero
         title={article.title}
         subtitle={article.desc || heroCopy.fallback_subtitle || ''}

@@ -10,6 +10,7 @@ import LocalOfferOutlinedIcon from '@mui/icons-material/LocalOfferOutlined';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
 import DownloadIcon from '@mui/icons-material/Download';
+import { absoluteUrl, alertJsonLd } from '../../lib/seo';
 import Layout from '../../components/Layout';
 import ShareLinks from '../../components/ShareLinks';
 import PageHero from '../../components/PageHero';
@@ -61,7 +62,12 @@ export default function AdvisoryDetail({ unavailable, alertByLocale, pageByLocal
   const alertPath = `/early-warnings/${buildSlugPath(alert.title, alert.id)}`;
 
   return (
-    <Layout title={alert.title} description={String(alert.body || "").replace(/<[^>]*>/g, "").slice(0, 160)}>
+    <Layout
+      title={alert.title}
+      description={String(alert.body || '').replace(/<[^>]*>/g, '').slice(0, 160)}
+      type="article"
+      jsonLd={alertJsonLd(alertByLocale.en, absoluteUrl(alertPath))}
+    >
       <PageHero
         title={alert.title}
         subtitle={alert.area || label('hero', 'fallback_subtitle', 'Early warning advisory')}
