@@ -66,7 +66,9 @@ if (mode !== 'baseline' && existsSync(browserFile)) {
 
 const config = join(here, 'playwright.config.mjs');
 const args = ['playwright', 'test', '-c', config, ...(mode === 'baseline' ? ['--update-snapshots'] : []), ...extra];
-const r = spawnSync('npx', args, {
+// Windows runs npx through cmd.exe, which would treat | & < > ^ in an argument (e.g. --grep "a|b") as its own syntax.
+const quote = (a) => (process.platform === 'win32' && /[\s|&<>^"]/.test(a) ? `"${a.replace(/"/g, '\\"')}"` : a);
+const r = spawnSync('npx', args.map(quote), {
   stdio: 'inherit',
   shell: process.platform === 'win32',
   env: { ...process.env, ...browser.env, VISUAL_URL: url, VISUAL_MODE: mode },
