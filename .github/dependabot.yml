@@ -1,4 +1,6 @@
 # Dependency updates (FE-01). Minor and patch updates come as one weekly PR; majors one PR each.
+# Until launch, no major upgrades of the framework (Next.js, React) or web-push: each needs its own
+# migration and a full re-test. Remove the ignore list after launch and plan those upgrades.
 version: 2
 updates:
   - package-ecosystem: npm
@@ -12,6 +14,15 @@ updates:
     groups:
       minor-and-patch:
         update-types: [minor, patch]
+    ignore:
+      - dependency-name: next
+        update-types: [version-update:semver-major]
+      - dependency-name: react
+        update-types: [version-update:semver-major]
+      - dependency-name: react-dom
+        update-types: [version-update:semver-major]
+      - dependency-name: web-push
+        update-types: [version-update:semver-major]
     labels: [dependencies]
   - package-ecosystem: github-actions
     directory: /
