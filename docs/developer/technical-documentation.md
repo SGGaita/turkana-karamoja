@@ -68,7 +68,6 @@ The Turkana–Karamoja Climate Hub uses a headless architecture: a Next.js 15 fr
 | `lib/fallback-data.js` | Static content when WordPress is unreachable |
 | `lib/org-session.js` | JWT session storage (sessionStorage) |
 | `contexts/SiteHeaderContext.js` | Global nav/branding state |
-| `wordpress-plugin/tk-partner-portal/` | Partner portal WordPress plugin source |
 | `planning/` | Setup checklists and integration specs |
 
 ---
@@ -183,6 +182,13 @@ curl "BASE/wp-json/tk/v1/my-submissions" \
 |-------|--------|-------------|
 | `/api/push/subscribe` | POST | Store browser push subscription |
 | `/api/push/broadcast` | POST | Send push notification (requires `PUSH_BROADCAST_SECRET`) |
+| `/api/revalidate` | POST | Rebuild changed pages (requires `REVALIDATE_SECRET`, sent by the CMS) |
+| `/api/auth/login` | POST | Partner sign-in; keeps the CMS token in an httpOnly cookie |
+| `/api/auth/session` | GET | `{ signedIn, email }` (never the token) |
+| `/api/auth/logout` | POST | Ends the session |
+| `/api/auth/change-password` | POST | Changes the password and swaps in the new token |
+| `/api/portal/<CMS route>` | GET/POST/PATCH/DELETE | Partner portal calls, forwarded with the token; allowlist in `lib/server/portal-routes.js` |
+| `/sitemap.xml`, `/robots.txt` | GET | SEO; indexing only when `NEXT_PUBLIC_ALLOW_INDEXING=true` |
 
 ---
 
@@ -194,33 +200,37 @@ curl "BASE/wp-json/tk/v1/my-submissions" \
 | `/early-warnings` | `getServerSideProps` | Always fresh alerts |
 | `/early-warnings/[slug]` | `getStaticPaths` + `getStaticProps` | Individual advisory pages |
 | `/reports` | Client-side (`useEffect`) | Dynamic search and filtering |
-| `/partners-stakeholders` | Client-only | Auth state in sessionStorage |
+| `/partners-stakeholders` | Client-only | Signed-in state from `/api/auth/session`; the token stays in an httpOnly cookie |
 | `/help/*` | Static | Documentation pages |
 
-> **Note:** All fetchers in `lib/wordpress.js` use `fetchWithFallback()` — if WordPress is down, static fallback data is served and the `apiStale` flag is set.
+> **Note:** Public pages read Karamoja Core (`karamoja/v1`) through `lib/cms.js`. If WordPress can't be reached during a
+> build the page shows "can't be shown just now" and rebuilds a minute later; after a build, a failed refresh keeps the
+> last good page. There is no made-up fallback content.
 
 ---
 
 ## Authentication Flow
 
-1. Organisation registers via `POST /tk/v1/register-organization` (public).
-2. Admin approves in wp-admin → WordPress user created → password setup email sent.
-3. Partner logs in via `POST /jwt-auth/v1/token` from the frontend.
-4. JWT stored in sessionStorage (`tk_hub_jwt`, `tk_hub_user_email`, `tk_hub_org`).
-5. Authenticated requests include `Authorization: Bearer` header.
-6. Logout clears sessionStorage keys.
-
-> **Note:** Demo mode: when WordPress is not configured, `partners-stakeholders.js` accepts demo credentials for UI testing.
+1. Organisation registers via `POST /tk/v1/register-organization` (public, captcha).
+2. A reviewer approves it in wp-admin → partner account created → "set your password" email with a link to
+   `/partners-stakeholders/set-password`.
+3. The partner signs in on the website: `POST /api/auth/login`. The website's server signs in with Karamoja Core
+   (`karamoja/v1/auth/login`; the JWT plugin before cut-over) and keeps the token in an **httpOnly, SameSite=Lax cookie**
+   (`kc_session`). No script in the browser can read it.
+4. Portal calls go to `/api/portal/<CMS route>`, which adds the token and forwards only the routes in
+   `lib/server/portal-routes.js`. State-changing calls need `X-Requested-With: karamoja` (CSRF).
+5. File uploads: the browser gets a short-lived upload ticket (`karamoja/v1/portal/upload-ticket`) and sends the file
+   straight to the CMS, because files up to 10 MB don't fit through the website's server.
+6. The CMS sees the visitor's address through `CMS_PROXY_SECRET` (= `KARAMOJA_PROXY_SECRET`), so sign-in limits stay per
+   visitor. Sign-out clears the cookie; a token the CMS refuses ends the session.
 
 ---
 
 ## WordPress Plugin Deployment
 
-1. Copy `wordpress-plugin/tk-partner-portal/` to `wp-content/plugins/tk-partner-portal/`.
-2. Copy mu-plugins from `wordpress-plugin/tk-partner-portal/mu-plugins-live/` to `wp-content/mu-plugins/`.
-3. Activate **TK Partner Portal** in wp-admin → Plugins.
-4. Install and configure JWT Authentication plugin with secret in `wp-config.php`.
-5. Flush permalinks (**Settings → Permalinks → Save**).
+The CMS code lives in its own repository, [`SGGaita/karamoja-wp`](https://github.com/SGGaita/karamoja-wp) (the
+`wp-content` folder: Karamoja Core, the cut-over loader and the interim hotfixes). Its README and the deployment guide
+describe installation, configuration and the cut-over. This repository no longer carries a copy of the plugins.
 
 ---
 
