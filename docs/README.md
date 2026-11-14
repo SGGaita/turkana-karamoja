@@ -31,5 +31,5 @@ Next.js 15 Frontend  ←→  WordPress REST API  ←→  MySQL
 
 - `planning/wordpress-setup-checklist.md` — WordPress CPT and ACF setup
 - `planning/wp-local-xampp-setup.md` — Local XAMPP configuration
-- `wordpress-plugin/tk-partner-portal/README.md` — Partner portal plugin
+- CMS plugins: the [`SGGaita/karamoja-wp`](https://github.com/SGGaita/karamoja-wp) repository
 - `.env.example` — Environment variable template

@@ -30,5 +30,8 @@
   },
   "devDependencies": {
     "vitest": "^3.2.7"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
