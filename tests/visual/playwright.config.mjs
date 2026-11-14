@@ -16,7 +16,7 @@ export default defineConfig({
   outputDir: '../../test-results/visual',
   // One folder per viewport, no operating-system suffix: pictures taken on Windows compare on Windows or Linux.
   snapshotPathTemplate: '{testDir}/__screenshots__/{projectName}/{arg}{ext}',
-  timeout: 90_000,
+  timeout: 180_000, // Slow connections: a detail page loads its list page first.
   retries: 0,
   // Comparing: pages with no "before" picture (newer than the sandbox) are captured instead of failing.
   updateSnapshots: process.env.VISUAL_MODE === 'baseline' ? 'all' : 'missing',
