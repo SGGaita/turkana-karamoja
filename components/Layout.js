@@ -21,7 +21,6 @@ export default function Layout({ children, title = APP_FULL_NAME, description, t
         <meta name="description" content={metaDescription} key="description" />
         <meta property="og:title" content={`${title} | ${APP_PAGE_TITLE_SUFFIX}`} key="og:title" />
         <meta property="og:description" content={metaDescription} key="og:description" />
-        <meta name="theme-color" content="#C1440E" key="theme-color" />
       </Head>
       <SeoHead type={type} image={image} noindex={noindex} jsonLd={jsonLd} />
       <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: '#FDF6EC' }}>

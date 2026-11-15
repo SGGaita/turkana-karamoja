@@ -43,6 +43,8 @@ const nextConfig = {
       { source: '/dashboard', destination: '/partners-stakeholders', permanent: true },
       { source: '/submit', destination: '/partners-stakeholders', permanent: true },
       { source: '/contact-us', destination: '/contact', permanent: true },
+      // The manifest now comes from the CMS (FE-08).
+      { source: '/manifest.json', destination: '/manifest.webmanifest', permanent: true },
     ];
   },
 };

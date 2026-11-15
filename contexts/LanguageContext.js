@@ -131,6 +131,13 @@ export function LanguageProvider({
   const cmsLoc = cmsLocale(activeLocale);
   const clientGlobals = useCmsContent(globalsLoader, cmsLoc, mounted);
 
+  // The installed app's name in the visitor's language (FE-08): browsers read the manifest link when installing.
+  useEffect(() => {
+    if (!mounted || typeof document === 'undefined') return;
+    const link = document.querySelector('link[rel="manifest"]');
+    if (link) link.setAttribute('href', cmsLoc === 'en' ? '/manifest.webmanifest' : `/manifest.webmanifest?lang=${cmsLoc}`);
+  }, [mounted, cmsLoc]);
+
   const setLocale = useCallback((nextLocale) => {
     if (!SUPPORTED_LOCALES.includes(nextLocale)) return;
     setLocaleState(nextLocale);

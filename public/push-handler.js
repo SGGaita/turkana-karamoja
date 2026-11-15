@@ -1,5 +1,10 @@
 /* Push notification handlers — imported by the PWA service worker in production. */
 
+/** A path on this site, or null (never an outside address). */
+function sitePath(p) {
+  return typeof p === 'string' && /^\/(?!\/)\S*$/.test(p) ? p : null;
+}
+
 self.addEventListener('push', (event) => {
   let data = { title: 'New climate alert', body: 'A new advisory has been published.', url: '/early-warnings' };
 
@@ -15,8 +20,9 @@ self.addEventListener('push', (event) => {
   // RED alerts stay on screen until the person acts on them.
   const options = {
     body: data.body,
-    icon: '/icons/icon-192.png',
-    badge: '/icons/badge-96.png',
+    // Paths on this site sent by /api/push/broadcast (Site settings → Installed app), else the built-in icons.
+    icon: sitePath(data.icon) || '/icons/icon-192.png',
+    badge: sitePath(data.badge) || '/icons/badge-96.png',
     data: { url: data.url || '/early-warnings', alertId: data.alertId, state: data.state || 'active' },
     tag: data.tag || 'karamoja-alert',
     renotify: data.state !== 'cancelled',
