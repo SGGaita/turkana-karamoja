@@ -2,7 +2,11 @@ import { Box, Typography, Divider } from '@mui/material';
 import { APP_NAME, APP_TAGLINE, APP_COPYRIGHT } from '../lib/branding';
 import { FOOTER_REGIONS } from '../lib/regions';
 import Link from 'next/link';
-import { useLocalizedHomeSections, useShell } from '../contexts/LanguageContext';
+import { useLocalizedHomeSections, useShell, useT } from '../contexts/LanguageContext';
+import { askConsentAgain } from '../lib/analytics';
+import LinkBehavior from './LinkBehavior';
+
+const smallLink = { fontSize: '0.65rem', color: '#5A5A5A', textDecoration: 'none', '&:hover': { color: '#9A9A9A' } };
 import OfflineDownload from './OfflineDownload';
 import { InstallAppButton } from '../contexts/InstallContext';
 
@@ -48,6 +52,8 @@ function builtInFooter(footer) {
 export default function Footer() {
   const homeSections = useLocalizedHomeSections();
   const shell = useShell();
+  const t = useT();
+  const analytics = shell?.analytics;
   if (shell && shell.footer.enabled === false) return null;
   // Karamoja → Site settings → Footer once saved; the site's own pages until then.
   const data = shell
@@ -217,18 +223,22 @@ export default function Footer() {
         >
           {data.copyright}
         </Typography>
-        <Box sx={{ display: 'flex', gap: 3 }}>
-          {['Privacy Policy', 'Terms of Use', 'Accessibility', 'Data Policy'].map((l) => (
-            <Box
-              key={l}
-              component="a"
-              href="#"
-              sx={{ fontSize: '0.65rem', color: '#5A5A5A', textDecoration: 'none', '&:hover': { color: '#9A9A9A' } }}
-            >
-              {l}
-            </Box>
-          ))}
-        </Box>
+        {/* The privacy notice and "Analytics settings" (Site settings → Analytics, FE-27). The links that were here
+            (Privacy Policy, Terms of Use, Accessibility, Data Policy) went nowhere. */}
+        {(analytics?.privacy?.href || analytics?.ga4Id) && (
+          <Box sx={{ display: 'flex', gap: 3 }}>
+            {analytics?.privacy?.href && (
+              <Box component={LinkBehavior} href={analytics.privacy.href} sx={smallLink}>
+                {analytics.privacy.label || t('consent.privacy')}
+              </Box>
+            )}
+            {analytics?.ga4Id && (
+              <Box component="button" type="button" onClick={askConsentAgain} sx={{ ...smallLink, bgcolor: 'transparent', border: 0, p: 0, cursor: 'pointer', fontFamily: 'inherit' }}>
+                {t('consent.settings')}
+              </Box>
+            )}
+          </Box>
+        )}
       </Box>
     </Box>
   );

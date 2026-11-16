@@ -6,6 +6,7 @@ import {
 } from '../lib/offline';
 import { useLanguage, useT } from './LanguageContext';
 import OfflineIndicator from '../components/OfflineIndicator';
+import { track } from '../lib/analytics';
 
 /**
  * Offline use (FE-09): saves pages for use without a connection, tells the visitor what is saved, and offers to
@@ -62,6 +63,7 @@ export function OfflineProvider({ children }) {
       const paths = forLocale(loc, contentPaths(manifest));
       setProgress({ done: 0, total: paths.length });
       const done = await warm(groupFor('content', loc), paths, id, (m) => setProgress({ done: m.done, total: m.total }));
+      track('offline_save', { mode: manual ? 'button' : 'auto', items: done.total, failed: done.failed });
       state = writeState({
         content: { at: done.at, total: done.total, failed: done.failed, manual: Boolean(manual), lang: loc },
         ...(manual ? { optIn: true } : {}),

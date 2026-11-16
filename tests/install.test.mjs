@@ -73,7 +73,7 @@ describe('analytics', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
   });
-  it('sends to dataLayer, gtag and a browser event', () => {
+  it('reaches browser listeners always, and Google only after the visitor accepts (lib/analytics.js)', () => {
     const events = [];
     const target = new EventTarget();
     target.addEventListener('kc-analytics', (e) => events.push(e.detail));
@@ -81,8 +81,8 @@ describe('analytics', () => {
     vi.stubGlobal('window', Object.assign(target, { dataLayer: [], gtag }));
     vi.stubGlobal('CustomEvent', class extends Event { constructor(n, o) { super(n); this.detail = o?.detail; } });
     track('install_prompt_shown', { source: 'auto' });
-    expect(window.dataLayer).toEqual([{ event: 'install_prompt_shown', source: 'auto' }]);
-    expect(gtag).toHaveBeenCalledWith('event', 'install_prompt_shown', { source: 'auto' });
+    expect(gtag).not.toHaveBeenCalled();
+    expect(window.dataLayer).toEqual([]);
     expect(events).toEqual([{ event: 'install_prompt_shown', source: 'auto' }]);
   });
 });

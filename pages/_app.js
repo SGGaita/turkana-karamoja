@@ -14,6 +14,9 @@ import { LanguageProvider } from '../contexts/LanguageContext';
 import ShellHead from '../components/ShellHead';
 import { OfflineProvider } from '../contexts/OfflineContext';
 import { InstallProvider } from '../contexts/InstallContext';
+import AnalyticsConsent from '../components/AnalyticsConsent';
+import { useEffect } from 'react';
+import { startMonitoring } from '../lib/monitoring';
 
 // NOTE: no getInitialProps here on purpose. A getInitialProps on _app runs on EVERY
 // client-side navigation and blocks the route change until it resolves — with a slow CMS
@@ -21,6 +24,8 @@ import { InstallProvider } from '../contexts/InstallContext';
 // Shared CMS content (home sections / footer) is now loaded lazily in LanguageProvider,
 // or passed in via a page's getStaticProps (see pages/index.js).
 export default function MyApp({ Component, pageProps }) {
+  // Error monitoring (FE-27): nothing loads unless NEXT_PUBLIC_SENTRY_DSN is set.
+  useEffect(() => startMonitoring(), []);
   return (
     <LanguageProvider
       homeSectionsByLocale={pageProps.homeSectionsByLocale || null}
@@ -33,6 +38,7 @@ export default function MyApp({ Component, pageProps }) {
         <InstallProvider>
           <OfflineProvider>
             <Component {...pageProps} />
+            <AnalyticsConsent />
           </OfflineProvider>
         </InstallProvider>
       </ThemeProvider>

@@ -14,6 +14,7 @@ import {
 } from '../lib/push-client';
 import { useT } from '../contexts/LanguageContext';
 import { useInstall } from '../contexts/InstallContext';
+import { track } from '../lib/analytics';
 
 const MESSAGE_KEYS = {
   PERMISSION_BLOCKED: 'push.msg_blocked',
@@ -86,6 +87,7 @@ export default function PushSubscribeButton({ compact = false }) {
     setLoading(true);
     try {
       await subscribeToPush(vapidPublic);
+      track('push_subscribe');
       setPermission('granted');
       setSubscribed(true);
       setMsg({ type: 'success', text: t('push.msg_on') });
@@ -105,6 +107,7 @@ export default function PushSubscribeButton({ compact = false }) {
     setLoading(true);
     try {
       await unsubscribeFromPush();
+      track('push_unsubscribe');
       setSubscribed(false);
       setMsg({ type: 'info', text: t('push.msg_off') });
     } catch (e) {

@@ -101,3 +101,12 @@ describe('alert structured data', () => {
     expect(alertJsonLd(null)).toBeNull();
   });
 });
+
+describe('public settings in browser code', () => {
+  it('reads NEXT_PUBLIC_* literally (a default of `env = process.env` is empty in the browser)', async () => {
+    const { readFileSync } = await import('node:fs');
+    for (const f of ['lib/seo.js', 'lib/monitoring-shared.js']) {
+      expect(readFileSync(f, 'utf8'), f).not.toMatch(/env = process\.env\b/);
+    }
+  });
+});

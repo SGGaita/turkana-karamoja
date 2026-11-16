@@ -239,5 +239,11 @@
   "language.select": "Select language",
   "language.not_translated": "Not yet translated",
   "language.not_translated_hint": "Shown in English until it is translated.",
-  "language.page_partly": "Parts of this page are not translated yet and are shown in English."
+  "language.page_partly": "Parts of this page are not translated yet and are shown in English.",
+  "consent.title": "Help us improve the hub",
+  "consent.text": "May we count your visit with Google Analytics? It shows us which information is useful. No advertising, and nothing is sent unless you choose Accept.",
+  "consent.accept": "Accept",
+  "consent.decline": "Decline",
+  "consent.privacy": "Privacy notice",
+  "consent.settings": "Analytics settings"
 }
