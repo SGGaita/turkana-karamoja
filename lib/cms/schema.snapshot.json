@@ -1,0 +1,810 @@
+{
+  "_note": "npm run cms:schema — do not edit by hand.",
+  "source": "file",
+  "pages": {
+    "about": {
+      "version": 3,
+      "sections": {
+        "hero": {
+          "fields": {
+            "title": "text",
+            "subtitle": "textarea",
+            "image": "image"
+          }
+        },
+        "intro": {
+          "fields": {
+            "title": "text",
+            "body": "richtext"
+          }
+        },
+        "commissioned": {
+          "fields": {
+            "title": "text",
+            "organisation": "text",
+            "project": "text",
+            "text": "textarea",
+            "logo": "image"
+          }
+        },
+        "features": {
+          "fields": {
+            "title": "text",
+            "items": {
+              "type": "repeater",
+              "fields": {
+                "title": "text",
+                "text": "textarea"
+              }
+            }
+          }
+        },
+        "steps": {
+          "fields": {
+            "title": "text",
+            "items": {
+              "type": "repeater",
+              "fields": {
+                "title": "text",
+                "text": "textarea"
+              }
+            }
+          }
+        },
+        "partners": {
+          "fields": {
+            "title": "text",
+            "intro": "textarea",
+            "items": "reference"
+          }
+        }
+      }
+    },
+    "alert-detail": {
+      "version": 2,
+      "sections": {
+        "hero": {
+          "fields": {
+            "image": "image",
+            "fallback_subtitle": "text"
+          }
+        },
+        "actions": {
+          "fields": {
+            "title": "text"
+          }
+        },
+        "share": {
+          "fields": {
+            "text": "text"
+          }
+        }
+      }
+    },
+    "assistance": {
+      "version": 2,
+      "sections": {
+        "hero": {
+          "fields": {
+            "title": "text",
+            "subtitle": "textarea",
+            "image": "image"
+          }
+        },
+        "intro": {
+          "fields": {
+            "title": "text",
+            "text": "textarea"
+          }
+        },
+        "empty": {
+          "fields": {
+            "text": "text"
+          }
+        }
+      }
+    },
+    "community": {
+      "version": 3,
+      "sections": {
+        "hero": {
+          "fields": {
+            "title": "text",
+            "subtitle": "textarea",
+            "image": "image"
+          }
+        },
+        "intro": {
+          "fields": {
+            "title": "text",
+            "text": "textarea"
+          }
+        },
+        "services": {
+          "fields": {
+            "title": "text",
+            "items": "reference"
+          }
+        },
+        "initiatives": {
+          "fields": {
+            "title": "text",
+            "items": "reference"
+          }
+        },
+        "outreach": {
+          "fields": {
+            "title": "text",
+            "items": {
+              "type": "repeater",
+              "fields": {
+                "label": "text",
+                "description": "text",
+                "country": "select",
+                "region": "text"
+              }
+            }
+          }
+        },
+        "radio": {
+          "fields": {
+            "title": "text",
+            "stations": {
+              "type": "repeater",
+              "fields": {
+                "name": "text",
+                "frequency": "text",
+                "languages": "text",
+                "times": "text",
+                "country": "select",
+                "region": "text"
+              }
+            }
+          }
+        }
+      }
+    },
+    "contact": {
+      "version": 2,
+      "sections": {
+        "hero": {
+          "fields": {
+            "title": "text",
+            "subtitle": "textarea",
+            "image": "image"
+          }
+        },
+        "intro": {
+          "fields": {
+            "title": "text",
+            "text": "textarea"
+          }
+        },
+        "form": {
+          "fields": {
+            "title": "text",
+            "intro": "textarea"
+          }
+        },
+        "help_box": {
+          "fields": {
+            "title": "text",
+            "items": {
+              "type": "repeater",
+              "fields": {
+                "text": "text"
+              }
+            },
+            "note": "textarea"
+          }
+        },
+        "offices": {
+          "fields": {
+            "title": "text"
+          }
+        },
+        "hotlines": {
+          "fields": {
+            "title": "text"
+          }
+        }
+      }
+    },
+    "early-warnings": {
+      "version": 2,
+      "sections": {
+        "hero": {
+          "fields": {
+            "title": "text",
+            "subtitle": "textarea",
+            "image": "image"
+          }
+        },
+        "intro": {
+          "fields": {
+            "title": "text",
+            "text": "textarea"
+          }
+        },
+        "legend": {
+          "fields": {
+            "note": "text"
+          }
+        },
+        "empty": {
+          "fields": {
+            "text": "text"
+          }
+        }
+      }
+    },
+    "errors": {
+      "version": 2,
+      "sections": {
+        "not_found": {
+          "fields": {
+            "title": "text",
+            "text": "textarea",
+            "button": "link"
+          }
+        },
+        "server_error": {
+          "fields": {
+            "title": "text",
+            "text": "textarea",
+            "button": "link"
+          }
+        }
+      }
+    },
+    "globals": {
+      "version": 4,
+      "sections": {
+        "branding": {
+          "fields": {
+            "site_name": "text",
+            "tagline": "text",
+            "logo": "image",
+            "copyright": "text"
+          }
+        },
+        "topbar": {
+          "fields": {
+            "status_text": "text",
+            "links": {
+              "type": "repeater",
+              "fields": {
+                "link": "link"
+              }
+            }
+          }
+        },
+        "navigation": {
+          "fields": {
+            "menu": "computed",
+            "cta": "link"
+          }
+        },
+        "footer": {
+          "fields": {
+            "about": "textarea",
+            "partners": {
+              "type": "repeater",
+              "fields": {
+                "name": "text"
+              }
+            },
+            "column1_title": "text",
+            "column1_links": {
+              "type": "repeater",
+              "fields": {
+                "link": "link"
+              }
+            },
+            "column2_title": "text",
+            "column2_links": {
+              "type": "repeater",
+              "fields": {
+                "link": "link"
+              }
+            },
+            "regions_title": "text",
+            "regions": {
+              "type": "repeater",
+              "fields": {
+                "name": "text"
+              }
+            },
+            "contact_title": "text",
+            "contact_link": "link",
+            "contact_lines": {
+              "type": "repeater",
+              "fields": {
+                "text": "text",
+                "note": "text"
+              }
+            }
+          }
+        },
+        "contacts": {
+          "fields": {
+            "offices": {
+              "type": "repeater",
+              "fields": {
+                "name": "text",
+                "region": "text",
+                "address": "text",
+                "phone": "text",
+                "email": "text",
+                "hours": "text"
+              }
+            },
+            "form_recipient": "text"
+          }
+        },
+        "hotlines": {
+          "fields": {
+            "lines": {
+              "type": "repeater",
+              "fields": {
+                "label": "text",
+                "country": "text",
+                "display": "text",
+                "tel": "text"
+              }
+            }
+          }
+        },
+        "social": {
+          "fields": {
+            "links": {
+              "type": "repeater",
+              "fields": {
+                "network": "select",
+                "url": "link"
+              }
+            }
+          }
+        },
+        "coverage": {
+          "fields": {
+            "intro": "textarea",
+            "areas": "computed"
+          }
+        },
+        "alert_legend": {
+          "fields": {
+            "title": "text",
+            "red_title": "text",
+            "red_description": "textarea",
+            "orange_title": "text",
+            "orange_description": "textarea",
+            "yellow_title": "text",
+            "yellow_description": "textarea",
+            "green_title": "text",
+            "green_description": "textarea"
+          }
+        },
+        "seo": {
+          "fields": {
+            "title_suffix": "text",
+            "description": "textarea",
+            "share_image": "image"
+          }
+        },
+        "app": {
+          "fields": {
+            "name": "text",
+            "short_name": "text",
+            "description": "textarea",
+            "icon": "image",
+            "icon_maskable": "image",
+            "badge": "image",
+            "theme_color": "color",
+            "background_color": "color",
+            "shortcuts": {
+              "type": "repeater",
+              "fields": {
+                "name": "text",
+                "short_name": "text",
+                "url": "text"
+              }
+            }
+          }
+        },
+        "app_behaviour": {
+          "fields": {
+            "prompt_show_after": "select",
+            "prompt_pages": "select",
+            "prompt_seconds": "number",
+            "prompt_snooze_days": "number",
+            "prompt_max_dismissals": "number",
+            "offline_reports": "number",
+            "offline_initiatives": "number",
+            "offline_organizations": "number",
+            "offline_skip_help": "toggle"
+          }
+        },
+        "vocabularies": {
+          "fields": {
+            "water_point_types": {
+              "type": "repeater",
+              "fields": {
+                "key": "text",
+                "label": "text"
+              }
+            },
+            "water_point_statuses": {
+              "type": "repeater",
+              "fields": {
+                "key": "text",
+                "label": "text"
+              }
+            },
+            "site_types": {
+              "type": "repeater",
+              "fields": {
+                "key": "text",
+                "label": "text"
+              }
+            },
+            "report_categories": {
+              "type": "repeater",
+              "fields": {
+                "key": "text",
+                "label": "text"
+              }
+            },
+            "countries": {
+              "type": "repeater",
+              "fields": {
+                "key": "text",
+                "label": "text"
+              }
+            },
+            "target_groups": {
+              "type": "repeater",
+              "fields": {
+                "key": "text",
+                "label": "text"
+              }
+            }
+          }
+        },
+        "languages": {
+          "fields": {
+            "sw": "toggle",
+            "pk": "toggle",
+            "tk": "toggle",
+            "note": "text"
+          }
+        }
+      }
+    },
+    "health": {
+      "version": 2,
+      "sections": {
+        "hero": {
+          "fields": {
+            "title": "text",
+            "subtitle": "textarea",
+            "image": "image"
+          }
+        },
+        "intro": {
+          "fields": {
+            "title": "text",
+            "text": "textarea"
+          }
+        },
+        "empty": {
+          "fields": {
+            "text": "text"
+          }
+        }
+      }
+    },
+    "help": {
+      "version": 2,
+      "sections": {
+        "hero": {
+          "fields": {
+            "title": "text",
+            "subtitle": "textarea",
+            "image": "image"
+          }
+        },
+        "intro": {
+          "fields": {
+            "title": "text",
+            "text": "textarea"
+          }
+        },
+        "cards": {
+          "fields": {
+            "user_guide": "textarea",
+            "partner_guide": "textarea",
+            "faq": "textarea"
+          }
+        },
+        "faq": {
+          "fields": {
+            "title": "text",
+            "subtitle": "textarea"
+          }
+        },
+        "contact": {
+          "fields": {
+            "title": "text",
+            "text": "textarea"
+          }
+        }
+      }
+    },
+    "home": {
+      "version": 2,
+      "sections": {
+        "hero": {
+          "fields": {
+            "eyebrow": "text",
+            "title": "text",
+            "title_accent": "text",
+            "subtitle": "textarea",
+            "image": "image",
+            "primary_cta": "link",
+            "secondary_cta": "link"
+          }
+        },
+        "overview": {
+          "fields": {
+            "title": "text",
+            "subtitle": "text",
+            "warnings_label": "text",
+            "warnings": "computed",
+            "as_of": "date",
+            "metrics": {
+              "type": "repeater",
+              "fields": {
+                "value": "text",
+                "label": "text",
+                "note": "text",
+                "color": "color"
+              }
+            },
+            "note": "textarea"
+          }
+        },
+        "about": {
+          "fields": {
+            "eyebrow": "text",
+            "title_line_1": "text",
+            "title_line_2": "text",
+            "description": "textarea",
+            "image": "image",
+            "partner_count_label": "text",
+            "cta": "link",
+            "highlights": {
+              "type": "repeater",
+              "fields": {
+                "title": "text",
+                "text": "textarea"
+              }
+            }
+          }
+        },
+        "map": {
+          "fields": {
+            "eyebrow": "text",
+            "title": "text",
+            "subtitle": "textarea"
+          }
+        },
+        "warnings": {
+          "fields": {
+            "title": "text",
+            "alerts": "computed"
+          }
+        },
+        "initiatives": {
+          "fields": {
+            "eyebrow": "text",
+            "title": "text",
+            "subtitle": "textarea",
+            "items": "reference",
+            "button": "link"
+          }
+        },
+        "get_involved": {
+          "fields": {
+            "eyebrow": "text",
+            "heading": "text",
+            "body": "textarea",
+            "button": "link"
+          }
+        }
+      }
+    },
+    "initiative-detail": {
+      "version": 1,
+      "sections": {
+        "hero": {
+          "fields": {
+            "image": "image",
+            "fallback_subtitle": "text"
+          }
+        }
+      }
+    },
+    "offline": {
+      "version": 2,
+      "sections": {
+        "message": {
+          "fields": {
+            "title": "text",
+            "text": "textarea",
+            "button": "link"
+          }
+        }
+      }
+    },
+    "organization-detail": {
+      "version": 1,
+      "sections": {
+        "hero": {
+          "fields": {
+            "image": "image",
+            "fallback_subtitle": "text"
+          }
+        }
+      }
+    },
+    "organizations": {
+      "version": 2,
+      "sections": {
+        "hero": {
+          "fields": {
+            "title": "text",
+            "subtitle": "textarea",
+            "image": "image"
+          }
+        },
+        "intro": {
+          "fields": {
+            "title": "text",
+            "text": "textarea"
+          }
+        },
+        "groups": {
+          "fields": {
+            "items": {
+              "type": "repeater",
+              "fields": {
+                "title": "text",
+                "text": "textarea"
+              }
+            }
+          }
+        },
+        "list": {
+          "fields": {
+            "title": "text"
+          }
+        },
+        "empty": {
+          "fields": {
+            "text": "text"
+          }
+        }
+      }
+    },
+    "partners": {
+      "version": 2,
+      "sections": {
+        "hero": {
+          "fields": {
+            "title": "text",
+            "subtitle": "textarea",
+            "image": "image"
+          }
+        },
+        "register": {
+          "fields": {
+            "title": "text",
+            "intro": "textarea"
+          }
+        },
+        "signin": {
+          "fields": {
+            "title": "text",
+            "intro": "textarea"
+          }
+        }
+      }
+    },
+    "planting-calendar": {
+      "version": 2,
+      "sections": {
+        "hero": {
+          "fields": {
+            "title": "text",
+            "subtitle": "textarea",
+            "image": "image"
+          }
+        },
+        "intro": {
+          "fields": {
+            "title": "text",
+            "text": "textarea"
+          }
+        },
+        "empty": {
+          "fields": {
+            "text": "text"
+          }
+        }
+      }
+    },
+    "report-detail": {
+      "version": 2,
+      "sections": {
+        "hero": {
+          "fields": {
+            "image": "image",
+            "fallback_subtitle": "text"
+          }
+        },
+        "download": {
+          "fields": {
+            "title": "text"
+          }
+        }
+      }
+    },
+    "reports": {
+      "version": 2,
+      "sections": {
+        "hero": {
+          "fields": {
+            "title": "text",
+            "subtitle": "textarea",
+            "image": "image"
+          }
+        },
+        "intro": {
+          "fields": {
+            "title": "text",
+            "text": "textarea"
+          }
+        },
+        "empty": {
+          "fields": {
+            "text": "text"
+          }
+        }
+      }
+    },
+    "water-points": {
+      "version": 3,
+      "sections": {
+        "hero": {
+          "fields": {
+            "title": "text",
+            "subtitle": "textarea",
+            "image": "image"
+          }
+        },
+        "intro": {
+          "fields": {
+            "title": "text",
+            "text": "textarea"
+          }
+        },
+        "empty": {
+          "fields": {
+            "text": "text"
+          }
+        }
+      }
+    }
+  }
+}
