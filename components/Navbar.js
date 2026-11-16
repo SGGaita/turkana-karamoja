@@ -252,6 +252,7 @@ export default function Navbar({ urgentBanner = null }) {
           <Box sx={{ px: 2, py: 1.5, display: 'flex', flexDirection: 'column', gap: 1.25, alignItems: 'flex-start' }}>
             <InstallAppButton
               variant="contained"
+              onClick={() => setDrawerOpen(false)}
               sx={{ bgcolor: '#C1440E', fontWeight: 700, '&:hover': { bgcolor: '#9E370B' } }}
             />
             <PushSubscribeButton compact />

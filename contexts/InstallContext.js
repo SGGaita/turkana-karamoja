@@ -218,12 +218,12 @@ export function InstallProvider({ children }) {
 }
 
 /** "Install app": only where installing is possible (and never inside the installed app). */
-export function InstallAppButton({ sx, variant = 'outlined', size = 'small' }) {
+export function InstallAppButton({ sx, variant = 'outlined', size = 'small', onClick }) {
   const { canInstall, openInstall } = useInstall();
   const t = useT();
   if (!canInstall) return null;
   return (
-    <Button variant={variant} size={size} onClick={() => openInstall('button')} sx={{ textTransform: 'none', ...sx }}>
+    <Button variant={variant} size={size} onClick={() => { onClick?.(); openInstall('button'); }} sx={{ textTransform: 'none', ...sx }}>
       {t('install.app_button')}
     </Button>
   );
