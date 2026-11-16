@@ -3,18 +3,12 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 /**
- * Public pages read Karamoja Core (karamoja/v1) only. The other WordPress routes the website may call are the ones Core
- * serves after cut-over (WP-39): partner portal, contact form, push subscriptions, download counting and the
- * partner's own uploads. The old content routes (tk/v1 hero, home-sections, site-header…) disappear at cut-over.
+ * The website calls Karamoja Core's karamoja/v1 only (WP-39), plus three WordPress routes for the partner's own
+ * submissions and uploads. The old plugin's addresses (the old namespace) are answered by Core for 90 days after
+ * cut-over, then removed: nothing here may call them.
  */
 const ROOTS = ['components', 'contexts', 'lib', 'pages', 'scripts'];
 const ALLOWED = [
-  'tk/v1/contact-submit',
-  'tk/v1/register-organization',
-  'tk/v1/organization-status',
-  'tk/v1/my-submissions',
-  'tk/v1/reports/', // download counting
-  'tk/v1/push/subscriptions',
   'wp/v2/media',
   'wp/v2/tk_report',
   'wp/v2/tk_alert',
@@ -28,7 +22,7 @@ function files(dir) {
 }
 
 describe('WordPress routes', () => {
-  it('calls only Karamoja Core content routes and the routes Core serves at cut-over', () => {
+  it('calls no old tk/v1 address, and only the wp/v2 routes for submissions and uploads', () => {
     const hits = [];
     ROOTS.flatMap((r) => files(r)).forEach((f) => {
       readFileSync(f, 'utf8').split('\n').forEach((line, i) => {

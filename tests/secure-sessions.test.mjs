@@ -91,10 +91,10 @@ describe('calls to the CMS', () => {
 
 describe('portal route allowlist', () => {
   it('allows exactly the portal routes', () => {
-    expect(portalRouteAllowed('GET', 'tk/v1/my-submissions')).toBe(true);
-    expect(portalRouteAllowed('PATCH', 'tk/v1/my-submissions/report/12')).toBe(true);
-    expect(portalRouteAllowed('POST', 'tk/v1/my-submissions/advisory/12/withdraw')).toBe(true);
-    expect(portalRouteAllowed('DELETE', 'tk/v1/my-submissions/report/12/documents')).toBe(true);
+    expect(portalRouteAllowed('GET', 'karamoja/v1/portal/submissions')).toBe(true);
+    expect(portalRouteAllowed('PATCH', 'karamoja/v1/portal/submissions/report/12')).toBe(true);
+    expect(portalRouteAllowed('POST', 'karamoja/v1/portal/submissions/advisory/12/withdraw')).toBe(true);
+    expect(portalRouteAllowed('DELETE', 'karamoja/v1/portal/submissions/report/12/documents')).toBe(true);
     expect(portalRouteAllowed('POST', 'wp/v2/tk_alert')).toBe(true);
     expect(portalRouteAllowed('POST', 'karamoja/v1/portal/upload-ticket')).toBe(true);
   });
@@ -103,8 +103,9 @@ describe('portal route allowlist', () => {
     expect(portalRouteAllowed('POST', 'wp/v2/users')).toBe(false);
     expect(portalRouteAllowed('DELETE', 'wp/v2/tk_alert')).toBe(false);
     expect(portalRouteAllowed('POST', 'wp/v2/tk_alert/5')).toBe(false);
-    expect(portalRouteAllowed('GET', 'tk/v1/my-submissions/../../wp/v2/users')).toBe(false);
-    expect(portalRouteAllowed('PATCH', 'tk/v1/my-submissions/user/12')).toBe(false);
+    expect(portalRouteAllowed('GET', 'karamoja/v1/portal/submissions/../../wp/v2/users')).toBe(false);
+    expect(portalRouteAllowed('PATCH', 'karamoja/v1/portal/submissions/user/12')).toBe(false);
+    expect(portalRouteAllowed('GET', 'tk/v1/my-submissions')).toBe(false); // the old addresses (WP-39)
   });
 });
 
@@ -176,10 +177,10 @@ describe('API routes', () => {
   it('portal forwards allowed calls with the token from the cookie', async () => {
     global.fetch = vi.fn(async () => new Response('{"items":[]}', { status: 200, headers: { 'content-type': 'application/json' } }));
     const r = res();
-    await portalProxy(req({ cookies: `kc_session=${TOKEN}`, query: { path: ['tk', 'v1', 'my-submissions'] } }), r);
+    await portalProxy(req({ cookies: `kc_session=${TOKEN}`, query: { path: ['karamoja', 'v1', 'portal', 'submissions'] } }), r);
     expect(r.statusCode).toBe(200);
     const [url, init] = global.fetch.mock.calls[0];
-    expect(url).toBe('https://cms.example/wp-json/tk/v1/my-submissions');
+    expect(url).toBe('https://cms.example/wp-json/karamoja/v1/portal/submissions');
     expect(init.headers.Authorization).toBe(`Bearer ${TOKEN}`);
   });
 
@@ -189,7 +190,7 @@ describe('API routes', () => {
     await portalProxy(req({ cookies: `kc_session=${TOKEN}`, query: { path: ['wp', 'v2', 'users'] } }), r1);
     expect(r1.statusCode).toBe(404);
     const r2 = res();
-    await portalProxy(req({ query: { path: ['tk', 'v1', 'my-submissions'] } }), r2);
+    await portalProxy(req({ query: { path: ['karamoja', 'v1', 'portal', 'submissions'] } }), r2);
     expect(r2.statusCode).toBe(401);
     expect(global.fetch).not.toHaveBeenCalled();
   });
@@ -197,7 +198,7 @@ describe('API routes', () => {
   it('portal ends the session when the CMS refuses the token', async () => {
     global.fetch = vi.fn(async () => new Response('{"code":"jwt_auth_invalid_token"}', { status: 403 }));
     const r = res();
-    await portalProxy(req({ cookies: `kc_session=${TOKEN}`, query: { path: ['tk', 'v1', 'my-submissions'] } }), r);
+    await portalProxy(req({ cookies: `kc_session=${TOKEN}`, query: { path: ['karamoja', 'v1', 'portal', 'submissions'] } }), r);
     expect(r.statusCode).toBe(401);
     expect(r.body.code).toBe('session_expired');
     expect(String(r.headers['set-cookie'])).toContain('Max-Age=0');
@@ -210,7 +211,7 @@ describe('API routes', () => {
     expect(r.statusCode).toBe(201);
     expect(global.fetch.mock.calls[0][1].body.toString()).toBe('{"title":"x"}');
     const r2 = res();
-    await portalProxy(req({ cookies: `kc_session=${TOKEN}`, query: { path: ['tk', 'v1', 'organization-status'], email: 'me@x.org' } }), r2);
-    expect(global.fetch.mock.calls[1][0]).toBe('https://cms.example/wp-json/tk/v1/organization-status?email=me%40x.org');
+    await portalProxy(req({ cookies: `kc_session=${TOKEN}`, query: { path: ['karamoja', 'v1', 'portal', 'status'], email: 'me@x.org' } }), r2);
+    expect(global.fetch.mock.calls[1][0]).toBe('https://cms.example/wp-json/karamoja/v1/portal/status?email=me%40x.org');
   });
 });
