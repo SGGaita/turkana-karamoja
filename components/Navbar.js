@@ -99,7 +99,9 @@ export default function Navbar({ urgentBanner = null }) {
               display: 'flex',
               alignItems: 'center',
               gap: 1.5,
-              flexShrink: 0,
+              // Phones: the logo shrinks to leave room for the menu button (a wide logo pushed it off the screen).
+              flexShrink: { xs: 1, md: 0 },
+              minWidth: 0,
               textDecoration: 'none',
             }}
           >
@@ -108,9 +110,10 @@ export default function Navbar({ urgentBanner = null }) {
                 height: { xs: 56, md: 76 },
                 display: 'flex',
                 alignItems: 'center',
+                minWidth: 0,
               }}
             >
-              <BrandLogo src={branding.logoUrl} alt={branding.title} priority />
+              <BrandLogo src={branding.logoUrl} alt={branding.title} priority style={{ maxWidth: '100%' }} />
             </Box>
             <Box sx={{ display: { xs: 'none', md: 'block' } }}>
               <Typography

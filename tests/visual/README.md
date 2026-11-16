@@ -25,5 +25,8 @@ How to read the result:
 - Detail pages (one alert, report, organisation, initiative, help article) are the first link on their list page, so
   the same test works whatever content the site has.
 
+The FE-25 review of every difference (fixed, or accepted and why) is in [`REVIEW-FE25.md`](REVIEW-FE25.md). Add to it
+when a later change makes a page differ on purpose.
+
 Retake the "before" pictures only if the reference itself should change. They are the record of the site before the
 migration.

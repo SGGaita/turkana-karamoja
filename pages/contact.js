@@ -67,7 +67,7 @@ function CmsContact({ pageByLocale, offices, social }) {
           )}
         </Box>
 
-        {shown('offices') && <RegionalOffices offices={offices} title={copy('offices').title} intro="" />}
+        {shown('offices') && <RegionalOffices offices={offices} title={copy('offices').title} intro={copy('offices').intro || ''} />}
         <SocialLinks social={social} title={t('contact.social')} intro="" />
       </Box>
     </Layout>

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { serviceHero } from '../../lib/defaults';
 import { Box, Typography, Chip } from '@mui/material';
 import Layout from '../../components/Layout';
 import PageHero from '../../components/PageHero';
@@ -13,8 +14,7 @@ import { useLanguage, useShell, useVocabLabel } from '../../contexts/LanguageCon
 // What the page showed before Karamoja → Website pages → Assistance sites is saved.
 const DEFAULT_COPY = {
   hero: {
-    title: 'Humanitarian Assistance Locator',
-    subtitle: 'Food distribution, NFI, cash transfer and registration sites across Turkana and Karamoja',
+    ...serviceHero('assistance'),
     image: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=1400&q=70',
   },
   intro: {},

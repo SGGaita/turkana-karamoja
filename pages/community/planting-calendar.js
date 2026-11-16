@@ -1,4 +1,5 @@
 import { Box, Typography } from '@mui/material';
+import { serviceHero } from '../../lib/defaults';
 import Layout from '../../components/Layout';
 import PageHero from '../../components/PageHero';
 import CmsUnavailable from '../../components/CmsUnavailable';
@@ -12,8 +13,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 // What the page showed before Karamoja → Website pages → Planting calendar is saved.
 const DEFAULT_COPY = {
   hero: {
-    title: 'Farming & Planting Calendar',
-    subtitle: 'Climate-smart agriculture advisories, seasonal planting windows, and agro-dealer locations',
+    ...serviceHero('planting-calendar'),
     image: 'https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=1400&q=70',
   },
   intro: {},
