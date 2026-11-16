@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useLocalizedHomeSections, useShell } from '../contexts/LanguageContext';
 import { withoutRetiredLinks } from '../lib/topbar-links';
 import OfflineDownload from './OfflineDownload';
+import { InstallAppButton } from '../contexts/InstallContext';
 
 /** The old footer content (home sections + built-in lists), until Site settings are saved. */
 function legacyFooter(footer) {
@@ -182,7 +183,12 @@ export default function Footer() {
 
         <Divider sx={{ borderColor: 'rgba(255,255,255,0.08)' }} />
         <Box sx={{ py: 2 }}>
-          <OfflineDownload />
+          <OfflineDownload>
+            <InstallAppButton
+              variant="contained"
+              sx={{ bgcolor: '#C1440E', fontSize: '0.7rem', fontWeight: 700, '&:hover': { bgcolor: '#9E370B' } }}
+            />
+          </OfflineDownload>
         </Box>
       </Box>
 

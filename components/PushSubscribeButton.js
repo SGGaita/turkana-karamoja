@@ -13,6 +13,7 @@ import {
   unsubscribeFromPush,
 } from '../lib/push-client';
 import { useT } from '../contexts/LanguageContext';
+import { useInstall } from '../contexts/InstallContext';
 
 const MESSAGE_KEYS = {
   PERMISSION_BLOCKED: 'push.msg_blocked',
@@ -35,6 +36,7 @@ const PLACEHOLDER_SX = (compact) => ({
 
 export default function PushSubscribeButton({ compact = false }) {
   const t = useT();
+  const { openInstall } = useInstall();
   const [msg, setMsg] = useState(null);
   const [loading, setLoading] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
@@ -56,12 +58,13 @@ export default function PushSubscribeButton({ compact = false }) {
   }, [vapidPublic]);
 
   const handleSubscribe = async () => {
-    if (!vapidPublic) {
-      setMsg({ type: 'warning', text: t('push.msg_not_configured') });
+    if (needsIosHomeScreenInstall()) {
+      // Alerts on iPhone need the app on the Home Screen first: the same steps as the install offer (FE-10).
+      openInstall('push_hint');
       return;
     }
-    if (needsIosHomeScreenInstall()) {
-      setMsg({ type: 'info', text: permissionMessage('IOS_INSTALL') });
+    if (!vapidPublic) {
+      setMsg({ type: 'warning', text: t('push.msg_not_configured') });
       return;
     }
     if (typeof window !== 'undefined' && !window.isSecureContext) {
