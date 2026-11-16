@@ -3,7 +3,7 @@ import Layout from '../../components/Layout';
 import PageHero from '../../components/PageHero';
 import CmsUnavailable from '../../components/CmsUnavailable';
 import { CommunityBackLink, StatusPill, IntroBox, EmptyNote } from '../../components/CommunityServiceLayout';
-import { PLANTING_STATUS, formatDateRange } from '../../lib/community-services';
+import { PLANTING_STATUS_COLORS, formatDateRange } from '../../lib/community-services';
 import { cmsStaticProps } from '../../lib/cms';
 import { listCmsProps, pageCopy, plantingFromCms } from '../../lib/cms-community';
 import { pickLocale } from '../../lib/cms-alerts';
@@ -56,8 +56,8 @@ function PlantingCalendarPageBody({ itemsByLocale, pageByLocale }) {
             <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontSize: '1.2rem', fontWeight: 700, mb: 2 }}>{season}</Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
               {rows.map((row) => {
-                const status = PLANTING_STATUS[row.status]
-                  ? { label: t(`community.planting_${row.status}`), color: PLANTING_STATUS[row.status].color }
+                const status = PLANTING_STATUS_COLORS[row.status]
+                  ? { label: t(`community.planting_${row.status}`), color: PLANTING_STATUS_COLORS[row.status] }
                   : { label: row.status, color: '#9A9A9A' };
                 return (
                   <Box key={row.id} sx={{ flex: '1 1 calc(50% - 8px)', minWidth: { xs: '100%', md: 'calc(50% - 8px)' }, bgcolor: 'white', border: '1px solid #E8E0D5', borderRadius: 2, p: 2.5 }}>

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Box, Typography } from '@mui/material';
 import EventOutlinedIcon from '@mui/icons-material/EventOutlined';
-import { fallbackHero } from '../lib/fallback-data';
+import { DEFAULT_HERO as fallbackHero } from '../lib/defaults';
 import { useLanguage, useLocalizedHero } from '../contexts/LanguageContext';
 import { overviewHasContent } from '../lib/cms-home';
 

@@ -5,7 +5,6 @@ import PageHero from '../../components/PageHero';
 import CmsUnavailable from '../../components/CmsUnavailable';
 import { CommunityServiceMap, CommunityBackLink, StatusPill, StatChip, IntroBox, EmptyNote } from '../../components/CommunityServiceLayout';
 import { toServiceMapMarker } from '../../lib/wp-mappers';
-import { ASSISTANCE_SITE_TYPES } from '../../lib/community-services';
 import { cmsStaticProps } from '../../lib/cms';
 import { listCmsProps, pageCopy, assistanceSiteFromCms } from '../../lib/cms-community';
 import { pickLocale } from '../../lib/cms-alerts';
@@ -40,7 +39,7 @@ function AssistancePageBody({ itemsByLocale, pageByLocale }) {
   const { locale, t } = useLanguage();
   const assistanceSites = pickLocale(itemsByLocale, locale) || [];
   const { copy, hero } = pageCopy(pageByLocale, locale, DEFAULT_COPY);
-  const typeLabel = useVocabLabel('site_types', ASSISTANCE_SITE_TYPES);
+  const typeLabel = useVocabLabel('site_types');
   // Filter chips: the site types from Site settings → Lists once saved, else the built-in short labels.
   const vocabTypes = useShell()?.vocabularies?.site_types;
   const filterTypes = (vocabTypes && Object.keys(vocabTypes).length

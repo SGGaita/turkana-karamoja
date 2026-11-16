@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { fallbackSiteHeader, fallbackHomeSections } from '../lib/fallback-data';
+import { DEFAULT_SITE_HEADER as fallbackSiteHeader, DEFAULT_HOME_SECTIONS as fallbackHomeSections } from '../lib/defaults';
 import siteHeaderSnapshot from '../lib/site-header.snapshot.json';
 import { cmsLocale, getGlobals } from '../lib/cms';
 import { shellFromGlobals } from '../lib/cms-globals';
@@ -203,13 +203,15 @@ export function useShell() {
  * The label for a code from Site settings → Lists (e.g. useVocabLabel('water_point_types')('borehole')), falling back
  * to the website's built-in labels until Site settings are saved, then to the code itself.
  */
-export function useVocabLabel(list, fallback = {}) {
+export function useVocabLabel(list) {
   const vocab = useShell()?.vocabularies?.[list];
-  return (code) => {
-    const fromFallback = fallback[code];
-    const builtIn = typeof fromFallback === 'object' && fromFallback ? fromFallback.label : fromFallback;
-    return (vocab && vocab[code]) || builtIn || code || '';
-  };
+  // Site settings → Lists; a code not (yet) in the list is shown readably ("non_functional" → "Non functional").
+  return (code) => (vocab && vocab[code]) || humanizeCode(code);
+}
+
+export function humanizeCode(code) {
+  const s = String(code || '').replace(/[_-]+/g, ' ').trim();
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 }
 
 /**

@@ -11,8 +11,8 @@ import Link from 'next/link';
 import { Typography } from '@mui/material';
 import { cmsStaticProps, getPageAllLocales, isPublishedPage } from '../lib/cms';
 import { pageCopy } from '../lib/cms-community';
-import { fallbackAboutPage } from '../lib/fallback-data';
-import { featuresFromCms, stepsFromCms, partnersFromCms } from '../lib/cms-about-contact';
+import { PAGE_IMAGES } from '../lib/defaults';
+import { featuresFromCms, stepsFromCms, partnersFromCms, commissionedFromCms } from '../lib/cms-about-contact';
 import { getCoverageAreas } from '../lib/cms-areas';
 import { useLanguage } from '../contexts/LanguageContext';
 import { APP_NAME } from '../lib/branding';
@@ -52,7 +52,7 @@ const headingSx = { fontFamily: '"Montserrat", sans-serif', fontSize: { xs: '1.6
 /** About from Karamoja → Website pages → About (built-in title and sections until it is saved). */
 function CmsAbout({ pageByLocale, areas }) {
   const { locale } = useLanguage();
-  const { copy, shown, hero } = pageCopy(pageByLocale, locale, { hero: { title: `About ${APP_NAME}`, image: fallbackAboutPage.featuredImage } });
+  const { copy, shown, hero } = pageCopy(pageByLocale, locale, { hero: { title: `About ${APP_NAME}`, image: PAGE_IMAGES.about } });
   const intro = copy('intro');
   const features = shown('features') ? featuresFromCms(copy('features')) : [];
   const steps = shown('steps') ? stepsFromCms(copy('steps')) : [];
@@ -72,7 +72,7 @@ function CmsAbout({ pageByLocale, areas }) {
         <AboutHubIntro excludeCommissionedHighlight />
       )}
 
-      <CommissionedBySection />
+      {shown('commissioned') && <CommissionedBySection data={commissionedFromCms(copy('commissioned'))} />}
 
       <GeographicCoverageSection areas={areas} />
 

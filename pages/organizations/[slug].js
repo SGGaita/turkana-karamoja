@@ -4,7 +4,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Layout from '../../components/Layout';
 import PageHero from '../../components/PageHero';
 import CmsUnavailable from '../../components/CmsUnavailable';
-import { partnerTypeColors } from '../../lib/fallback-data';
+import { PARTNER_TYPE_COLORS as partnerTypeColors } from '../../lib/defaults';
 import { buildSlugPath, slugify } from '../../lib/slug';
 import { cmsStaticProps, cmsGet, cmsLocale, getAll, getPageAllLocales, inAllLocales, isPublishedPage } from '../../lib/cms';
 import { pickLocale, levelLabel } from '../../lib/cms-alerts';

@@ -1,38 +1,45 @@
 import { Box, Typography, Divider } from '@mui/material';
 import { APP_NAME, APP_TAGLINE, APP_COPYRIGHT } from '../lib/branding';
 import { FOOTER_REGIONS } from '../lib/regions';
-import { TOLL_FREE_LINES } from '../lib/toll-free-lines';
 import Link from 'next/link';
 import { useLocalizedHomeSections, useShell } from '../contexts/LanguageContext';
-import { withoutRetiredLinks } from '../lib/topbar-links';
 import OfflineDownload from './OfflineDownload';
 import { InstallAppButton } from '../contexts/InstallContext';
 
-/** The old footer content (home sections + built-in lists), until Site settings are saved. */
-function legacyFooter(footer) {
-  const asLinks = (list) => withoutRetiredLinks(list).map((l) => (typeof l === 'string' ? { label: l, href: '' } : l));
+/**
+ * Until Site settings are saved: the site's own pages, the cluster's regions and the contact page. No phone numbers,
+ * partner names or links to pages that don't exist (those come from Site settings → Footer and Hotlines).
+ */
+function builtInFooter(footer) {
   return {
     siteName: APP_NAME,
     tagline: APP_TAGLINE,
     about: footer.metaDescription,
-    partners: ['KMD', 'UMA', 'NDMA', 'OPM', 'OCHA', 'FAO', 'ICPAC', 'UNICEF', 'WFP'],
+    partners: [],
     columns: [
-      // "API Access" etc. may still be stored in the CMS or the browser cache; never show it.
-      { title: footer.columnKaramoja || 'Karamoja', links: asLinks(footer.linksKaramoja?.length ? footer.linksKaramoja : ['About Karamoja', 'Our Partners', 'Data Sources', 'Methodology']) },
-      { title: footer.columnServices || 'Services', links: asLinks(footer.linksServices?.length ? footer.linksServices : ['Early Warnings', 'Weather Forecasts', 'Community Bulletins', 'Submit Advisory', 'Donor Portal']) },
+      {
+        title: footer.columnKaramoja || 'Karamoja',
+        links: [
+          { label: 'About Karamoja', href: '/about' },
+          { label: 'Organisations', href: '/organizations' },
+          { label: 'Help', href: '/help' },
+        ],
+      },
+      {
+        title: footer.columnServices || 'Services',
+        links: [
+          { label: 'Early Warnings', href: '/early-warnings' },
+          { label: 'Community services', href: '/community' },
+          { label: 'Reports', href: '/reports' },
+          { label: 'Partners & Stakeholders', href: '/partners-stakeholders' },
+        ],
+      },
     ],
     regionsTitle: footer.columnRegions || 'Regions',
     regions: FOOTER_REGIONS,
     contactTitle: footer.columnContact || 'Contact',
     contactLink: { label: footer.contactLink || 'Contact Us →', href: '/contact' },
-    contactLines: (footer.contacts?.length
-      ? footer.contacts
-      : [
-        // Placeholder numbers, the demo email and the fake "24/7 duty officer" line were removed (E8).
-        { label: 'Lodwar, Turkana County, Kenya', sub: '' },
-        { label: 'Moroto, Uganda', sub: '' },
-        ...TOLL_FREE_LINES.map((l) => ({ label: l.display, sub: l.label })),
-      ]).map((c) => ({ text: c.label, note: c.sub })),
+    contactLines: [],
     copyright: `${APP_COPYRIGHT} · Kenya · Uganda`,
     social: [],
   };
@@ -42,10 +49,10 @@ export default function Footer() {
   const homeSections = useLocalizedHomeSections();
   const shell = useShell();
   if (shell && shell.footer.enabled === false) return null;
-  // Karamoja → Site settings → Footer once saved; the old content until then.
+  // Karamoja → Site settings → Footer once saved; the site's own pages until then.
   const data = shell
     ? { ...shell.footer, contactLines: [...shell.footer.contactLines, ...shell.hotlines.map((l) => ({ text: l.display, note: l.label }))] }
-    : legacyFooter(homeSections.footer || {});
+    : builtInFooter(homeSections.footer || {});
   const columns = [
     ...data.columns,
     ...(data.regions.length ? [{ title: data.regionsTitle, links: data.regions.map((r) => ({ label: r, href: '' })) }] : []),

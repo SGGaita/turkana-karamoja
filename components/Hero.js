@@ -1,6 +1,6 @@
 import { Box, Typography, Button } from '@mui/material';
 import Link from 'next/link';
-import { fallbackHero } from '../lib/fallback-data';
+import { DEFAULT_HERO as fallbackHero } from '../lib/defaults';
 import { useLocalizedHero } from '../contexts/LanguageContext';
 
 export default function Hero() {

@@ -4,11 +4,8 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import {
-  WATER_POINT_STATUS,
-  WATER_POINT_TYPES,
-  ASSISTANCE_SITE_TYPES,
-} from '../lib/community-services';
+import { WATER_POINT_STATUS_COLORS } from '../lib/community-services';
+import { useVocabLabel } from '../contexts/LanguageContext';
 import { getCartoTileUrl } from '../lib/map-tiles';
 
 function makeMarkerIcon(color) {
@@ -23,23 +20,27 @@ function makeMarkerIcon(color) {
 
 function markerColor(marker) {
   if (marker.kind === 'water') {
-    return WATER_POINT_STATUS[marker.status]?.color || '#2E7BB4';
+    return WATER_POINT_STATUS_COLORS[marker.status] || '#2E7BB4';
   }
   return '#E87010';
 }
 
-function markerSubtitle(marker) {
+/** Names from Site settings → Lists. */
+function markerSubtitle(marker, label) {
   if (marker.kind === 'water') {
-    const type = WATER_POINT_TYPES[marker.pointType] || marker.pointType;
-    const status = WATER_POINT_STATUS[marker.status]?.label || marker.status;
-    return `${type} · ${status}`;
+    return `${label.waterType(marker.pointType)} · ${label.waterStatus(marker.status)}`;
   }
-  const type = ASSISTANCE_SITE_TYPES[marker.siteType] || marker.siteType;
+  const type = label.siteType(marker.siteType);
   return marker.agency ? `${type} · ${marker.agency}` : type;
 }
 
 export default function CommunityServiceMap({ markers = [], apiStale = false, emptyMessage }) {
   const [selected, setSelected] = useState(null);
+  const label = {
+    waterType: useVocabLabel('water_point_types'),
+    waterStatus: useVocabLabel('water_point_statuses'),
+    siteType: useVocabLabel('site_types'),
+  };
   const mappable = useMemo(() => markers.filter((m) => m.lat != null && m.lng != null), [markers]);
 
   return (
@@ -73,7 +74,7 @@ export default function CommunityServiceMap({ markers = [], apiStale = false, em
           </Box>
           <Typography sx={{ fontSize: '0.7rem', color: '#9A9A9A', mb: 0.75 }}>{selected.region}</Typography>
           <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color: markerColor(selected), mb: 1 }}>
-            {markerSubtitle(selected)}
+            {markerSubtitle(selected, label)}
           </Typography>
           {selected.desc && (
             <Typography sx={{ fontSize: '0.72rem', color: '#5A5A5A', lineHeight: 1.5, mb: 1 }}>{selected.desc}</Typography>
@@ -108,7 +109,7 @@ export default function CommunityServiceMap({ markers = [], apiStale = false, em
             >
               <Popup>
                 <strong>{marker.name}</strong><br />
-                {markerSubtitle(marker)}
+                {markerSubtitle(marker, label)}
               </Popup>
             </Marker>
           ))}
