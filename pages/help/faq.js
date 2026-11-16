@@ -5,6 +5,7 @@ import HelpLayout, { HelpUnavailable, helpRichTextSx } from '../../components/He
 import { useLanguage } from '../../contexts/LanguageContext';
 import { pickLocale } from '../../lib/cms-alerts';
 import { inAllLocales } from '../../lib/cms';
+import { faqJsonLd } from '../../lib/seo';
 import { GUIDES, faqFromCms, getHelpFaq, helpCopy, helpPageAllLocales, helpStaticProps, topicsAllLocales } from '../../lib/cms-help';
 
 export default function HelpFaq({ unavailable, faqByLocale, topicsByLocale, pageByLocale }) {
@@ -26,6 +27,7 @@ export default function HelpFaq({ unavailable, faqByLocale, topicsByLocale, page
 
   return (
     <HelpLayout
+      jsonLd={faqJsonLd(categories)}
       title={copy.faq.title}
       subtitle={copy.faq.subtitle}
       image={copy.hero.image}

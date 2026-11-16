@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { Box, Typography, TextField, Button, Alert, LinearProgress } from '@mui/material';
 import { passwordHint, setPassword, resetPassword } from '../lib/partner-auth';
 import HelpStepLink from './HelpStepLink';
+import HelpTip from './HelpTip';
 
 /**
  * Choose a password from an emailed link: kind 'setup' (after approval) or 'reset'.
@@ -50,7 +51,10 @@ export default function PasswordSetForm({ kind }) {
         Use at least 10 characters. A few unrelated words with a number or symbol work well. Don&apos;t use your
         email, name or organisation name.
       </Typography>
-      <HelpStepLink article={kind === 'setup' ? 'partner-set-password' : 'partner-forgot-password'} sx={{ mb: 2 }} />
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 2 }}>
+        <HelpStepLink article={kind === 'setup' ? 'partner-set-password' : 'partner-forgot-password'} />
+        <HelpTip contextKey={kind === 'setup' ? 'partner.set-password' : 'partner.reset'} />
+      </Box>
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       <TextField
         label="New password" type="password" autoComplete="new-password" fullWidth required size="small"

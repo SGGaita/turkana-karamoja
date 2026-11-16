@@ -16,6 +16,7 @@ import { getLanguageLabel } from '../lib/wp-mappers';
 import { HUB_LANGUAGES } from '../lib/languages';
 import { formatFileSize } from '../lib/report-utils';
 import HelpStepLink from './HelpStepLink';
+import HelpTip from './HelpTip';
 
 const STATUS_STYLES = {
   pending: { bg: '#fff4ec', color: '#b45309', border: '#f59e0b' },
@@ -250,6 +251,7 @@ export default function PartnerSubmissionsPanel({
       <Typography sx={{ fontSize: '0.85rem', color: '#5A5A5A', mb: 3 }}>
         View advisories and reports submitted by your organisation. Reports can be edited any time, including after approval; advisories can be edited while pending or rejected. Items can also be withdrawn or extended with more documents.{' '}
         <HelpStepLink article="partner-review-statuses" />
+        <HelpTip contextKey="partner.submissions" />
       </Typography>
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
@@ -259,6 +261,7 @@ export default function PartnerSubmissionsPanel({
       ) : items.length === 0 ? (
         <Box sx={{ bgcolor: '#FDF9F4', border: '1px dashed #E8E0D5', borderRadius: 2, p: 4, textAlign: 'center' }}>
           <Typography sx={{ color: '#9A9A9A', fontSize: '0.9rem' }}>No submissions yet. Use the advisory or report tabs to submit content.</Typography>
+          <HelpStepLink article="partner-submit-advisory" sx={{ mt: 1 }} />
         </Box>
       ) : visibleItems.length === 0 ? (
         <Box sx={{ bgcolor: '#FDF9F4', border: '1px dashed #E8E0D5', borderRadius: 2, p: 4, textAlign: 'center' }}>

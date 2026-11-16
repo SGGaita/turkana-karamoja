@@ -17,6 +17,7 @@ import AdvisoryValidityField from './AdvisoryValidityField';
 import { emptyAdvisoryValidity, validateAdvisoryValidity } from '../lib/advisory-validity';
 import { ADVISORY_REGION_OPTIONS } from '../lib/regions';
 import HelpStepLink from './HelpStepLink';
+import HelpTip from './HelpTip';
 
 const HubRichTextEditor = dynamic(() => import('./HubRichTextEditor'), { ssr: false });
 
@@ -125,7 +126,10 @@ export default function AdvisorySubmissionForm({ token, orgRecord, onNotify, onS
       <Typography sx={{ fontSize: '0.85rem', color: '#5A5A5A', mb: 3, lineHeight: 1.55 }}>
         Early warnings must be specific and actionable — pin the location, name who should act, and list clear steps communities can take now.
       </Typography>
-      <HelpStepLink article="partner-submit-advisory" sx={{ mt: -2, mb: 3 }} />
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: -2, mb: 3 }}>
+        <HelpStepLink article="partner-submit-advisory" />
+        <HelpTip contextKey="partner.submit-advisory" />
+      </Box>
 
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2.5 }}>
         <TextField label="Contact Name *" required value={form.contact} onChange={(e) => setForm((f) => ({ ...f, contact: e.target.value }))} sx={{ ...inputSx, flex: '1 1 240px' }} size="small" />
