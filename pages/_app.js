@@ -4,6 +4,7 @@ import theme from '../theme';
 import { LanguageProvider } from '../contexts/LanguageContext';
 import ShellHead from '../components/ShellHead';
 import { OfflineProvider } from '../contexts/OfflineContext';
+import { InstallProvider } from '../contexts/InstallContext';
 
 // NOTE: no getInitialProps here on purpose. A getInitialProps on _app runs on EVERY
 // client-side navigation and blocks the route change until it resolves — with a slow CMS
@@ -19,9 +20,11 @@ export default function MyApp({ Component, pageProps }) {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <ShellHead />
-        <OfflineProvider>
-          <Component {...pageProps} />
-        </OfflineProvider>
+        <InstallProvider>
+          <OfflineProvider>
+            <Component {...pageProps} />
+          </OfflineProvider>
+        </InstallProvider>
       </ThemeProvider>
     </LanguageProvider>
   );

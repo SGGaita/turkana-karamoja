@@ -24,6 +24,7 @@ import AlertBanner from './AlertBanner';
 import LanguageSelector from './LanguageSelector';
 import PushSubscribeButton from './PushSubscribeButton';
 import { resolveTopbarLink, isRetiredLink } from '../lib/topbar-links';
+import { InstallAppButton } from '../contexts/InstallContext';
 
 export default function Navbar({ urgentBanner = null }) {
   const { branding, topbar, navLinks } = useSiteHeader();
@@ -248,7 +249,11 @@ export default function Navbar({ urgentBanner = null }) {
             })}
           </List>
 
-          <Box sx={{ px: 2, py: 1.5 }}>
+          <Box sx={{ px: 2, py: 1.5, display: 'flex', flexDirection: 'column', gap: 1.25, alignItems: 'flex-start' }}>
+            <InstallAppButton
+              variant="contained"
+              sx={{ bgcolor: '#C1440E', fontWeight: 700, '&:hover': { bgcolor: '#9E370B' } }}
+            />
             <PushSubscribeButton compact />
           </Box>
 
