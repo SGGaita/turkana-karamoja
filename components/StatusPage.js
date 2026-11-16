@@ -8,9 +8,9 @@ const str = (v) => (typeof v === 'string' ? v : '');
 
 /**
  * A short message page (offline, page not found, server error). Text from Karamoja → Website pages (`page`, section
- * `section`) once saved, else `fallback` ({ title, text, button: { label, href } }).
+ * `section`) once saved, else `fallback` ({ title, text, button: { label, href } }). `children` go below.
  */
-export default function StatusPage({ pageByLocale, section, fallback, code }) {
+export default function StatusPage({ pageByLocale, section, fallback, code, children }) {
   const { locale } = useLanguage();
   const saved = pickLocale(pageByLocale, locale)?.sections?.[section];
   const msg = saved && saved.enabled !== false ? saved : fallback;
@@ -30,6 +30,7 @@ export default function StatusPage({ pageByLocale, section, fallback, code }) {
             {str(button.label) || fallback.button.label}
           </Button>
         )}
+        {children}
       </Box>
     </Layout>
   );

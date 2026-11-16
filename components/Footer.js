@@ -5,6 +5,7 @@ import { TOLL_FREE_LINES } from '../lib/toll-free-lines';
 import Link from 'next/link';
 import { useLocalizedHomeSections, useShell } from '../contexts/LanguageContext';
 import { withoutRetiredLinks } from '../lib/topbar-links';
+import OfflineDownload from './OfflineDownload';
 
 /** The old footer content (home sections + built-in lists), until Site settings are saved. */
 function legacyFooter(footer) {
@@ -180,6 +181,9 @@ export default function Footer() {
         </Box>
 
         <Divider sx={{ borderColor: 'rgba(255,255,255,0.08)' }} />
+        <Box sx={{ py: 2 }}>
+          <OfflineDownload />
+        </Box>
       </Box>
 
       <Box

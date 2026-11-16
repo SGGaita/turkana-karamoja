@@ -3,6 +3,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import theme from '../theme';
 import { LanguageProvider } from '../contexts/LanguageContext';
 import ShellHead from '../components/ShellHead';
+import { OfflineProvider } from '../contexts/OfflineContext';
 
 // NOTE: no getInitialProps here on purpose. A getInitialProps on _app runs on EVERY
 // client-side navigation and blocks the route change until it resolves — with a slow CMS
@@ -18,7 +19,9 @@ export default function MyApp({ Component, pageProps }) {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <ShellHead />
-        <Component {...pageProps} />
+        <OfflineProvider>
+          <Component {...pageProps} />
+        </OfflineProvider>
       </ThemeProvider>
     </LanguageProvider>
   );

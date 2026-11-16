@@ -1,7 +1,6 @@
 import Head from 'next/head';
 import Navbar from './Navbar';
 import Footer from './Footer';
-import OfflineIndicator from './OfflineIndicator';
 import SeoHead from './SeoHead';
 import { Box } from '@mui/material';
 import { useShell } from '../contexts/LanguageContext';
@@ -24,7 +23,6 @@ export default function Layout({ children, title = APP_FULL_NAME, description, t
       </Head>
       <SeoHead type={type} image={image} noindex={noindex} jsonLd={jsonLd} />
       <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: '#FDF6EC' }}>
-        <OfflineIndicator />
         <Navbar />
         <Box component="main" sx={{ flex: 1 }}>
           {children}

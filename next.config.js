@@ -47,16 +47,36 @@ const nextConfig = {
       { source: '/manifest.json', destination: '/manifest.webmanifest', permanent: true },
     ];
   },
+  async rewrites() {
+    // Report documents under the website's own address, so "Save for offline" can keep them (FE-09).
+    const base = (process.env.NEXT_PUBLIC_WP_BASE_URL || '').replace(/\/$/, '');
+    if (!/^https?:\/\//.test(base)) return [];
+    return [{ source: '/cms-files/:path*', destination: `${base}/wp-content/uploads/:path*` }];
+  },
+};
+
+const { CACHES, LIMITS } = require('./lib/offline-config');
+
+// Offline use (FE-09). Workbox serialises these rules into the service worker, so callbacks must not use variables
+// from this file; the cache names and limits are written in as values. public/offline-sw.js saves pages ahead of time.
+const keepEvenIfVaried = { ignoreVary: true };
+/** The app's start address is /?source=pwa; store and find it as "/". */
+const dropSourceParam = {
+  cacheKeyWillBeUsed: async ({ request }) => {
+    const u = new URL(request.url);
+    u.searchParams.delete('source');
+    return u.href;
+  },
 };
 
 const withPWA = require('@ducanh2912/next-pwa').default({
   dest: 'public',
-  // PWA is off in `next dev` unless NEXT_PUBLIC_PWA_DEV=true (set it in .env.local to test install/offline locally).
   disable: process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_PWA_DEV !== 'true',
   register: true,
-  // A page that isn't saved on the device, opened without a connection, shows /offline (Website pages → Offline page).
+  // A new version waits until the visitor chooses "Reload" (components/OfflineManager.js), instead of replacing the
+  // code under an open page; and pages are not reloaded on their own when the connection comes back.
+  reloadOnOnline: false,
   fallbacks: { document: '/offline' },
-  // Keep big/dev-only files out of the install-time precache (they're still served normally).
   publicExcludes: [
     '!noprecache/**/*',
     '!docs/**/*',
@@ -66,10 +86,8 @@ const withPWA = require('@ducanh2912/next-pwa').default({
     '!favicon-48.png',
   ],
   workboxOptions: {
-    importScripts: ['/push-handler.js'],
-    // Next 15 emits dynamic-css-manifest.json but never serves it publicly (404). If it stays in the
-    // precache list the service worker install fails and NO service worker is ever registered.
-    // Supplying `exclude` replaces next-pwa's defaults, so they are repeated here.
+    skipWaiting: false,
+    importScripts: ['/push-handler.js', '/offline-sw.js'],
     exclude: [
       /\/_next\/static\/.*(?<!\.p)\.woff2/,
       /\.map$/,
@@ -77,29 +95,75 @@ const withPWA = require('@ducanh2912/next-pwa').default({
       /dynamic-css-manifest\.json$/,
     ],
     runtimeCaching: [
+      // Sign-in, portal, push and revalidation calls are never stored.
       {
-        urlPattern: /^https:\/\/.*\/wp-json\/.*/i,
+        urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.startsWith('/api/'),
+        handler: 'NetworkOnly',
+      },
+      // Saved documents are served by offline-sw.js; the rest of /cms-files/ isn't stored.
+      {
+        urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.startsWith('/cms-files/'),
+        handler: 'NetworkOnly',
+      },
+      // Page data used when moving between pages.
+      {
+        urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.startsWith('/_next/data/'),
         handler: 'NetworkFirst',
         options: {
-          cacheName: 'wp-api-cache',
-          networkTimeoutSeconds: 10,
-          expiration: { maxEntries: 50, maxAgeSeconds: 300 },
+          cacheName: CACHES.data,
+          networkTimeoutSeconds: 4,
+          expiration: LIMITS.data,
+          cacheableResponse: { statuses: [200] },
+          matchOptions: keepEvenIfVaried,
         },
       },
+      // Pages.
       {
-        urlPattern: /\/early-warnings/,
+        urlPattern: ({ request, sameOrigin }) => sameOrigin && request.mode === 'navigate',
         handler: 'NetworkFirst',
         options: {
-          cacheName: 'ews-pages',
-          networkTimeoutSeconds: 10,
+          cacheName: CACHES.pages,
+          networkTimeoutSeconds: 4,
+          expiration: LIMITS.pages,
+          cacheableResponse: { statuses: [200] },
+          matchOptions: keepEvenIfVaried,
+          plugins: [dropSourceParam],
         },
       },
+      // Resized pictures.
       {
-        // NetworkFirst (not StaleWhileRevalidate) so visitors get the latest deploy straight
-        // away; the cached page is only used when offline or the network is slow.
-        urlPattern: ({ request }) => request.destination === 'document',
+        urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname === '/_next/image',
+        handler: 'StaleWhileRevalidate',
+        options: { cacheName: CACHES.images, expiration: LIMITS.images, cacheableResponse: { statuses: [200] } },
+      },
+      // Pictures straight from the CMS.
+      {
+        urlPattern: ({ url }) => /\/wp-content\/uploads\/.+\.(png|jpe?g|webp|gif|svg)$/i.test(url.pathname),
+        handler: 'CacheFirst',
+        options: { cacheName: CACHES.media, expiration: LIMITS.media, cacheableResponse: { statuses: [0, 200] } },
+      },
+      // Map tiles: only those already viewed, at most 300 for 30 days.
+      {
+        urlPattern: ({ url }) => /(^|\.)basemaps\.cartocdn\.com$|(^|\.)tile\.openstreetmap\.org$/.test(url.hostname),
+        handler: 'CacheFirst',
+        options: { cacheName: CACHES.tiles, expiration: LIMITS.tiles, cacheableResponse: { statuses: [0, 200] } },
+      },
+      // CMS calls made by the browser (public data).
+      {
+        urlPattern: ({ url }) => url.pathname.includes('/wp-json/karamoja/v1/') || url.pathname.includes('/wp-json/tk/v1/'),
         handler: 'NetworkFirst',
-        options: { cacheName: 'pages-cache', networkTimeoutSeconds: 5 },
+        options: {
+          cacheName: CACHES.api,
+          networkTimeoutSeconds: 6,
+          expiration: LIMITS.api,
+          cacheableResponse: { statuses: [200] },
+        },
+      },
+      // Fonts.
+      {
+        urlPattern: ({ url }) => url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com',
+        handler: 'StaleWhileRevalidate',
+        options: { cacheName: CACHES.fonts, expiration: LIMITS.fonts, cacheableResponse: { statuses: [0, 200] } },
       },
     ],
   },

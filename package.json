@@ -9,7 +9,8 @@
     "start": "next start",
     "test": "vitest run",
     "test:visual": "node tests/visual/run.mjs compare",
-    "test:visual:baseline": "node tests/visual/run.mjs baseline"
+    "test:visual:baseline": "node tests/visual/run.mjs baseline",
+    "test:offline": "playwright test -c tests/offline/playwright.config.mjs"
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^10.2.9",
