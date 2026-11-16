@@ -126,7 +126,7 @@ export default function OrganizationsIndex({ unavailable, itemsByLocale, pageByL
   return <CmsOrganizations itemsByLocale={itemsByLocale} pageByLocale={pageByLocale} />;
 }
 
-export async function getStaticProps() {
+export async function getStaticProps({ locale }) {
   return cmsStaticProps(async () => {
     const [lists, pages] = await Promise.all([
       inAllLocales((l) => getAll('organizations', {}, l)),
@@ -140,5 +140,5 @@ export async function getStaticProps() {
     const enSlug = new Map((itemsByLocale.en || []).map((o) => [o.id, o.slug]));
     Object.values(itemsByLocale).forEach((list) => list.forEach((o) => { o.slug = enSlug.get(o.id) || o.slug; }));
     return { itemsByLocale, pageByLocale: isPublishedPage(pages?.en) ? pages : null };
-  }, { revalidate: 300, name: 'organizations' });
+  }, { locale, revalidate: 300, name: 'organizations' });
 }

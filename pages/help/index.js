@@ -12,6 +12,7 @@ import { HelpUnavailable } from '../../components/HelpLayout';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { pickLocale } from '../../lib/cms-alerts';
 import { helpCopy, helpPageAllLocales, helpStaticProps, searchHelp, topicsAllLocales } from '../../lib/cms-help';
+import { withPageLocale } from '../../lib/cms';
 
 const CARDS = [
   { slug: 'user-guide', icon: MenuBookOutlinedIcon, color: '#C1440E', copyKey: 'user_guide' },
@@ -146,9 +147,9 @@ export default function HelpHub({ unavailable, topicsByLocale, pageByLocale }) {
   );
 }
 
-export async function getStaticProps() {
-  return helpStaticProps(async () => {
+export async function getStaticProps({ locale }) {
+  return withPageLocale(locale, () => helpStaticProps(async () => {
     const [topicsByLocale, pageByLocale] = await Promise.all([topicsAllLocales(), helpPageAllLocales()]);
     return { topicsByLocale, pageByLocale };
-  });
+  }));
 }

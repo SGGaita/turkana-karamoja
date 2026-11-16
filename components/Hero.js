@@ -1,4 +1,5 @@
 import { Box, Typography, Button } from '@mui/material';
+import { PageTranslationNote } from './NotTranslated';
 import Link from 'next/link';
 import { DEFAULT_HERO as fallbackHero } from '../lib/defaults';
 import { useLocalizedHero } from '../contexts/LanguageContext';
@@ -115,6 +116,9 @@ export default function Hero() {
             >
               {hero.subtitle}
             </Typography>
+            <Box sx={{ mt: -2.5, mb: 3 }}>
+              <PageTranslationNote />
+            </Box>
 
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
               <Button

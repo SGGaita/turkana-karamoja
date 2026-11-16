@@ -11,8 +11,6 @@ import {
   ListItem,
   ListItemText,
   Divider,
-  useMediaQuery,
-  useTheme,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
@@ -29,8 +27,6 @@ import { InstallAppButton } from '../contexts/InstallContext';
 export default function Navbar({ urgentBanner = null }) {
   const { branding, topbar, navLinks } = useSiteHeader();
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'), { noSsr: true });
   const router = useRouter();
 
   return (
@@ -145,42 +141,40 @@ export default function Navbar({ urgentBanner = null }) {
 
           <Box sx={{ flex: 1 }} />
 
-          {!isMobile && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              {navLinks.map((link) => {
-                const isActive = router.pathname === link.href;
-                return (
-                  <Button
-                    key={link.label}
-                    component={Link}
-                    href={link.href}
-                    sx={{
-                      color: isActive ? '#C1440E' : '#3D2B1F',
-                      fontSize: '0.85rem',
-                      fontWeight: isActive ? 700 : 500,
-                      px: 1.2,
-                      py: 0.8,
-                      borderBottom: isActive ? '2px solid #C1440E' : '2px solid transparent',
-                      borderRadius: 0,
-                      '&:hover': { color: '#C1440E', bgcolor: 'rgba(193,68,14,0.06)' },
-                    }}
-                  >
-                    {link.label}
-                  </Button>
-                );
-              })}
-            </Box>
-          )}
+          {/* Desktop links and the phone menu button are both in the page and shown by screen width (CSS), so the
+              server's HTML matches the first render on every screen. */}
+          <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 0.5 }}>
+            {navLinks.map((link) => {
+              const isActive = router.pathname === link.href;
+              return (
+                <Button
+                  key={link.label}
+                  component={Link}
+                  href={link.href}
+                  sx={{
+                    color: isActive ? '#C1440E' : '#3D2B1F',
+                    fontSize: '0.85rem',
+                    fontWeight: isActive ? 700 : 500,
+                    px: 1.2,
+                    py: 0.8,
+                    borderBottom: isActive ? '2px solid #C1440E' : '2px solid transparent',
+                    borderRadius: 0,
+                    '&:hover': { color: '#C1440E', bgcolor: 'rgba(193,68,14,0.06)' },
+                  }}
+                >
+                  {link.label}
+                </Button>
+              );
+            })}
+          </Box>
 
-          {isMobile && (
-            <IconButton
-              onClick={() => setDrawerOpen(true)}
-              sx={{ color: '#3D2B1F' }}
-              aria-label="Open menu"
-            >
-              <MenuIcon />
-            </IconButton>
-          )}
+          <IconButton
+            onClick={() => setDrawerOpen(true)}
+            sx={{ color: '#3D2B1F', display: { xs: 'inline-flex', md: 'none' } }}
+            aria-label="Open menu"
+          >
+            <MenuIcon />
+          </IconButton>
         </Toolbar>
       </AppBar>
 

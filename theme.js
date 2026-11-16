@@ -1,4 +1,5 @@
 import { createTheme } from '@mui/material/styles';
+import LinkBehavior from './components/LinkBehavior';
 
 const theme = createTheme({
   palette: {
@@ -138,6 +139,9 @@ const theme = createTheme({
     borderRadius: 8,
   },
   components: {
+    // Buttons and links with an internal href keep the reader's language (components/LinkBehavior.js, FE-26).
+    MuiButtonBase: { defaultProps: { LinkComponent: LinkBehavior } },
+    MuiLink: { defaultProps: { component: LinkBehavior } },
     MuiButton: {
       styleOverrides: {
         root: {

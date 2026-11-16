@@ -90,6 +90,6 @@ function WaterPointsPageBody({ itemsByLocale, pageByLocale }) {
   );
 }
 
-export async function getStaticProps() {
-  return cmsStaticProps(() => listCmsProps('water-points', 'water-points', waterPointFromCms), { revalidate: 60, name: 'water points' });
+export async function getStaticProps({ locale }) {
+  return cmsStaticProps(() => listCmsProps('water-points', 'water-points', waterPointFromCms), { locale, revalidate: 60, name: 'water points' });
 }

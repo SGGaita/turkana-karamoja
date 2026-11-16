@@ -4,7 +4,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import HelpLayout, { HelpUnavailable, helpRichTextSx } from '../../components/HelpLayout';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { pickLocale } from '../../lib/cms-alerts';
-import { inAllLocales } from '../../lib/cms';
+import { inAllLocales, withPageLocale } from '../../lib/cms';
 import { faqJsonLd } from '../../lib/seo';
 import { GUIDES, faqFromCms, getHelpFaq, helpCopy, helpPageAllLocales, helpStaticProps, topicsAllLocales } from '../../lib/cms-help';
 
@@ -74,13 +74,13 @@ export default function HelpFaq({ unavailable, faqByLocale, topicsByLocale, page
   );
 }
 
-export async function getStaticProps() {
-  return helpStaticProps(async () => {
+export async function getStaticProps({ locale }) {
+  return withPageLocale(locale, () => helpStaticProps(async () => {
     const [faqByLocale, topicsByLocale, pageByLocale] = await Promise.all([
       inAllLocales((l) => getHelpFaq(l).then(faqFromCms)),
       topicsAllLocales(),
       helpPageAllLocales(),
     ]);
     return { faqByLocale, topicsByLocale, pageByLocale };
-  });
+  }));
 }

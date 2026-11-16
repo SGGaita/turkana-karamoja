@@ -1,4 +1,5 @@
 import StatusPage, { statusPageProps } from '../components/StatusPage';
+import { withPageLocale } from '../lib/cms';
 
 const FALLBACK = {
   title: 'Something went wrong',
@@ -11,6 +12,6 @@ export default function ServerError({ pageByLocale }) {
 }
 
 // Built once with the site (a server-error page can't depend on the server): changes show after the next build.
-export async function getStaticProps() {
-  return { props: { pageByLocale: await statusPageProps('errors') } };
+export async function getStaticProps({ locale }) {
+  return { props: { pageByLocale: await withPageLocale(locale, () => statusPageProps('errors')) } };
 }

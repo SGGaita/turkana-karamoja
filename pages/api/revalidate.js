@@ -1,4 +1,7 @@
 import crypto from 'crypto';
+import { getGlobals } from '../../lib/cms';
+import { languagesFromGlobals } from '../../lib/cms-globals';
+import { DEFAULT_LOCALE, SITE_LOCALES, localePath } from '../../lib/locales';
 
 /**
  * On-demand revalidation (karamoja-wp WP-30): WordPress POSTs the paths it changed so those pages are rebuilt within
@@ -10,10 +13,34 @@ import crypto from 'crypto';
  *
  * Answers 200 with a result per path. A path that isn't a page yet (e.g. a brand-new alert) is reported, not fatal:
  * it is built on its first visit anyway.
+ *
+ * Each path is rebuilt in every language marked ready in Site settings → Languages (FE-26): /reports, /sw/reports.
+ * Languages not ready yet refresh on their normal timer.
  */
 
 const MAX_PATHS = 100;
-const CONCURRENCY = 4;
+const CONCURRENCY = 8;
+const LANG_TTL_MS = 60 * 1000;
+let readyCache = { at: 0, codes: null };
+
+/** Address languages to rebuild: English and the ready ones (all of them if Site settings can't be read). */
+export async function readyLanguages(now = Date.now(), load = () => getGlobals('en')) {
+  if (readyCache.codes && now - readyCache.at < LANG_TTL_MS) return readyCache.codes;
+  let codes = SITE_LOCALES;
+  try {
+    const ready = languagesFromGlobals(await load()).map((l) => l.code).filter((c) => SITE_LOCALES.includes(c));
+    if (ready.length) codes = [DEFAULT_LOCALE, ...ready.filter((c) => c !== DEFAULT_LOCALE)];
+  } catch {
+    /* CMS not reachable: every language */
+  }
+  readyCache = { at: now, codes };
+  return codes;
+}
+
+/** Every language's address of each path: ['/reports'] → ['/reports', '/sw/reports']. */
+export function languagePaths(paths, codes) {
+  return paths.flatMap((p) => codes.map((c) => localePath(p, c)));
+}
 
 function secretMatches(given, expected) {
   if (!given || !expected || expected.length < 32) return false;
@@ -53,12 +80,13 @@ export default async function handler(req, res) {
   }
 
   // Rebuild a few pages at a time: one by one, a full refresh can outlast WordPress's wait.
-  const results = new Array(wanted.length);
+  const targets = languagePaths(wanted, await readyLanguages());
+  const results = new Array(targets.length);
   let next = 0;
   const worker = async () => {
-    while (next < wanted.length) {
+    while (next < targets.length) {
       const i = next++;
-      const path = wanted[i];
+      const path = targets[i];
       try {
         await res.revalidate(path);
         results[i] = { path, ok: true };
@@ -67,7 +95,7 @@ export default async function handler(req, res) {
       }
     }
   };
-  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, wanted.length) }, worker));
+  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, targets.length) }, worker));
   const ok = results.filter((r) => r.ok).length;
   return res.status(200).json({ revalidated: ok, failed: results.length - ok, results });
 }

@@ -1,23 +1,21 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/router';
 import { DEFAULT_SITE_HEADER as fallbackSiteHeader, DEFAULT_HOME_SECTIONS as fallbackHomeSections } from '../lib/defaults';
 import siteHeaderSnapshot from '../lib/site-header.snapshot.json';
 import { cmsLocale, getGlobals } from '../lib/cms';
 import { shellFromGlobals } from '../lib/cms-globals';
 import { translate } from '../lib/ui-strings';
+import { DEFAULT_LOCALE, LOCALE_COOKIE, OLD_LOCALE_COOKIE, SITE_LOCALES, localePath, siteLocale } from '../lib/locales';
 
-export const LANG_COOKIE = 'tk_hub_lang';
-export const SUPPORTED_LOCALES = ['en', 'sw', 'tu', 'pk', 'ng'];
+/** Address languages (FE-26): the page's language is its address (/sw/…), not a cookie. */
+export const SUPPORTED_LOCALES = SITE_LOCALES;
 
-function readLangCookie() {
-  if (typeof document === 'undefined') return 'en';
-  const match = document.cookie.match(/(?:^|;\s*)tk_hub_lang=([^;]+)/);
-  const value = decodeURIComponent(match?.[1] || '');
-  return SUPPORTED_LOCALES.includes(value) ? value : 'en';
-}
-
-function writeLangCookie(locale) {
+/** Remembers the choice for the next visit (middleware.js sends English addresses there). */
+function rememberLocale(locale) {
   if (typeof document === 'undefined') return;
-  document.cookie = `${LANG_COOKIE}=${encodeURIComponent(locale)};path=/;max-age=${60 * 60 * 24 * 365};SameSite=Lax`;
+  const year = 60 * 60 * 24 * 365;
+  document.cookie = `${LOCALE_COOKIE}=${encodeURIComponent(locale)};path=/;max-age=${year};SameSite=Lax`;
+  document.cookie = `${OLD_LOCALE_COOKIE}=;path=/;max-age=0;SameSite=Lax`;
 }
 
 // Karamoja → Site settings (header, footer, helplines, languages, interface text) is fetched in the background — never
@@ -107,6 +105,9 @@ function useCmsContent(loader, locale, enabled) {
 const LanguageContext = createContext({
   t: (key, vars) => translate(null, key, vars),
   locale: 'en',
+  addressLocale: 'en',
+  readyLocales: ['en'],
+  pageUntranslated: false,
   setLocale: () => {},
   siteHeaderByLocale: { en: fallbackSiteHeader, sw: fallbackSiteHeader },
   homeSectionsByLocale: { en: fallbackHomeSections, sw: fallbackHomeSections },
@@ -118,16 +119,14 @@ export function LanguageProvider({
   children,
   homeSectionsByLocale,
   heroByLocale = null,
+  untranslated = null,
 }) {
-  const [locale, setLocaleState] = useState('en');
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
-  useEffect(() => {
-    setLocaleState(readLangCookie());
-    setMounted(true);
-  }, []);
-
-  const activeLocale = mounted ? locale : 'en';
+  // The address decides the language, on the server too: the first paint is already in that language.
+  const activeLocale = siteLocale(router?.locale) || DEFAULT_LOCALE;
   const cmsLoc = cmsLocale(activeLocale);
   const clientGlobals = useCmsContent(globalsLoader, cmsLoc, mounted);
 
@@ -138,11 +137,17 @@ export function LanguageProvider({
     if (link) link.setAttribute('href', cmsLoc === 'en' ? '/manifest.webmanifest' : `/manifest.webmanifest?lang=${cmsLoc}`);
   }, [mounted, cmsLoc]);
 
-  const setLocale = useCallback((nextLocale) => {
-    if (!SUPPORTED_LOCALES.includes(nextLocale)) return;
-    setLocaleState(nextLocale);
-    writeLangCookie(nextLocale);
-  }, []);
+  // The same page in another language: /reports → /sw/reports. Remembered for the next visit.
+  const setLocale = useCallback(
+    (nextLocale) => {
+      const loc = siteLocale(nextLocale);
+      if (!loc || !router) return;
+      rememberLocale(loc);
+      if (loc === activeLocale) return;
+      router.push({ pathname: router.pathname, query: router.query }, router.asPath, { locale: loc, scroll: false });
+    },
+    [router, activeLocale]
+  );
 
   const value = useMemo(() => {
     const headers = { en: fallbackSiteHeader }; // Built-in header until Site settings are saved.
@@ -151,12 +156,15 @@ export function LanguageProvider({
     const offered = shellFromGlobals(globalsFor(cmsLoc))?.languages; // Every language's settings carry the list; the freshest copy wins.
     const allowed = !offered || offered.some((l) => l.code === activeLocale || l.cms === cmsLoc);
     const effective = allowed ? activeLocale : 'en';
+    const ready = (offered || []).map((l) => l.code);
     const baseHeader = headers[effective] || headers.en || fallbackSiteHeader;
     const effectiveGlobals = globalsFor(cmsLocale(effective));
     const shell = shellFromGlobals(effectiveGlobals, baseHeader);
     const uiStrings = effectiveGlobals?.ui_strings || null; // Interface text: works before Site settings are saved.
     return {
       locale: effective,
+      addressLocale: activeLocale,
+      readyLocales: offered ? ready : SUPPORTED_LOCALES,
       setLocale,
       shell,
       t: (key, vars) => translate(uiStrings, key, vars),
@@ -169,7 +177,39 @@ export function LanguageProvider({
     };
   }, [activeLocale, cmsLoc, setLocale, homeSectionsByLocale, clientGlobals, heroByLocale]);
 
-  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
+  // Does this page (Website pages) have text still in English in the reader's language? (FE-26: note in the header.)
+  // `untranslated` is the page's pageByLocale (each language's answer lists `_untranslated` fields) or, for Home,
+  // untranslatedByLocale (the lists only).
+  const pageUntranslated = useMemo(() => {
+    const cms = cmsLocale(value.locale);
+    if (cms === 'en' || !untranslated) return false;
+    const entry = untranslated[cms];
+    const list = Array.isArray(entry) ? entry : entry?._untranslated;
+    return Array.isArray(list) && list.length > 0;
+  }, [untranslated, value.locale]);
+
+  // The remembered language, when an English address was answered from a saved copy (the service worker or the
+  // browser's cache) instead of reaching middleware.js. Online only: offline, the other language may not be saved.
+  useEffect(() => {
+    if (!mounted || !router || activeLocale !== DEFAULT_LOCALE) return;
+    // Read now, not at load: choosing English in the menu writes the cookie before moving to the English address.
+    const m = document.cookie.match(new RegExp(`(?:^|;\\s*)${LOCALE_COOKIE}=([^;]+)`));
+    const remembered = siteLocale(decodeURIComponent(m?.[1] || ''));
+    if (!remembered || remembered === DEFAULT_LOCALE || !value.readyLocales.includes(remembered)) return;
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+    router.replace({ pathname: router.pathname, query: router.query }, router.asPath, { locale: remembered, scroll: false });
+  }, [mounted, router, activeLocale, value.readyLocales]);
+
+  // A language not (or no longer) marked ready in Site settings → Languages: the English address instead.
+  const notReady = value.locale !== activeLocale;
+  useEffect(() => {
+    if (!mounted || !notReady || !router) return;
+    rememberLocale(DEFAULT_LOCALE);
+    router.replace({ pathname: router.pathname, query: router.query }, router.asPath, { locale: DEFAULT_LOCALE });
+  }, [mounted, notReady, router]);
+
+  const provided = useMemo(() => ({ ...value, pageUntranslated }), [value, pageUntranslated]);
+  return <LanguageContext.Provider value={provided}>{children}</LanguageContext.Provider>;
 }
 
 export function useLanguage() {
@@ -219,4 +259,13 @@ export function humanizeCode(code) {
  */
 export function useT() {
   return useLanguage().t;
+}
+
+/**
+ * The address of a page in the reader's language, for plain links that don't go through Next.js's Link (a link that
+ * opens a new tab): `const to = useLocalePath(); to('/help/x')` → '/sw/help/x'.
+ */
+export function useLocalePath() {
+  const { addressLocale } = useLanguage();
+  return (path) => localePath(path, addressLocale);
 }

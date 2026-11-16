@@ -240,6 +240,6 @@ async function cmsProps() {
   };
 }
 
-export async function getStaticProps() {
-  return cmsStaticProps(cmsProps, { revalidate: 120, name: 'community' });
+export async function getStaticProps({ locale }) {
+  return cmsStaticProps(cmsProps, { locale, revalidate: 120, name: 'community' });
 }

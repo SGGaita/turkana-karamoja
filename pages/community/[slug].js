@@ -14,6 +14,7 @@ import { cmsStaticProps, getCollection, getInitiative, getPageAllLocales, inAllL
 import { initiativeFromCms, sameSlugs } from '../../lib/cms-community';
 import { pickLocale } from '../../lib/cms-alerts';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { NotTranslatedBadge } from '../../components/NotTranslated';
 
 const HERO_IMAGE = 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1400&q=70';
 
@@ -113,6 +114,7 @@ export default function CommunityInitiativeDetail({ unavailable, articleByLocale
               />
             )}
 
+            <NotTranslatedBadge untranslated={article.untranslated} sx={{ mb: 2 }} />
             <Box sx={richTextSx} dangerouslySetInnerHTML={{ __html: article.content || `<p>${article.desc}</p>` }} />
 
             {(article.freq || article.times) && (
@@ -252,7 +254,7 @@ async function cmsProps(id) {
   };
 }
 
-export async function getStaticProps({ params }) {
+export async function getStaticProps({ params, locale }) {
   const id = extractIdFromSlugPath(params.slug);
   if (!/^\d+$/.test(String(id))) return { notFound: true };
   return cmsStaticProps(async () => {
@@ -263,5 +265,5 @@ export async function getStaticProps({ params }) {
       return { redirect: { destination: `/community/${canonical}`, permanent: true } };
     }
     return props;
-  }, { revalidate: 300, name: 'initiative' });
+  }, { locale, revalidate: 300, name: 'initiative' });
 }

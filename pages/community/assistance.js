@@ -120,6 +120,6 @@ function AssistancePageBody({ itemsByLocale, pageByLocale }) {
   );
 }
 
-export async function getStaticProps() {
-  return cmsStaticProps(() => listCmsProps('assistance-sites', 'assistance', assistanceSiteFromCms), { revalidate: 60, name: 'assistance sites' });
+export async function getStaticProps({ locale }) {
+  return cmsStaticProps(() => listCmsProps('assistance-sites', 'assistance', assistanceSiteFromCms), { locale, revalidate: 60, name: 'assistance sites' });
 }

@@ -4,6 +4,7 @@ import { Box } from '@mui/material';
 import StatusPage, { statusPageProps } from '../components/StatusPage';
 import TollFreeLines from '../components/TollFreeLines';
 import { useT } from '../contexts/LanguageContext';
+import { withPageLocale } from '../lib/cms';
 
 const FALLBACK = {
   title: 'You are offline',
@@ -28,6 +29,6 @@ export default function Offline({ pageByLocale }) {
   );
 }
 
-export async function getStaticProps() {
-  return { props: { pageByLocale: await statusPageProps('offline') }, revalidate: 3600 };
+export async function getStaticProps({ locale }) {
+  return { props: { pageByLocale: await withPageLocale(locale, () => statusPageProps('offline')) }, revalidate: 3600 };
 }

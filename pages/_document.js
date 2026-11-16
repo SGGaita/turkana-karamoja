@@ -1,15 +1,18 @@
 import { Html, Head, Main, NextScript } from 'next/document';
 import { headIcons } from '../lib/pwa';
 import pwaSnapshot from '../lib/pwa.snapshot.json';
+import { cmsFor } from '../lib/locales';
 
 // Icons and colour from Karamoja → Site settings → Installed app, as saved at build time (FE-08).
 const head = headIcons(pwaSnapshot);
 
-export default function Document() {
+export default function Document({ locale }) {
+  // <html lang> is the address language (en, sw, pko, tuv: the tags Core gives each language), set by Next.js (FE-26).
+  const cms = cmsFor(locale);
   return (
-    <Html lang="en">
+    <Html>
       <Head>
-        <link rel="manifest" href="/manifest.webmanifest" />
+        <link rel="manifest" href={cms === 'en' ? '/manifest.webmanifest' : `/manifest.webmanifest?lang=${cms}`} />
         <meta name="theme-color" content={head.themeColor} />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         {head.favicons.map((href) => {

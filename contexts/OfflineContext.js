@@ -2,9 +2,9 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { Button, Snackbar } from '@mui/material';
 import {
   STATIC_ROUTES, connectionIsSlow, contentPaths, fetchOfflineManifest, isInstalled, needsContent, needsCore,
-  readState, requestPersist, warm, writeState,
+  readState, requestPersist, warm, writeState, forLocale, groupFor,
 } from '../lib/offline';
-import { useT } from './LanguageContext';
+import { useLanguage, useT } from './LanguageContext';
 import OfflineIndicator from '../components/OfflineIndicator';
 
 /**
@@ -29,8 +29,16 @@ function buildId() {
   return typeof window !== 'undefined' ? window.__NEXT_DATA__?.buildId || '' : '';
 }
 
+/** Saved state as seen by one language (FE-26): another language's saved content doesn't count. */
+function stateFor(loc) {
+  const s = readState();
+  return s.content && (s.content.lang || 'en') !== loc ? { ...s, content: undefined } : s;
+}
+
 export function OfflineProvider({ children }) {
   const t = useT();
+  // Pages are saved in the language being read: /sw/reports for a Kiswahili reader (FE-26).
+  const { addressLocale: loc } = useLanguage();
   const [online, setOnline] = useState(true);
   const [slow, setSlow] = useState(false);
   const [supported, setSupported] = useState(false);
@@ -45,17 +53,17 @@ export function OfflineProvider({ children }) {
     running.current = true;
     try {
       const id = buildId();
-      let state = readState();
-      if (needsCore(state, id)) {
-        const done = await warm('core', STATIC_ROUTES, id);
-        if (!done.stopped) state = writeState({ build: { id, at: done.at } });
+      let state = stateFor(loc);
+      if (needsCore(state, `${id}:${loc}`)) {
+        const done = await warm(groupFor('core', loc), forLocale(loc, STATIC_ROUTES), id);
+        if (!done.stopped) state = writeState({ build: { id: `${id}:${loc}`, at: done.at } });
       }
       const manifest = await fetchOfflineManifest();
-      const paths = contentPaths(manifest);
+      const paths = forLocale(loc, contentPaths(manifest));
       setProgress({ done: 0, total: paths.length });
-      const done = await warm('content', paths, id, (m) => setProgress({ done: m.done, total: m.total }));
+      const done = await warm(groupFor('content', loc), paths, id, (m) => setProgress({ done: m.done, total: m.total }));
       state = writeState({
-        content: { at: done.at, total: done.total, failed: done.failed, manual: Boolean(manual) },
+        content: { at: done.at, total: done.total, failed: done.failed, manual: Boolean(manual), lang: loc },
         ...(manual ? { optIn: true } : {}),
       });
       setSavedAt(done.at);
@@ -66,7 +74,7 @@ export function OfflineProvider({ children }) {
       setProgress(null);
       running.current = false;
     }
-  }, []);
+  }, [loc]);
 
   /** The "Download for offline use" button. */
   const downloadForOffline = useCallback(async () => {
@@ -82,7 +90,7 @@ export function OfflineProvider({ children }) {
     const isSlow = connectionIsSlow(conn);
     setSlow(isSlow);
     if (isSlow) return; // Only the button.
-    const state = readState();
+    const state = stateFor(loc);
     const installed = isInstalled();
     if (needsContent(state, { installed })) {
       if (installed) requestPersist();
@@ -90,18 +98,18 @@ export function OfflineProvider({ children }) {
       return;
     }
     const id = buildId();
-    if (needsCore(state, id) && !running.current) {
+    if (needsCore(state, `${id}:${loc}`) && !running.current) {
       running.current = true;
       try {
-        const done = await warm('core', STATIC_ROUTES, id);
-        if (!done.stopped) writeState({ build: { id, at: done.at } });
+        const done = await warm(groupFor('core', loc), forLocale(loc, STATIC_ROUTES), id);
+        if (!done.stopped) writeState({ build: { id: `${id}:${loc}`, at: done.at } });
       } catch {
         /* Next time. */
       } finally {
         running.current = false;
       }
     }
-  }, [saveContent]);
+  }, [saveContent, loc]);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !('serviceWorker' in navigator) || typeof caches === 'undefined') return undefined;

@@ -91,6 +91,6 @@ function PlantingCalendarPageBody({ itemsByLocale, pageByLocale }) {
   );
 }
 
-export async function getStaticProps() {
-  return cmsStaticProps(() => listCmsProps('planting-advisories', 'planting-calendar', plantingFromCms), { revalidate: 60, name: 'planting advisories' });
+export async function getStaticProps({ locale }) {
+  return cmsStaticProps(() => listCmsProps('planting-advisories', 'planting-calendar', plantingFromCms), { locale, revalidate: 60, name: 'planting advisories' });
 }

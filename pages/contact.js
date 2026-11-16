@@ -79,7 +79,7 @@ export default function Contact({ unavailable, pageByLocale, offices, social }) 
   return <CmsContact pageByLocale={pageByLocale} offices={offices || []} social={social || []} />;
 }
 
-export async function getStaticProps() {
+export async function getStaticProps({ locale }) {
   return cmsStaticProps(async () => {
     const [pageByLocale, globals] = await Promise.all([getPageAllLocales('contact'), getGlobals('en').catch(() => null)]);
     return {
@@ -87,5 +87,5 @@ export async function getStaticProps() {
       offices: officesFromGlobals(globals),
       social: socialFromGlobals(globals),
     };
-  }, { revalidate: 3600, name: 'contact' });
+  }, { locale, revalidate: 3600, name: 'contact' });
 }

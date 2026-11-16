@@ -1,5 +1,6 @@
 import { Box, Typography, Breadcrumbs } from '@mui/material';
 import Link from 'next/link';
+import { PageTranslationNote } from './NotTranslated';
 
 export default function PageHero({ title, subtitle, image, breadcrumbs = [], contentMaxWidth = 1200 }) {
   return (
@@ -93,6 +94,7 @@ export default function PageHero({ title, subtitle, image, breadcrumbs = [], con
               {subtitle}
             </Typography>
           )}
+          <PageTranslationNote />
         </Box>
       </Box>
 

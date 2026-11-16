@@ -21,9 +21,13 @@ if (process.env.NEXT_PUBLIC_WP_BASE_URL) {
 }
 
 const { securityHeaders } = require('./lib/security-headers');
+const { SITE_LOCALES, DEFAULT_LOCALE } = require('./lib/locales');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Language addresses (FE-26): English at /, the others at /sw/…, /pko/…, /tuv/…. The address decides the language;
+  // middleware.js sends a returning visitor to the language they chose last.
+  i18n: { locales: SITE_LOCALES, defaultLocale: DEFAULT_LOCALE, localeDetection: false },
   // CSP, HSTS (production), no framing, no sniffing, referrer and permissions policies (FE-06).
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders() }];
@@ -51,7 +55,7 @@ const nextConfig = {
     // Report documents under the website's own address, so "Save for offline" can keep them (FE-09).
     const base = (process.env.NEXT_PUBLIC_WP_BASE_URL || '').replace(/\/$/, '');
     if (!/^https?:\/\//.test(base)) return [];
-    return [{ source: '/cms-files/:path*', destination: `${base}/wp-content/uploads/:path*` }];
+    return [{ source: '/cms-files/:path*', destination: `${base}/wp-content/uploads/:path*`, locale: false }];
   },
 };
 

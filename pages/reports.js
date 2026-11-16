@@ -35,7 +35,8 @@ function ReportsLibrary({ reportsByLocale = null, pageByLocale = null }) {
   const hero = sections?.hero || DEFAULT_HERO;
   const intro = sections?.intro?.enabled !== false ? sections?.intro : null;
   // Reports are pre-rendered (ISR) in every language and kept fresh by instant updates; no browser fetch.
-  const [reports, setReports] = useState(pickLocale(reportsByLocale, 'en') || []);
+  // The address gives the language on the server too (FE-26), so the first paint is already in it.
+  const [reports, setReports] = useState(pickLocale(reportsByLocale, locale) || []);
   useEffect(() => {
     setReports(pickLocale(reportsByLocale, locale) || []);
   }, [reportsByLocale, locale]);
@@ -336,6 +337,6 @@ async function cmsProps() {
   return { reportsByLocale, pageByLocale: isPublishedPage(pages?.en) ? pages : null };
 }
 
-export async function getStaticProps() {
-  return cmsStaticProps(cmsProps, { revalidate: 300, name: 'reports' });
+export async function getStaticProps({ locale }) {
+  return cmsStaticProps(cmsProps, { locale, revalidate: 300, name: 'reports' });
 }

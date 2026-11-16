@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import { useT } from '../contexts/LanguageContext';
+import { useLocalePath, useT } from '../contexts/LanguageContext';
 
 /**
  * "Help with this step": opens the matching Partner Guide article (Karamoja → Help) in a new tab, so a half-filled
@@ -9,10 +9,11 @@ import { useT } from '../contexts/LanguageContext';
  */
 export default function HelpStepLink({ article, sx }) {
   const t = useT();
+  const to = useLocalePath();
   return (
     <Box
       component="a"
-      href={`/help/${article}`}
+      href={to(`/help/${article}`)}
       target="_blank"
       rel="noopener"
       sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, fontSize: '0.8rem', color: '#2E7BB4', textDecoration: 'none', '&:hover': { textDecoration: 'underline' }, ...sx }}

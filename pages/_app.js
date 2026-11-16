@@ -25,6 +25,7 @@ export default function MyApp({ Component, pageProps }) {
     <LanguageProvider
       homeSectionsByLocale={pageProps.homeSectionsByLocale || null}
       heroByLocale={pageProps.heroByLocale || null}
+      untranslated={pageProps.untranslatedByLocale || pageProps.pageByLocale || null}
     >
       <ThemeProvider theme={theme}>
         <CssBaseline />

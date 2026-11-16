@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react';
 import { Box, CircularProgress, Drawer, IconButton, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
-import { useLanguage } from '../contexts/LanguageContext';
+import { useLanguage, useLocalePath } from '../contexts/LanguageContext';
 import { cmsLocale } from '../lib/cms';
 import { partnerArticles } from '../lib/help-client';
 
 /** The portal's Help panel (FE-14): every Partner Guide article, opening in a new tab. */
 export default function PortalHelp({ open, onClose }) {
+  const to = useLocalePath();
   const { t, locale } = useLanguage();
   const [articles, setArticles] = useState(null);
   const [failed, setFailed] = useState(false);
@@ -42,7 +43,7 @@ export default function PortalHelp({ open, onClose }) {
             <Box component="li" key={a.key} sx={{ borderBottom: '1px solid #F0EBE3' }}>
               <Box
                 component="a"
-                href={`/help/${a.key}`}
+                href={to(`/help/${a.key}`)}
                 target="_blank"
                 rel="noopener"
                 sx={{ display: 'flex', gap: 1.25, py: 1.25, textDecoration: 'none', '&:hover .t': { color: '#C1440E' } }}

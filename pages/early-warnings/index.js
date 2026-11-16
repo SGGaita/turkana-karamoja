@@ -13,6 +13,7 @@ import { buildSlugPath } from '../../lib/slug';
 import { cmsStaticProps, getCollection, getPageAllLocales, inAllLocales, isPublishedPage } from '../../lib/cms';
 import { pickLocale, splitAlerts, levelLabel, validityLabel } from '../../lib/cms-alerts';
 import { useLanguage, useT } from '../../contexts/LanguageContext';
+import { NotTranslatedBadge } from '../../components/NotTranslated';
 
 const HERO_IMAGE = 'https://images.unsplash.com/photo-1504608524841-42584120d693?w=1400&q=70';
 
@@ -66,6 +67,7 @@ function AlertCard({ a, ended = false }) {
           }}
         >
           {a.title}
+          <NotTranslatedBadge untranslated={a.untranslated} sx={{ ml: 1 }} />
         </Typography>
         {href && (
           <Button
@@ -231,6 +233,6 @@ async function cmsProps() {
   };
 }
 
-export async function getStaticProps() {
-  return cmsStaticProps(cmsProps, { revalidate: 120, name: 'early warnings' });
+export async function getStaticProps({ locale }) {
+  return cmsStaticProps(cmsProps, { locale, revalidate: 120, name: 'early warnings' });
 }

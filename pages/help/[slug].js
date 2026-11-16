@@ -5,7 +5,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import HelpLayout, { HelpUnavailable, helpRichTextSx } from '../../components/HelpLayout';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { pickLocale, formatDay } from '../../lib/cms-alerts';
-import { inAllLocales } from '../../lib/cms';
+import { inAllLocales, withPageLocale } from '../../lib/cms';
 import {
   GUIDES,
   articleFromCms,
@@ -108,8 +108,8 @@ export async function getStaticPaths() {
   }
 }
 
-export async function getStaticProps({ params }) {
-  return helpStaticProps(async () => {
+export async function getStaticProps({ params, locale }) {
+  return withPageLocale(locale, () => helpStaticProps(async () => {
     const slug = String(params?.slug || '');
     const [articleByLocale, topicsByLocale, pageByLocale] = await Promise.all([
       inAllLocales((l) => getHelpArticle(slug, l).then(articleFromCms)),
@@ -117,5 +117,5 @@ export async function getStaticProps({ params }) {
       helpPageAllLocales(),
     ]);
     return { articleByLocale, topicsByLocale, pageByLocale };
-  });
+  }));
 }

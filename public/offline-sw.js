@@ -18,7 +18,17 @@
   const PARALLEL = 3;
   const GIVE_UP_AFTER = 6; // Failures in a row: the connection is gone.
 
-  const dataUrl = (buildId, path) => `/_next/data/${buildId}${path === '/' ? '/index' : path}.json`;
+  // Page data of an address. With language addresses (FE-26) every language, English included, has its own folder:
+  // /sw/reports → /_next/data/<build>/sw/reports.json, / → /_next/data/<build>/en.json. `locales` comes with the job.
+  let LOCALES = [];
+  const dataUrl = (buildId, path) => {
+    if (!LOCALES.length) return `/_next/data/${buildId}${path === '/' ? '/index' : path}.json`;
+    const m = path.match(/^\/([^/]+)(\/.*)?$/);
+    const prefixed = m && LOCALES.includes(m[1]) && m[1] !== LOCALES[0];
+    const loc = prefixed ? m[1] : LOCALES[0];
+    const rest = prefixed ? m[2] || '' : path === '/' ? '' : path;
+    return `/_next/data/${buildId}/${loc}${rest}.json`;
+  };
 
   async function tell(message) {
     const list = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
@@ -32,7 +42,8 @@
     return true;
   }
 
-  async function warm({ id, group, buildId, paths }) {
+  async function warm({ id, group, buildId, paths, locales }) {
+    if (Array.isArray(locales) && locales.length) LOCALES = locales.filter((l) => typeof l === 'string');
     const origin = self.location.origin;
     const [pages, data, meta] = await Promise.all([caches.open(PAGES), caches.open(DATA), caches.open(META)]);
     const list = Array.from(new Set((paths || []).filter((p) => typeof p === 'string' && /^\/(?!\/)\S*$/.test(p))));
