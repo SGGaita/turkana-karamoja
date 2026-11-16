@@ -4,11 +4,12 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import DownloadIcon from '@mui/icons-material/Download';
 import { trackReportDownload } from '../lib/wordpress';
 import { fileDownloadCount, formatDownloadCount } from '../lib/report-utils';
+import SaveForOffline from './SaveForOffline';
 
 /** Compact language switcher for a report's file variants: one row of language pills
  *  (only shown when there's more than one) plus a single Preview/Download row for
  *  whichever language is selected — instead of repeating a full row per language. */
-export default function ReportFileLanguages({ files, report, onPreview, onDownloadTracked }) {
+export default function ReportFileLanguages({ files, report, onPreview, onDownloadTracked, reportPath }) {
   const [activeIdx, setActiveIdx] = useState(0);
 
   if (!files?.length) return null;
@@ -86,6 +87,7 @@ export default function ReportFileLanguages({ files, report, onPreview, onDownlo
           >
             Download
           </Button>
+          <SaveForOffline file={file} report={report} reportPath={reportPath} />
         </Box>
       </Box>
     </Box>

@@ -228,6 +228,7 @@ function ReportPage({ reportByLocale, pageByLocale }) {
                     report={current}
                     onPreview={(r, file) => setPreview({ report: r, file })}
                     onDownloadTracked={handleDownloadTracked}
+                    reportPath={router.asPath.split(/[?#]/)[0]}
                   />
                 </SidePanelSection>
               )}
