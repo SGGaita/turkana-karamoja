@@ -11,6 +11,7 @@ import { pickLocale, levelLabel } from '../../lib/cms-alerts';
 import { pageCopy } from '../../lib/cms-community';
 import { profileFromCms } from '../../lib/cms-orgs';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { NotTranslatedBadge } from '../../components/NotTranslated';
 
 const countryLabels = { KE: 'Kenya', UG: 'Uganda', INT: 'International' };
 
@@ -52,6 +53,7 @@ function CmsProfile({ profileByLocale, pageByLocale, paths }) {
                   </Box>
                 </Box>
               </Box>
+              <NotTranslatedBadge untranslated={org.untranslated} fields={['description']} sx={{ mb: 1 }} />
               {org.descriptionHtml && (
                 <Box sx={{ fontSize: '0.88rem', color: '#5A5A5A', lineHeight: 1.75, mb: 2, '& p': { m: '0 0 0.8em' }, '& a': { color: '#C1440E' } }} dangerouslySetInnerHTML={{ __html: org.descriptionHtml }} />
               )}
@@ -171,12 +173,12 @@ async function cmsProps(slug) {
 }
 
 // Organisation addresses are name slugs (no id), e.g. "/organizations/ndma". Core finds the organisation by it.
-export async function getStaticProps({ params }) {
+export async function getStaticProps({ params, locale }) {
   return cmsStaticProps(async () => {
     const props = await cmsProps(params.slug);
     if (!props) return null;
     const canonical = props.profileByLocale.en.organization.slug;
     if (canonical !== params.slug) return { redirect: { destination: `/organizations/${canonical}`, permanent: false } };
     return props;
-  }, { revalidate: 300, name: 'organization' });
+  }, { locale, revalidate: 300, name: 'organization' });
 }

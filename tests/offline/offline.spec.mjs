@@ -4,22 +4,23 @@ import { createRequire } from 'node:module';
 const { STATIC_ROUTES } = createRequire(import.meta.url)('../../lib/offline-config.js');
 const OFFLINE_TITLE = /You are offline/i;
 
-/** First visit: wait for the service worker and for the main pages of this build to be saved. */
-async function firstVisit(page) {
-  await page.goto('/', { waitUntil: 'load' });
+/** First visit: wait for the service worker and for the main pages of this build to be saved (in one language). */
+async function firstVisit(page, home = '/', locale = 'en') {
+  await page.goto(home, { waitUntil: 'load' });
   await page.evaluate(() => navigator.serviceWorker.ready);
   if (!(await page.evaluate(() => Boolean(navigator.serviceWorker.controller)))) {
     await page.reload({ waitUntil: 'load' });
   }
   await expect
     .poll(
-      () => page.evaluate(() => {
+      () => page.evaluate((loc) => {
         try {
-          return JSON.parse(localStorage.getItem('kc_offline') || '{}').build?.id === window.__NEXT_DATA__.buildId;
+          // Saved per language since FE-26: "<build>:<language>".
+          return JSON.parse(localStorage.getItem('kc_offline') || '{}').build?.id === `${window.__NEXT_DATA__.buildId}:${loc}`;
         } catch {
           return false;
         }
-      }),
+      }, locale),
       { timeout: 150_000, intervals: [1000] },
     )
     .toBe(true);
@@ -66,6 +67,24 @@ test('"Download for offline use" saves current content', async ({ page, context,
   for (const path of manifest.paths.slice(0, 5)) {
     await test.step(path, async () => {
       await page.goto(path, { waitUntil: 'domcontentloaded' });
+      await expect(page.locator('h1').first()).not.toHaveText(OFFLINE_TITLE);
+    });
+  }
+  await context.setOffline(false);
+});
+
+test('a Kiswahili reader gets the Kiswahili pages offline (FE-26)', async ({ page, context }) => {
+  await page.goto('/sw', { waitUntil: 'load' });
+  // Kiswahili not marked ready in Site settings → Languages: the site moves to English and there is nothing to test.
+  await page.waitForTimeout(1500);
+  test.skip(!page.url().includes('/sw'), 'Kiswahili is not marked ready in the CMS.');
+  await firstVisit(page, '/sw', 'sw');
+  await context.setOffline(true);
+  for (const route of ['/sw/reports', '/sw/early-warnings', '/sw/help']) {
+    await test.step(route, async () => {
+      const res = await page.goto(route, { waitUntil: 'domcontentloaded' });
+      expect(res?.ok(), `${route} answered`).toBeTruthy();
+      await expect(page.locator('html')).toHaveAttribute('lang', 'sw');
       await expect(page.locator('h1').first()).not.toHaveText(OFFLINE_TITLE);
     });
   }

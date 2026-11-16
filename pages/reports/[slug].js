@@ -23,6 +23,7 @@ const HERO_IMAGE = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=
 import { getReportFiles, applyReportDownloadStats } from '../../lib/report-utils';
 import { buildSlugPath, extractIdFromSlugPath, slugify } from '../../lib/slug';
 import { getCountryLabel } from '../../lib/countries';
+import { NotTranslatedBadge } from '../../components/NotTranslated';
 
 const richTextSx = {
   fontSize: '0.9rem',
@@ -157,6 +158,7 @@ function ReportPage({ reportByLocale, pageByLocale }) {
 
             <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontWeight: 700, fontSize: { xs: '1.3rem', md: '1.6rem' }, color: '#3D2B1F', mb: 1.5 }}>
               {current.title}
+              <NotTranslatedBadge untranslated={current.untranslated} sx={{ ml: 1.5 }} />
             </Typography>
 
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center', mb: 3 }}>
@@ -280,7 +282,7 @@ async function cmsProps(id) {
   return { reportByLocale, pageByLocale: isPublishedPage(pages?.en) ? pages : null };
 }
 
-export async function getStaticProps({ params }) {
+export async function getStaticProps({ params, locale }) {
   const id = extractIdFromSlugPath(params.slug);
   if (!/^\d+$/.test(String(id))) return { notFound: true };
   return cmsStaticProps(async () => {
@@ -292,5 +294,5 @@ export async function getStaticProps({ params }) {
       return { redirect: { destination: `/reports/${canonical}`, permanent: true } };
     }
     return props;
-  }, { revalidate: 300, name: 'report' });
+  }, { locale, revalidate: 300, name: 'report' });
 }

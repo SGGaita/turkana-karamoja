@@ -74,8 +74,8 @@ describe('shell from site settings', () => {
     expect(hotlinesFromGlobals(globals({ hotlines: { enabled: false, lines: [{ display: '1', tel: '1' }] } }))).toEqual([]);
   });
 
-  it('offers English and the languages marked ready; Turkana/Karamojong is "tu" on the website', () => {
-    expect(languagesFromGlobals(globals()).map((l) => l.code)).toEqual(['en', 'sw', 'tu']);
+  it('offers English and the languages marked ready, with their address codes (Turkana/Karamojong is /tuv, FE-26)', () => {
+    expect(languagesFromGlobals(globals()).map((l) => l.code)).toEqual(['en', 'sw', 'tuv']);
     expect(languagesFromGlobals({ languages: [{ code: 'en', enabled: false, label: 'English' }] }).map((l) => l.code)).toEqual(['en']);
   });
 

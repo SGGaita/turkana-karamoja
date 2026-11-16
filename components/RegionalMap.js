@@ -6,6 +6,8 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { HUB_MAP_LOCATIONS } from '../lib/hub-locations';
 import { getCartoTileUrl } from '../lib/map-tiles';
+import { useT } from '../contexts/LanguageContext';
+import LinkBehavior from './LinkBehavior';
 
 const ALERT_COLORS = {
   severe:   '#D63030',
@@ -75,6 +77,7 @@ const filterBtn = (active) => ({
 });
 
 export default function RegionalMap({ liveAdvisories = [], apiStale = false }) {
+  const t = useT();
   const [activeLayer, setActiveLayer] = useState('all');
   const [selected, setSelected] = useState(null);
 
@@ -176,11 +179,11 @@ export default function RegionalMap({ liveAdvisories = [], apiStale = false }) {
                 <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A', mb: 1 }}>Source: {selected.data.source}</Typography>
               )}
               <Typography
-                component="a"
+                component={LinkBehavior}
                 href={selected.data.href || '/early-warnings'}
                 sx={{ fontSize: '0.72rem', fontWeight: 700, color: '#C1440E', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
               >
-                View full advisory →
+                {t('alerts.view_full')} →
               </Typography>
             </>
           ) : selected.type === 'community' ? (

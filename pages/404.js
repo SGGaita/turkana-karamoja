@@ -1,4 +1,5 @@
 import StatusPage, { statusPageProps } from '../components/StatusPage';
+import { withPageLocale } from '../lib/cms';
 
 const FALLBACK = {
   title: 'Page not found',
@@ -11,6 +12,6 @@ export default function NotFound({ pageByLocale }) {
 }
 
 // Text from Karamoja → Website pages → Error pages; refreshed hourly and when the page is saved.
-export async function getStaticProps() {
-  return { props: { pageByLocale: await statusPageProps('errors') }, revalidate: 3600 };
+export async function getStaticProps({ locale }) {
+  return { props: { pageByLocale: await withPageLocale(locale, () => statusPageProps('errors')) }, revalidate: 3600 };
 }

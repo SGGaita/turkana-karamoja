@@ -6,6 +6,7 @@ import ReportDownloadStat from './ReportDownloadStat';
 import ShareLinks from './ShareLinks';
 import { buildSlugPath, slugify } from '../lib/slug';
 import { useT } from '../contexts/LanguageContext';
+import { NotTranslatedBadge } from './NotTranslated';
 
 export default function ReportCard({ report, onPreview, onDownloadTracked, compact = false }) {
   const t = useT();
@@ -57,6 +58,7 @@ export default function ReportCard({ report, onPreview, onDownloadTracked, compa
         }}
       >
         {report.title}
+        <NotTranslatedBadge untranslated={report.untranslated} sx={{ ml: 1 }} />
       </Typography>
       <Typography
         sx={{

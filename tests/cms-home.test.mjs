@@ -57,15 +57,15 @@ describe('home from CMS', () => {
     expect(homeVisibility(page())).toEqual({ hero: true, overview: true, about: true, map: true, warnings: false, initiatives: true, getInvolved: true });
   });
 
-  it('builds every website language; tu and ng read the combined CMS locale; missing ones use English', () => {
+  it('builds English and the languages loaded for this copy of the page (FE-26: /tuv reads the CMS "tk")', () => {
     const en = page();
-    const tk = page({ hero: { ...en.sections.hero, eyebrow: 'Turkana text' } });
+    const tk = page({ hero: { ...en.sections.hero, eyebrow: 'Turkana text' }, _untranslated: ['hero.title'] });
+    tk._untranslated = ['hero.title'];
     const props = homeProps({ en, tk }, { en: { backgroundImage: 'x' } }, { en: { footer: { a: 1 } } });
-    expect(Object.keys(props.heroByLocale).sort()).toEqual(['en', 'ng', 'pk', 'sw', 'tu']);
-    expect(props.heroByLocale.tu.eyebrow).toBe('Turkana text');
-    expect(props.heroByLocale.ng.eyebrow).toBe('Turkana text');
-    expect(props.heroByLocale.sw.eyebrow).toBe('Kenya · Uganda Districts');
-    expect(props.homeSectionsByLocale.pk.footer).toEqual({ a: 1 });
+    expect(Object.keys(props.heroByLocale).sort()).toEqual(['en', 'tuv']);
+    expect(props.heroByLocale.tuv.eyebrow).toBe('Turkana text');
+    expect(props.homeSectionsByLocale.tuv.footer).toEqual({ a: 1 });
+    expect(props.untranslatedByLocale).toEqual({ en: [], tk: ['hero.title'] });
     expect(props.homeVisible.warnings).toBe(false);
   });
 

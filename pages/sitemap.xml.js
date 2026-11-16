@@ -1,4 +1,5 @@
-import { getAll } from '../lib/cms';
+import { getAll, getGlobals } from '../lib/cms';
+import { languagesFromGlobals } from '../lib/cms-globals';
 import { getHelpTopics, topicsFromCms } from '../lib/cms-help';
 import { siteUrl, sitemapEntries, sitemapXml } from '../lib/seo';
 
@@ -15,13 +16,16 @@ export async function getServerSideProps({ res }) {
     res.end('Sitemap not available: NEXT_PUBLIC_SITE_URL is not set.');
     return { props: {} };
   }
-  const [alerts, reports, organizations, initiatives, topics] = await Promise.allSettled([
+  const [alerts, reports, organizations, initiatives, topics, globals] = await Promise.allSettled([
     getAll('alerts'),
     getAll('reports'),
     getAll('organizations'),
     getAll('initiatives'),
     getHelpTopics('en'),
+    getGlobals('en'),
   ]);
+  // Every page in each language marked ready in Site settings → Languages (FE-26); English only if unknown.
+  const ready = globals.status === 'fulfilled' ? languagesFromGlobals(globals.value) : [];
   let helpSlugs = [];
   if (topics.status === 'fulfilled') {
     try {
@@ -36,7 +40,7 @@ export async function getServerSideProps({ res }) {
     organizations: settled(organizations),
     initiatives: settled(initiatives),
     helpSlugs,
-  }));
+  }), process.env, ready.length ? ready : undefined);
   res.setHeader('Content-Type', 'application/xml; charset=utf-8');
   res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
   res.end(body);

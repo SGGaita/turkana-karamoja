@@ -1,8 +1,9 @@
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { useShell } from '../contexts/LanguageContext';
+import { useLanguage, useShell } from '../contexts/LanguageContext';
 import { APP_FULL_NAME } from '../lib/branding';
-import { absoluteUrl, canonicalPath, indexingAllowed, NOINDEX_PATHS } from '../lib/seo';
+import { localePath } from '../lib/locales';
+import { absoluteUrl, canonicalPath, hreflangLinks, indexingAllowed, NOINDEX_PATHS } from '../lib/seo';
 
 const DEFAULT_IMAGE = '/icons/icon-512.png';
 
@@ -14,16 +15,25 @@ const DEFAULT_IMAGE = '/icons/icon-512.png';
  */
 export default function SeoHead({ type = 'website', image = '', noindex = false, jsonLd = null }) {
   const router = useRouter();
-  const seo = useShell()?.seo;
+  const shell = useShell();
+  const seo = shell?.seo;
+  const { addressLocale, readyLocales } = useLanguage();
+  // router.asPath has no language prefix: the canonical address adds the page's own (/sw/reports, FE-26).
   const path = canonicalPath(router?.asPath);
   const pagePath = canonicalPath(router?.pathname);
-  const url = absoluteUrl(path);
+  const url = absoluteUrl(localePath(path, addressLocale));
   const share = absoluteUrl(image || seo?.shareImage || DEFAULT_IMAGE);
-  const hidden = noindex || !indexingAllowed() || NOINDEX_PATHS.includes(pagePath) || NOINDEX_PATHS.includes(path);
+  const notReady = !readyLocales.includes(addressLocale); // Languages not marked ready stay out of search results.
+  const hidden = noindex || notReady || !indexingAllowed() || NOINDEX_PATHS.includes(pagePath) || NOINDEX_PATHS.includes(path);
+  const alternates = hidden ? [] : hreflangLinks(path, shell?.languages || []);
   return (
     <Head>
       {url && !hidden && <link rel="canonical" href={url} key="canonical" />}
       {url && !hidden && <meta property="og:url" content={url} key="og:url" />}
+      {alternates.map((a) => (
+        <link rel="alternate" hrefLang={a.hreflang} href={a.href} key={`alt-${a.hreflang}`} />
+      ))}
+      <meta property="og:locale" content={(shell?.languages || []).find((l) => l.code === addressLocale)?.htmlLang || addressLocale} key="og:locale" />
       <meta property="og:type" content={type} key="og:type" />
       <meta property="og:site_name" content={APP_FULL_NAME} key="og:site_name" />
       {share && <meta property="og:image" content={share} key="og:image" />}

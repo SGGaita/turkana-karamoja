@@ -98,6 +98,6 @@ async function cmsProps() {
   return { alertsByLocale, ...content }; // heroByLocale / homeSectionsByLocale go to the shell (_app.js).
 }
 
-export async function getStaticProps() {
-  return cmsStaticProps(cmsProps, { revalidate: 120, name: 'home' });
+export async function getStaticProps({ locale }) {
+  return cmsStaticProps(cmsProps, { locale, revalidate: 120, name: 'home' });
 }

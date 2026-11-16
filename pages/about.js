@@ -109,9 +109,9 @@ export default function About({ unavailable, pageByLocale, areas = null }) {
   return <CmsAbout pageByLocale={pageByLocale} areas={areas} />;
 }
 
-export async function getStaticProps() {
+export async function getStaticProps({ locale }) {
   return cmsStaticProps(async () => {
     const [pageByLocale, areas] = await Promise.all([getPageAllLocales('about'), getCoverageAreas()]);
     return { pageByLocale: isPublishedPage(pageByLocale.en) ? pageByLocale : null, areas };
-  }, { revalidate: 3600, name: 'about' });
+  }, { locale, revalidate: 3600, name: 'about' });
 }

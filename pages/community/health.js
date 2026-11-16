@@ -123,6 +123,6 @@ function HealthAlertsPageBody({ itemsByLocale, pageByLocale }) {
   );
 }
 
-export async function getStaticProps() {
-  return cmsStaticProps(() => listCmsProps('alerts', 'health', healthAlertFromCms), { revalidate: 60, name: 'health alerts' });
+export async function getStaticProps({ locale }) {
+  return cmsStaticProps(() => listCmsProps('alerts', 'health', healthAlertFromCms), { locale, revalidate: 60, name: 'health alerts' });
 }

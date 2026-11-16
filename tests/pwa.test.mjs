@@ -62,7 +62,7 @@ describe('buildManifest', () => {
       name: live.name,
       short_name: 'Karamoja',
       lang: 'sw',
-      start_url: '/?source=pwa',
+      start_url: '/sw?source=pwa',
       scope: '/',
       display: 'standalone',
       theme_color: '#3D2B1F',
@@ -72,9 +72,15 @@ describe('buildManifest', () => {
     expect(m.icons.every((i) => i.type === 'image/png' && i.purpose)).toBe(true);
   });
 
+  it('opens in the language it was installed in, with a real language tag (FE-26)', () => {
+    expect(buildManifest({ ...live, lang: 'en' }, null)).toMatchObject({ lang: 'en', start_url: '/?source=pwa', id: '/' });
+    expect(buildManifest({ ...live, lang: 'pk' }, null)).toMatchObject({ lang: 'pko', start_url: '/pko?source=pwa', id: '/' });
+    expect(buildManifest({ ...live, lang: 'tk' }, null).lang).toBe('tuv');
+  });
+
   it('keeps only shortcuts to pages of the site, tagged as coming from the app', () => {
     const m = buildManifest(live, snapshot);
-    expect(m.shortcuts.map((s) => s.url)).toEqual(['/early-warnings?source=pwa', '/reports?type=a&source=pwa']);
+    expect(m.shortcuts.map((s) => s.url)).toEqual(['/sw/early-warnings?source=pwa', '/sw/reports?type=a&source=pwa']);
     expect(m.shortcuts[1].short_name).toBe('Reports');
     expect(m.shortcuts[0].icons[0].src).toBe('/icons/cms/abc1234567/icon-192.png');
   });

@@ -235,5 +235,9 @@
   "install.ios_title": "Add Karamoja to your Home Screen",
   "install.ios_step_share": "Tap the Share button in Safari's toolbar.",
   "install.ios_step_add": "Scroll down and tap \"Add to Home Screen\".",
-  "install.ios_step_done": "Tap \"Add\". Open Karamoja from your Home Screen from now on."
+  "install.ios_step_done": "Tap \"Add\". Open Karamoja from your Home Screen from now on.",
+  "language.select": "Select language",
+  "language.not_translated": "Not yet translated",
+  "language.not_translated_hint": "Shown in English until it is translated.",
+  "language.page_partly": "Parts of this page are not translated yet and are shown in English."
 }

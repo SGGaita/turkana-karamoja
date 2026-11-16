@@ -20,6 +20,7 @@ import { buildSlugPath, extractIdFromSlugPath } from '../../lib/slug';
 import { cmsStaticProps, getAlert, getPageAllLocales, inAllLocales, isPublishedPage } from '../../lib/cms';
 import { alertFromCms, pickLocale, levelLabel, validityLabel } from '../../lib/cms-alerts';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { NotTranslatedBadge } from '../../components/NotTranslated';
 
 const HERO_IMAGE = 'https://images.unsplash.com/photo-1504608524841-42584120d693?w=1400&q=70';
 
@@ -133,6 +134,7 @@ export default function AdvisoryDetail({ unavailable, alertByLocale, pageByLocal
               }}
             >
               {alert.title}
+              <NotTranslatedBadge untranslated={alert.untranslated} sx={{ ml: 1.5 }} />
             </Typography>
 
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2.5, mb: 3 }}>
@@ -412,7 +414,7 @@ async function cmsProps(id) {
   return { alertByLocale, pageByLocale: isPublishedPage(pages?.en) ? pages : null };
 }
 
-export async function getStaticProps({ params }) {
+export async function getStaticProps({ params, locale }) {
   const id = extractIdFromSlugPath(params.slug);
   if (!/^\d+$/.test(String(id))) return { notFound: true };
   return cmsStaticProps(async () => {
@@ -424,5 +426,5 @@ export async function getStaticProps({ params }) {
       return { redirect: { destination: `/early-warnings/${canonical}`, permanent: true } };
     }
     return props;
-  }, { revalidate: 120, name: 'alert' });
+  }, { locale, revalidate: 120, name: 'alert' });
 }

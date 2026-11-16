@@ -1,18 +1,24 @@
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 import { Box, Button, Menu, MenuItem, Typography } from '@mui/material';
 import LanguageIcon from '@mui/icons-material/Language';
 import CheckIcon from '@mui/icons-material/Check';
 
-import { HUB_LANGUAGES } from '../lib/languages';
-import { useLanguage, useShell, SUPPORTED_LOCALES } from '../contexts/LanguageContext';
-import { cmsLocale } from '../lib/cms';
+import { DEFAULT_LANGUAGES } from '../lib/defaults';
+import { localePath } from '../lib/locales';
+import { useLanguage, useShell, useT } from '../contexts/LanguageContext';
 
+/**
+ * Language menu (FE-26): English and the languages marked ready in Karamoja → Site settings → Languages. Each entry
+ * is a link to the same page in that language (/reports → /sw/reports); choosing one is remembered for the next visit.
+ */
 export default function LanguageSelector({ variant = 'default' }) {
   const { locale, setLocale } = useLanguage();
-  // Site settings → Languages decides which languages are offered; the built-in list until those are saved.
+  const t = useT();
+  const router = useRouter();
   const shell = useShell();
-  const languages = shell?.languages?.length ? shell.languages : HUB_LANGUAGES;
-  const isCurrent = (lang) => lang.code === locale || (lang.cms && lang.cms === cmsLocale(locale));
+  const languages = shell?.languages?.length ? shell.languages : DEFAULT_LANGUAGES;
+  const isCurrent = (lang) => lang.code === locale;
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -24,11 +30,13 @@ export default function LanguageSelector({ variant = 'default' }) {
     setAnchorEl(null);
   };
 
-  const handleLanguageSelect = (langCode) => {
+  const choose = (event, code) => {
+    // A normal click: navigate through the context (keeps the scroll position and remembers the choice).
+    // Ctrl/Cmd-click or middle-click: let the link open the other language in a new tab.
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.button === 1) return;
+    event.preventDefault();
     handleClose();
-    if (SUPPORTED_LOCALES.includes(langCode)) {
-      setLocale(langCode);
-    }
+    setLocale(code);
   };
 
   const currentLanguage = languages.find(isCurrent) || languages[0];
@@ -38,6 +46,10 @@ export default function LanguageSelector({ variant = 'default' }) {
     <Box>
       <Button
         onClick={handleClick}
+        aria-label={`${t('language.select')}: ${currentLanguage?.nativeName || ''}`}
+        aria-haspopup="menu"
+        aria-expanded={open ? 'true' : undefined}
+        aria-controls={open ? 'language-menu' : undefined}
         startIcon={<LanguageIcon />}
         fullWidth={isDrawer}
         sx={{
@@ -57,6 +69,7 @@ export default function LanguageSelector({ variant = 'default' }) {
         {currentLanguage?.nativeName}
       </Button>
       <Menu
+        id="language-menu"
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
@@ -72,17 +85,22 @@ export default function LanguageSelector({ variant = 'default' }) {
       >
         <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid #E8E0D5' }}>
           <Typography sx={{ fontSize: '0.7rem', color: '#9A9A9A', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>
-            Select Language
+            {t('language.select')}
           </Typography>
         </Box>
         {languages.map((lang) => {
-          const isSupported = SUPPORTED_LOCALES.includes(lang.code);
           return (
             <MenuItem
               key={lang.code}
-              onClick={() => handleLanguageSelect(lang.code)}
+              // A plain link to the page in that language (not Next.js's Link: it prefetches on hover, before the
+              // choice is saved, and middleware.js would then send the click back to the language being left).
+              component="a"
+              href={localePath(router.asPath, lang.code)}
+              hrefLang={lang.htmlLang || lang.code}
+              lang={lang.htmlLang || lang.code}
+              onClick={(e) => choose(e, lang.code)}
               selected={isCurrent(lang)}
-              disabled={!isSupported}
+              aria-current={isCurrent(lang) ? 'true' : undefined}
               sx={{
                 py: 1.5,
                 px: 2,

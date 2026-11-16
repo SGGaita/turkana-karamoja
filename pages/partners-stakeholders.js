@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
@@ -33,7 +34,7 @@ import {
   USER_EMAIL_KEY, LEGACY_TOKEN_KEY,
 } from '../lib/org-session';
 import HelpStepLink from '../components/HelpStepLink';
-import { getPageAllLocales, isPublishedPage } from '../lib/cms';
+import { getPageAllLocales, isPublishedPage, withPageLocale } from '../lib/cms';
 import { pageCopy } from '../lib/cms-community';
 import { useLanguage } from '../contexts/LanguageContext';
 import HelpTip from '../components/HelpTip';
@@ -323,7 +324,7 @@ export default function Dashboard({ pageByLocale = null }) {
           <TextField label="Password" type="password" autoComplete="current-password" fullWidth required value={loginForm.password} onChange={(e) => setLoginForm((f) => ({ ...f, password: e.target.value }))} size="small" />
           {forgotPasswordUrl && (
             <Typography sx={{ fontSize: '0.8rem', mt: 1.5 }}>
-              <a href={forgotPasswordUrl} style={{ color: '#C1440E' }}>Forgot your password?</a>
+              <Link href={forgotPasswordUrl} style={{ color: '#C1440E' }}>Forgot your password?</Link>
             </Typography>
           )}
         </DialogContent>
@@ -567,10 +568,10 @@ export default function Dashboard({ pageByLocale = null }) {
 }
 
 // Page text from Karamoja → Website pages → Partner portal (the dashboard itself loads in the browser).
-export async function getStaticProps() {
+export async function getStaticProps({ locale }) {
   let pageByLocale = null;
   try {
-    const pages = await getPageAllLocales('partners');
+    const pages = await withPageLocale(locale, () => getPageAllLocales('partners'));
     pageByLocale = isPublishedPage(pages?.en) ? pages : null;
   } catch {
     /* Core not reachable: the defaults */
