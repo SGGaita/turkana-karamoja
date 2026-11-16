@@ -98,10 +98,10 @@ export function HelpUnavailable() {
 /**
  * A help page: hero, back link, sidebar with the guides and this page's headings, the content, and the contact box.
  */
-export default function HelpLayout({ title, subtitle, image, breadcrumbs, guides, active, toc, faqLabel, contact, children }) {
+export default function HelpLayout({ title, subtitle, image, breadcrumbs, guides, active, toc, faqLabel, contact, jsonLd = null, children }) {
   const t = useT();
   return (
-    <Layout title={title}>
+    <Layout title={title} jsonLd={jsonLd}>
       <PageHero title={title} subtitle={subtitle} image={image} breadcrumbs={breadcrumbs} />
       <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, md: 4 }, py: { xs: 4, md: 6 } }}>
         <Button component={Link} href="/help" startIcon={<ArrowBackIcon />} sx={{ mb: 3, color: '#5A5A5A', textTransform: 'none' }}>

@@ -36,6 +36,7 @@ import HelpStepLink from '../components/HelpStepLink';
 import { getPageAllLocales, isPublishedPage } from '../lib/cms';
 import { pageCopy } from '../lib/cms-community';
 import { useLanguage } from '../contexts/LanguageContext';
+import HelpTip from '../components/HelpTip';
 
 const STAT_CARDS = [
   { key: 'total', label: 'Total submissions', color: '#3D2B1F' },
@@ -337,7 +338,7 @@ export default function Dashboard({ pageByLocale = null }) {
   const pwHint = passwordHint(pwForm.next);
   const passwordDialog = (
     <Dialog open={pwOpen} onClose={() => setPwOpen(false)} maxWidth="xs" fullWidth>
-      <DialogTitle sx={{ fontFamily: '"Montserrat", sans-serif' }}>Change password</DialogTitle>
+      <DialogTitle sx={{ fontFamily: '"Montserrat", sans-serif', display: 'flex', alignItems: 'center', gap: 0.5 }}>Change password <HelpTip contextKey="partner.set-password" /></DialogTitle>
       <Box component="form" onSubmit={handleChangePassword}>
         <DialogContent>
           {pwError && <Alert severity="error" sx={{ mb: 2 }}>{pwError}</Alert>}

@@ -12,6 +12,9 @@ import CampaignOutlinedIcon from '@mui/icons-material/CampaignOutlined';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import LogoutIcon from '@mui/icons-material/Logout';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import PortalHelp from './PortalHelp';
+import { useT } from '../contexts/LanguageContext';
 import { APP_NAME, APP_PAGE_TITLE_SUFFIX } from '../lib/branding';
 
 const SIDEBAR_WIDTH = 264;
@@ -22,7 +25,8 @@ export const DASHBOARD_SECTIONS = [
   { key: 'report', label: 'Submit Report', icon: DescriptionOutlinedIcon },
 ];
 
-function SidebarContent({ orgRecord, section, onSectionChange, onLogout, onNavigate }) {
+function SidebarContent({ orgRecord, section, onSectionChange, onLogout, onNavigate, onHelp }) {
+  const t = useT();
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', bgcolor: '#3D2B1F', color: 'white' }}>
       <Box sx={{ p: 2.5, pb: 2 }}>
@@ -77,6 +81,11 @@ function SidebarContent({ orgRecord, section, onSectionChange, onLogout, onNavig
       <Divider sx={{ borderColor: 'rgba(255,255,255,0.12)' }} />
 
       <Box sx={{ p: 1.5 }}>
+        {/* Partner Guide articles (FE-14). */}
+        <ListItemButton onClick={() => { onHelp?.(); onNavigate?.(); }} sx={{ borderRadius: 1.5, mb: 0.5, color: 'rgba(255,255,255,0.85)', '&:hover': { bgcolor: 'rgba(255,255,255,0.08)' } }}>
+          <ListItemIcon sx={{ minWidth: 36, color: 'inherit' }}><HelpOutlineIcon fontSize="small" /></ListItemIcon>
+          <ListItemText primaryTypographyProps={{ fontSize: '0.85rem' }}>{t('help.portal_title')}</ListItemText>
+        </ListItemButton>
         <ListItemButton component={Link} href="/" sx={{ borderRadius: 1.5, mb: 0.5, color: 'rgba(255,255,255,0.85)', '&:hover': { bgcolor: 'rgba(255,255,255,0.08)' } }}>
           <ListItemIcon sx={{ minWidth: 36, color: 'inherit' }}><HomeOutlinedIcon fontSize="small" /></ListItemIcon>
           <ListItemText primaryTypographyProps={{ fontSize: '0.85rem' }}>Back to site</ListItemText>
@@ -102,6 +111,7 @@ export default function DashboardShell({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   const activeLabel = DASHBOARD_SECTIONS.find((s) => s.key === section)?.label || 'Overview';
 
@@ -126,7 +136,7 @@ export default function DashboardShell({
             height: '100vh',
           }}
         >
-          <SidebarContent orgRecord={orgRecord} section={section} onSectionChange={onSectionChange} onLogout={onLogout} />
+          <SidebarContent onHelp={() => setHelpOpen(true)} orgRecord={orgRecord} section={section} onSectionChange={onSectionChange} onLogout={onLogout} />
         </Box>
 
         {/* Mobile temporary drawer */}
@@ -142,7 +152,7 @@ export default function DashboardShell({
             </IconButton>
           </Box>
           <Box sx={{ flex: 1, height: '100%' }}>
-            <SidebarContent orgRecord={orgRecord} section={section} onSectionChange={onSectionChange} onLogout={onLogout} onNavigate={() => setMobileOpen(false)} />
+            <SidebarContent onHelp={() => setHelpOpen(true)} orgRecord={orgRecord} section={section} onSectionChange={onSectionChange} onLogout={onLogout} onNavigate={() => setMobileOpen(false)} />
           </Box>
         </Drawer>
 
@@ -183,6 +193,7 @@ export default function DashboardShell({
           </Box>
         </Box>
       </Box>
+      <PortalHelp open={helpOpen} onClose={() => setHelpOpen(false)} />
     </>
   );
 }
