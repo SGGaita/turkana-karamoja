@@ -60,6 +60,19 @@ export function InstallProvider({ children }) {
   const [settings, setSettings] = useState(() => promptSettings(pwaSnapshot?.pwa?.install_prompt));
   const shownThisPage = useRef(false);
   const hideTimer = useRef(null);
+  // The analytics question goes first (components/AnalyticsConsent.js): no install offer while it is on screen.
+  const [consentOpen, setConsentOpen] = useState(false);
+  useEffect(() => {
+    setConsentOpen(Boolean(window.__kcConsentOpen));
+    const on = () => setConsentOpen(true);
+    const off = () => setConsentOpen(false);
+    window.addEventListener('kc-consent-open', on);
+    window.addEventListener('kc-consent-closed', off);
+    return () => {
+      window.removeEventListener('kc-consent-open', on);
+      window.removeEventListener('kc-consent-closed', off);
+    };
+  }, []);
 
   const canInstall = !installed && (Boolean(promptEvent) || ios);
 
@@ -94,7 +107,7 @@ export function InstallProvider({ children }) {
 
   // Offered by itself, by the settings.
   useEffect(() => {
-    if (!canInstall || open || shownThisPage.current) return undefined;
+    if (!canInstall || open || shownThisPage.current || consentOpen) return undefined;
     const verdict = decide({
       settings, state: readInstallState(), path: router.asPath, canInstall, installed,
     });
@@ -107,7 +120,7 @@ export function InstallProvider({ children }) {
       return () => window.clearTimeout(id);
     }
     return undefined;
-  }, [canInstall, installed, open, router.asPath, settings, show]);
+  }, [canInstall, installed, open, router.asPath, settings, show, consentOpen]);
 
   // "Hide after N seconds" (0 = until the visitor chooses). Hiding this way is not a "Later".
   useEffect(() => {

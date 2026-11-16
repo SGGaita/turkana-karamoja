@@ -472,6 +472,12 @@
             }
           }
         },
+        "analytics": {
+          "fields": {
+            "ga4_id": "text",
+            "privacy_url": "link"
+          }
+        },
         "languages": {
           "fields": {
             "sw": "toggle",

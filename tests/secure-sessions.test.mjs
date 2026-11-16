@@ -112,7 +112,8 @@ describe('security headers', () => {
   const prod = { NODE_ENV: 'production', NEXT_PUBLIC_WP_BASE_URL: 'https://cms.example/' };
   it('allows scripts only from the site and Turnstile', () => {
     const csp = contentSecurityPolicy(prod);
-    expect(csp).toContain("script-src 'self' https://challenges.cloudflare.com;");
+    expect(csp).toContain("script-src 'self' https://challenges.cloudflare.com https://www.googletagmanager.com;");
+    expect(csp).toContain('https://*.google-analytics.com');
     expect(csp).not.toContain('unsafe-eval');
     expect(csp).toContain("connect-src 'self' https://cms.example https://challenges.cloudflare.com");
     expect(csp).toContain("frame-ancestors 'none'");
