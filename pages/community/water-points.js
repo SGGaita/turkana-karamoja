@@ -1,4 +1,5 @@
 import { Box, Typography } from '@mui/material';
+import { serviceHero } from '../../lib/defaults';
 import Layout from '../../components/Layout';
 import PageHero from '../../components/PageHero';
 import CmsUnavailable from '../../components/CmsUnavailable';
@@ -13,8 +14,7 @@ import { useLanguage, useVocabLabel } from '../../contexts/LanguageContext';
 // What the page showed before Karamoja → Website pages → Water points is saved.
 const DEFAULT_COPY = {
   hero: {
-    title: 'Water Point Status Map',
-    subtitle: 'Status of boreholes, pans, dams and water trucking points across Turkana and Karamoja',
+    ...serviceHero('water-points'),
     image: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=1400&q=70',
   },
   intro: {},

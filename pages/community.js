@@ -7,8 +7,9 @@ import CommunityInitiativeCard from '../components/CommunityInitiativeCard';
 import TollFreeLines from '../components/TollFreeLines';
 import { IntroBox } from '../components/CommunityServiceLayout';
 import { groupCommunityByCountryRegion } from '../lib/regions';
-import { cmsStaticProps, getAll, getPageAllLocales, inAllLocales, isPublishedPage } from '../lib/cms';
-import { chosen, initiativeFromCms, pageCopy, programmeFromCms, sameSlugs } from '../lib/cms-community';
+import { CMS_LOCALES, cmsStaticProps, getAll, getPageAllLocales, inAllLocales, isPublishedPage } from '../lib/cms';
+import { chosen, initiativeFromCms, pageCopy, programmeFromCms, sameSlugs, serviceCardsByLocale } from '../lib/cms-community';
+import { SERVICE_PAGES } from '../lib/defaults';
 import { pickLocale } from '../lib/cms-alerts';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -61,12 +62,16 @@ function RadioCard({ station }) {
   );
 }
 
-export default function Community({ unavailable, programmesByLocale, initiativesByLocale, pageByLocale }) {
+export default function Community({ unavailable, servicesByLocale, programmesByLocale, initiativesByLocale, pageByLocale }) {
   const { locale, t } = useLanguage();
   if (unavailable) return <CmsUnavailable />;
   const { copy, shown, hero } = pageCopy(pageByLocale, locale, DEFAULT_COPY);
   // The items picked in the page's sections, in that order (all published items until something is picked).
-  const programmes = chosen(copy('services').items, pickLocale(programmesByLocale, locale) || []);
+  // The service pages first (always), then the programmes picked in the page's Services section.
+  const programmes = [
+    ...(pickLocale(servicesByLocale, locale) || []),
+    ...chosen(copy('services').items, pickLocale(programmesByLocale, locale) || []),
+  ];
   const communityInitiatives = chosen(copy('initiatives').items, pickLocale(initiativesByLocale, locale) || []);
   // Karamoja → Website pages → Community → How we reach people / Partner radio stations.
   const outreach = shown('outreach') ? copy('outreach') : {};
@@ -124,7 +129,8 @@ export default function Community({ unavailable, programmesByLocale, initiatives
         {shown('services') && programmes.length > 0 && (
         <>
         <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontSize: '1.4rem', fontWeight: 700, mb: 3 }}>{copy('services').title || DEFAULT_COPY.services.title}</Typography>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 6 }}>
+        {/* Three to a row; a shorter last row keeps the same card width. */}
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, minmax(0, 1fr))' }, gap: 2, mb: 6 }}>
           {programmes.map((s) => {
             const isExternal = s.href?.startsWith('tel:');
             const CardWrapper = s.href ? (isExternal ? 'a' : Link) : 'div';
@@ -140,8 +146,6 @@ export default function Community({ unavailable, programmesByLocale, initiatives
                 component={CardWrapper}
                 {...wrapperProps}
                 sx={{
-                  flex: '1 1 calc(33.333% - 11px)',
-                  minWidth: { xs: '100%', md: 'calc(33.333% - 11px)' },
                   bgcolor: 'white',
                   border: '1px solid #E8E0D5',
                   borderRadius: 2,
@@ -219,15 +223,17 @@ export default function Community({ unavailable, programmesByLocale, initiatives
 
 /** Karamoja Core: programmes and initiatives in every language, and the page's sections once saved. */
 async function cmsProps() {
-  const [programmes, initiatives, pages] = await Promise.all([
+  const [programmes, initiatives, pages, ...servicePages] = await Promise.all([
     inAllLocales((l) => getAll('programmes', {}, l)),
     inAllLocales((l) => getAll('initiatives', {}, l)),
     getPageAllLocales('community').catch(() => null),
+    ...SERVICE_PAGES.map((p) => getPageAllLocales(p.key).catch(() => null)),
   ]);
   const map = (byLocale, fn) => Object.fromEntries(
     Object.entries(byLocale).map(([l, rows]) => [l, (Array.isArray(rows) ? rows : []).map(fn).filter(Boolean)])
   );
   return {
+    servicesByLocale: serviceCardsByLocale(servicePages, CMS_LOCALES),
     programmesByLocale: map(programmes, programmeFromCms),
     initiativesByLocale: sameSlugs(map(initiatives, initiativeFromCms)),
     pageByLocale: isPublishedPage(pages?.en) ? pages : null,

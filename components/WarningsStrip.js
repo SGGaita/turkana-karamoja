@@ -8,7 +8,11 @@ export default function WarningsStrip({ alerts: alertsProp = [], apiStale = fals
   const t = useT();
   const source = Array.isArray(alertsProp) ? alertsProp : [];
   const stripAlerts = source.slice(0, 4).map(toStripAlert);
-  const activeCount = source.filter((a) => a.level === 'RED' || a.level === 'ORANGE').length;
+  // Every active alert counts (the list is active alerts only); the dot is red when one of them is red or orange.
+  // Counting only red and orange said "0 Active Alerts" above a list of yellow ones.
+  const activeCount = source.length;
+  const severe = source.some((a) => a.level === 'RED' || a.level === 'ORANGE');
+  const dot = severe ? '#D63030' : '#E0A800';
   const hasAlerts = stripAlerts.length > 0;
 
   return (
@@ -43,8 +47,8 @@ export default function WarningsStrip({ alerts: alertsProp = [], apiStale = fals
         >
           {/* Weather readings removed: they were hardcoded, not live (audit v3 E7). */}
           <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Box sx={{ width: 7, height: 7, bgcolor: hasAlerts && activeCount ? '#D63030' : '#2E8B57', borderRadius: '50%' }} />
-            <Typography sx={{ color: hasAlerts && activeCount ? '#D63030' : '#2E8B57', fontSize: '0.75rem', fontWeight: 700 }}>
+            <Box sx={{ width: 7, height: 7, bgcolor: hasAlerts ? dot : '#2E8B57', borderRadius: '50%' }} />
+            <Typography sx={{ color: hasAlerts ? dot : '#2E8B57', fontSize: '0.75rem', fontWeight: 700 }}>
               {hasAlerts
                 ? t('home.active_alerts', { n: activeCount })
                 : t('home.no_active_alerts')}

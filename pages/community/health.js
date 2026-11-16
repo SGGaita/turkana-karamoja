@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { serviceHero } from '../../lib/defaults';
 import { Box, Typography, Chip, Button, Divider } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Layout from '../../components/Layout';
@@ -16,8 +17,7 @@ const ORDER = { RED: 0, ORANGE: 1, YELLOW: 2, GREEN: 3 };
 // What the page showed before Karamoja → Website pages → Health is saved.
 const DEFAULT_COPY = {
   hero: {
-    title: 'Health & Nutrition Alerts',
-    subtitle: 'Acute malnutrition rates, disease outbreaks, health facility status, and vaccination campaigns',
+    ...serviceHero('health'),
     image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1400&q=70',
   },
   intro: {

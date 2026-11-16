@@ -10,6 +10,7 @@ import {
   pageCopy,
   sameSlugs,
   telParts,
+  serviceCardsByLocale,
 } from '../lib/cms-community';
 import { vocabulariesFromGlobals } from '../lib/cms-globals';
 
@@ -109,5 +110,27 @@ describe('vocabularies', () => {
     const v = vocabulariesFromGlobals({ sections: { vocabularies: { site_types: [{ key: 'nfi', label: 'Household items' }, { key: '', label: 'x' }] } } });
     expect(v.site_types).toEqual({ nfi: 'Household items' });
     expect(v.water_point_types).toEqual({});
+  });
+});
+
+describe('service page cards on Community', () => {
+  const saved = (title, subtitle) => ({ updated_at: '2026-11-16', sections: { hero: { title, subtitle } } });
+
+  it('always lists the four service pages, with built-in headers until a page is saved', () => {
+    const cards = serviceCardsByLocale([null, null, null, null], ['en']).en;
+    expect(cards.map((c) => c.href)).toEqual([
+      '/community/assistance',
+      '/community/planting-calendar',
+      '/community/health',
+      '/community/water-points',
+    ]);
+    expect(cards[3].title).toBe('Water Point Status Map');
+  });
+
+  it("uses each page's own header, in the reader's language", () => {
+    const water = { en: saved('Water points', 'Boreholes and pans'), sw: saved('Vituo vya maji', '') };
+    const cards = serviceCardsByLocale([null, null, null, water], ['en', 'sw']);
+    expect(cards.en[3]).toMatchObject({ title: 'Water points', desc: 'Boreholes and pans' });
+    expect(cards.sw[3]).toMatchObject({ title: 'Vituo vya maji', desc: 'Boreholes and pans' }, 'untranslated: the English text');
   });
 });

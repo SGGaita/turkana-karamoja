@@ -3,7 +3,7 @@
   "source": "file",
   "pages": {
     "about": {
-      "version": 3,
+      "version": 4,
       "sections": {
         "hero": {
           "fields": {
@@ -165,7 +165,7 @@
       }
     },
     "contact": {
-      "version": 2,
+      "version": 3,
       "sections": {
         "hero": {
           "fields": {
@@ -200,7 +200,8 @@
         },
         "offices": {
           "fields": {
-            "title": "text"
+            "title": "text",
+            "intro": "textarea"
           }
         },
         "hotlines": {

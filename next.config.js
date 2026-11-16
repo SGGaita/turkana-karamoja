@@ -159,11 +159,11 @@ const withPWA = require('@ducanh2912/next-pwa').default({
           cacheableResponse: { statuses: [200] },
         },
       },
-      // Fonts.
+      // Fonts (Montserrat ships with the website, in /_next/static/media/).
       {
-        urlPattern: ({ url }) => url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com',
-        handler: 'StaleWhileRevalidate',
-        options: { cacheName: CACHES.fonts, expiration: LIMITS.fonts, cacheableResponse: { statuses: [0, 200] } },
+        urlPattern: ({ request, sameOrigin }) => sameOrigin && request.destination === 'font',
+        handler: 'CacheFirst',
+        options: { cacheName: CACHES.fonts, expiration: LIMITS.fonts, cacheableResponse: { statuses: [200] } },
       },
     ],
   },
