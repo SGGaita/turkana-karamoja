@@ -7,7 +7,8 @@ import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
 import LocalOfferOutlinedIcon from '@mui/icons-material/LocalOfferOutlined';
 import PublicOutlinedIcon from '@mui/icons-material/PublicOutlined';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
-import { HUB_COUNTRIES, getCountryLabel } from '../lib/countries';
+import { countryOptions } from '../lib/countries';
+import { useShell } from '../contexts/LanguageContext';
 import { useT } from '../contexts/LanguageContext';
 
 export const FILTER_SIDEBAR_WIDTH = 300;
@@ -81,6 +82,8 @@ export default function ReportsFilterPanel({
   onClear,
   onSearchClear,
 }) {
+  // Site settings → Lists → Countries (FE-20).
+  const countries = countryOptions(useShell()?.vocabularies?.countries);
   const t = useT();
   const activeCount = [
     search ? 1 : 0,
@@ -245,8 +248,8 @@ export default function ReportsFilterPanel({
           <Autocomplete
             multiple
             size="small"
-            options={HUB_COUNTRIES.map((c) => c.code)}
-            getOptionLabel={(code) => getCountryLabel(code)}
+            options={countries.codes}
+            getOptionLabel={(code) => countries.label(code)}
             value={filterCountries}
             onChange={(_, val) => onCountriesChange(val)}
             disableCloseOnSelect
@@ -332,7 +335,7 @@ export default function ReportsFilterPanel({
               {filterCountries.map((code) => (
                 <Chip
                   key={`co-${code}`}
-                  label={t('reports.chip_country', { v: getCountryLabel(code) })}
+                  label={t('reports.chip_country', { v: countries.label(code) })}
                   onDelete={() => onCountriesChange(filterCountries.filter((x) => x !== code))}
                   size="small"
                   sx={{ bgcolor: '#EAF3EC', color: '#2E7040', fontSize: '0.68rem', fontWeight: 600 }}

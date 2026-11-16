@@ -1,12 +1,14 @@
 import Image from 'next/image';
 import { Box, Typography, Chip } from '@mui/material';
 import { useSiteHeader } from '../contexts/SiteHeaderContext';
-import { commissionedByContent } from '../lib/about-hub-content';
+import { DEFAULT_COMMISSIONED } from '../lib/defaults';
 
+/** About → Commissioned by (Website pages → About, Core 0.41.0); the built-in text until the page is saved with it. */
 export default function CommissionedBySection({ data }) {
   const { branding } = useSiteHeader();
-  const commissioned = { ...commissionedByContent, ...data };
-  const logoUrl = branding.logoUrl || commissioned.logoUrl;
+  const fromCms = data && (data.organization || data.description);
+  const commissioned = fromCms ? data : DEFAULT_COMMISSIONED;
+  const logoUrl = (fromCms && data.logoUrl) || branding.logoUrl;
   const showLogo = Boolean(logoUrl);
 
   return (
@@ -44,7 +46,7 @@ export default function CommissionedBySection({ data }) {
           >
             <Image
               src={logoUrl}
-              alt={commissioned.logoAlt || 'Danish Refugee Council'}
+              alt={commissioned.organization || ''}
               width={320}
               height={120}
               style={{ width: '100%', height: 'auto', maxHeight: 120, objectFit: 'contain' }}

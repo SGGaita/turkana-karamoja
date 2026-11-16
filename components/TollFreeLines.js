@@ -1,6 +1,5 @@
 import { Box, Typography } from '@mui/material';
 import PhoneInTalkOutlinedIcon from '@mui/icons-material/PhoneInTalkOutlined';
-import { TOLL_FREE_LINES } from '../lib/toll-free-lines';
 import { useShell } from '../contexts/LanguageContext';
 
 const VARIANTS = {
@@ -26,9 +25,9 @@ const VARIANTS = {
 
 export default function TollFreeLines({ variant = 'light', title = 'Toll-free helplines', subtitle = 'Free to call from any network', sx }) {
   const v = VARIANTS[variant] || VARIANTS.light;
-  // Site settings → Hotlines once saved (an empty list hides the block); the built-in list until then.
+  // Site settings → Hotlines only: a wrong emergency number is worse than none, so nothing is built in.
   const shell = useShell();
-  const lines = shell ? shell.hotlines : TOLL_FREE_LINES;
+  const lines = shell ? shell.hotlines : [];
   if (!lines.length) return null;
 
   return (

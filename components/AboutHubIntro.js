@@ -3,7 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useSiteHeader } from '../contexts/SiteHeaderContext';
 import { useLocalizedHomeSections } from '../contexts/LanguageContext';
-import { ABOUT_HUB_IMAGE } from '../lib/about-hub-content';
+import { PAGE_IMAGES } from '../lib/defaults';
 
 export default function AboutHubIntro({ showCta = false, excludeCommissionedHighlight = false }) {
   const { branding } = useSiteHeader();
@@ -35,7 +35,7 @@ export default function AboutHubIntro({ showCta = false, excludeCommissionedHigh
       >
         <Box
           component="img"
-          src={ABOUT_HUB_IMAGE}
+          src={about.image || PAGE_IMAGES.aboutHub}
           alt="Turkana river and greenery"
           sx={{
             width: '100%',

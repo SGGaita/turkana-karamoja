@@ -14,7 +14,8 @@ import ReportsFilterPanel from '../components/ReportsFilterPanel';
 import { cmsStaticProps, getAll, getPageAllLocales, inAllLocales, isPublishedPage } from '../lib/cms';
 import { pickLocale } from '../lib/cms-alerts';
 import { reportFromCms } from '../lib/cms-reports';
-import { useLanguage } from '../contexts/LanguageContext';
+import { useLanguage, useShell } from '../contexts/LanguageContext';
+import { orderCategories } from '../lib/countries';
 
 const HERO_IMAGE = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1400&q=70';
 const DEFAULT_HERO = { title: 'Reports & Resources', subtitle: 'Published situation reports, assessments, and monitoring documents' };
@@ -67,11 +68,13 @@ function ReportsLibrary({ reportsByLocale = null, pageByLocale = null }) {
     return uniqueLabels(orgs);
   }, [reports]);
 
+  const categoryList = useShell()?.vocabularies?.report_categories;
   const allCategories = useMemo(() => {
     const cats = [];
     reports.forEach((r) => (r.categories?.length ? r.categories : [r.tag]).forEach((c) => cats.push(c)));
-    return uniqueLabels(cats);
-  }, [reports]);
+    // Only categories that have reports, in the order of Site settings → Lists → Report categories (FE-20).
+    return orderCategories(uniqueLabels(cats), categoryList);
+  }, [reports, categoryList]);
 
   const allKeywords = useMemo(() => {
     const categoryKeys = new Set(allCategories.map((c) => c.toLowerCase()));

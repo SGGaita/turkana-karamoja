@@ -4,7 +4,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Layout from '../../components/Layout';
 import PageHero from '../../components/PageHero';
 import CmsUnavailable from '../../components/CmsUnavailable';
-import { partnerTypeColors } from '../../lib/fallback-data';
+import { PARTNER_TYPE_COLORS as partnerTypeColors } from '../../lib/defaults';
 import { APP_NAME } from '../../lib/branding';
 import { cmsStaticProps, getAll, getPageAllLocales, inAllLocales, isPublishedPage } from '../../lib/cms';
 import { pickLocale } from '../../lib/cms-alerts';

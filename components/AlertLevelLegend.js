@@ -1,5 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import { fallbackAlertLegend } from '../lib/fallback-data';
+import { ALERT_LEGEND as fallbackAlertLegend } from '../lib/defaults';
 import { useShell } from '../contexts/LanguageContext';
 
 export const ALERT_LEVEL_LEGEND = fallbackAlertLegend.items;

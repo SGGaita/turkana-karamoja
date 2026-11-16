@@ -20,7 +20,7 @@ import { cmsStaticProps, getCollection, getPageAllLocales, inAllLocales, isPubli
 import { homeProps } from '../lib/cms-home';
 import { pickLocale, splitAlerts } from '../lib/cms-alerts';
 import { initiativeFromCms } from '../lib/cms-community';
-import { fallbackHero, fallbackHomeSections } from '../lib/fallback-data';
+import { DEFAULT_HERO as fallbackHero, DEFAULT_HOME_SECTIONS as fallbackHomeSections } from '../lib/defaults';
 
 // The overview panel shows only from the CMS (no made-up figures, audit E7).
 const ALL_VISIBLE = { hero: true, overview: false, about: true, map: true, warnings: true, initiatives: true, getInvolved: true };

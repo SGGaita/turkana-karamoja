@@ -4,7 +4,7 @@ import PageHero from '../../components/PageHero';
 import CmsUnavailable from '../../components/CmsUnavailable';
 import { CommunityServiceMap, CommunityBackLink, StatusPill, StatChip, IntroBox, EmptyNote } from '../../components/CommunityServiceLayout';
 import { toServiceMapMarker } from '../../lib/wp-mappers';
-import { WATER_POINT_STATUS, WATER_POINT_TYPES, countByStatus } from '../../lib/community-services';
+import { WATER_POINT_STATUS_COLORS, countByStatus } from '../../lib/community-services';
 import { cmsStaticProps } from '../../lib/cms';
 import { listCmsProps, pageCopy, waterPointFromCms } from '../../lib/cms-community';
 import { pickLocale } from '../../lib/cms-alerts';
@@ -30,8 +30,8 @@ function WaterPointsPageBody({ itemsByLocale, pageByLocale }) {
   const { locale, t } = useLanguage();
   const waterPoints = pickLocale(itemsByLocale, locale) || [];
   const { copy, hero } = pageCopy(pageByLocale, locale, DEFAULT_COPY);
-  const typeLabel = useVocabLabel('water_point_types', WATER_POINT_TYPES);
-  const statusLabel = useVocabLabel('water_point_statuses', WATER_POINT_STATUS);
+  const typeLabel = useVocabLabel('water_point_types');
+  const statusLabel = useVocabLabel('water_point_statuses');
   const markers = waterPoints.map((wp) => toServiceMapMarker(wp, 'water')).filter(Boolean);
   const statusCounts = countByStatus(waterPoints);
 
@@ -66,7 +66,7 @@ function WaterPointsPageBody({ itemsByLocale, pageByLocale }) {
         {!waterPoints.length && <EmptyNote text={copy('empty').text} />}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
           {waterPoints.map((wp) => {
-            const status = { label: statusLabel(wp.status), color: WATER_POINT_STATUS[wp.status]?.color || '#9A9A9A' };
+            const status = { label: statusLabel(wp.status), color: WATER_POINT_STATUS_COLORS[wp.status] || '#9A9A9A' };
             return (
               <Box key={wp.id} sx={{ bgcolor: 'white', border: '1px solid #E8E0D5', borderRadius: 2, p: 2.5 }}>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center', mb: 0.75 }}>

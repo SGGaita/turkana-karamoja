@@ -7,7 +7,7 @@ import TollFreeLines from '../components/TollFreeLines';
 import { RegionalOffices, SocialLinks } from '../components/ContactDirectory';
 import { cmsStaticProps, getGlobals, getPageAllLocales, isPublishedPage } from '../lib/cms';
 import { pageCopy } from '../lib/cms-community';
-import { fallbackContactPage } from '../lib/fallback-data';
+import { PAGE_IMAGES } from '../lib/defaults';
 import { helpBoxFromCms, officesFromGlobals, socialFromGlobals } from '../lib/cms-about-contact';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -26,7 +26,7 @@ const panelSx = {
 /** Contact from Karamoja → Website pages → Contact (built-in title until saved); offices and social accounts from Site settings. */
 function CmsContact({ pageByLocale, offices, social }) {
   const { locale, t } = useLanguage();
-  const { copy, shown, hero } = pageCopy(pageByLocale, locale, { hero: { title: 'Contact Us', image: fallbackContactPage.featuredImage } });
+  const { copy, shown, hero } = pageCopy(pageByLocale, locale, { hero: { title: 'Contact Us', image: PAGE_IMAGES.contact } });
   const intro = copy('intro');
   const form = copy('form');
   const box = helpBoxFromCms(copy('help_box'));
