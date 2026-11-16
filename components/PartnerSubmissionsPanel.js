@@ -17,6 +17,12 @@ import { HUB_LANGUAGES } from '../lib/languages';
 import { formatFileSize } from '../lib/report-utils';
 import HelpStepLink from './HelpStepLink';
 import HelpTip from './HelpTip';
+import { htmlToText } from '../lib/cms-alerts';
+
+function excerpt(html) {
+  const text = htmlToText(html || '').replace(/\s+/g, ' ').trim();
+  return text.length > 160 ? `${text.slice(0, 160)}…` : text;
+}
 
 const STATUS_STYLES = {
   pending: { bg: '#fff4ec', color: '#b45309', border: '#f59e0b' },
@@ -279,7 +285,8 @@ export default function PartnerSubmissionsPanel({
               </Box>
               <Typography sx={{ fontWeight: 700, fontSize: '0.92rem', color: '#3D2B1F', mb: 0.5 }}>{item.title}</Typography>
               <Typography sx={{ fontSize: '0.8rem', color: '#5A5A5A', mb: 1.5, lineHeight: 1.5 }}>
-                {(item.description || '').slice(0, 160)}{(item.description || '').length > 160 ? '…' : ''}
+                {/* The text, not its HTML (found while taking the help screenshots, WP-44). */}
+                {excerpt(item.description)}
               </Typography>
               {item.type === 'report' && item.files?.length > 0 && (
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.6, mb: 1.5 }}>

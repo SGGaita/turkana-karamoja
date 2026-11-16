@@ -20,6 +20,7 @@ export const helpRichTextSx = {
   '& strong': { color: '#3D2B1F' },
   '& code': { bgcolor: '#F4EDE4', px: 0.5, borderRadius: 0.5, fontSize: '0.85em' },
   '& img': { maxWidth: '100%', height: 'auto', borderRadius: 1, border: '1px solid #E8E0D5' },
+  '& figure': { m: 0, my: 2.5 }, // Help screenshots (WP-44).
   '& table': { width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem', mb: 2, display: 'block', overflowX: 'auto' },
   '& th': { bgcolor: '#3D2B1F', color: 'white', textAlign: 'left', p: 1.25, fontWeight: 600 },
   '& td': { borderBottom: '1px solid #E8E0D5', p: 1.25, verticalAlign: 'top' },

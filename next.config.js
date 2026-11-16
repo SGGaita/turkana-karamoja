@@ -136,9 +136,9 @@ const withPWA = require('@ducanh2912/next-pwa').default({
         handler: 'StaleWhileRevalidate',
         options: { cacheName: CACHES.images, expiration: LIMITS.images, cacheableResponse: { statuses: [200] } },
       },
-      // Pictures straight from the CMS.
+      // Pictures straight from the CMS, and the help screenshots shipped with Karamoja Core (WP-44).
       {
-        urlPattern: ({ url }) => /\/wp-content\/uploads\/.+\.(png|jpe?g|webp|gif|svg)$/i.test(url.pathname),
+        urlPattern: ({ url }) => /\/wp-content\/(uploads\/.+|plugins\/karamoja-core\/assets\/help\/[^/]+)\.(png|jpe?g|webp|gif|svg)$/i.test(url.pathname),
         handler: 'CacheFirst',
         options: { cacheName: CACHES.media, expiration: LIMITS.media, cacheableResponse: { statuses: [0, 200] } },
       },
