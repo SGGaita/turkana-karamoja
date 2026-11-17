@@ -28,7 +28,10 @@ test.describe('CMS, signed out', () => {
 
   test('no WordPress files that give away versions', async ({ request }) => {
     for (const f of ['/readme.html', '/license.txt', '/wp-content/debug.log']) {
-      expect((await request.get(`${env.cms}${f}`)).status(), `${f} (delete it from the server)`).toBeGreaterThanOrEqual(400);
+      // After cut-over WordPress sends unknown front-end addresses on to the website (a redirect): that is fine.
+      // Only the file itself coming back is a problem.
+      const res = await request.get(`${env.cms}${f}`, { maxRedirects: 0 });
+      expect(res.status(), `${f} is served (delete it from the server, or block it)`).not.toBe(200);
     }
   });
 
