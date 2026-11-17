@@ -1,0 +1,54 @@
+# Uptime (WP-38): the website and the CMS every 15 minutes. Opens an issue "Site down" when either fails twice in a
+# row, comments while it stays down, closes it on recovery. The primary monitor is an outside service (UptimeRobot
+# or Better Stack, see karamoja-wp docs/operations.md); this is the backup, and GitHub may run it a few minutes late.
+#
+# Turn on: Settings → Secrets and variables → Actions → Variables: SITE_URL (e.g. https://www.example.org) and
+# CMS_URL (e.g. https://cms.example.org). Without SITE_URL the job does nothing.
+name: Uptime
+
+on:
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: uptime
+  cancel-in-progress: false
+
+jobs:
+  check:
+    if: vars.SITE_URL != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: scripts/ops
+      - name: Check the site and the CMS
+        id: check
+        continue-on-error: true
+        run: |
+          urls=("${{ vars.SITE_URL }}/")
+          if [ -n "${{ vars.CMS_URL }}" ]; then urls+=("${{ vars.CMS_URL }}/wp-json/karamoja/v1/globals"); fi
+          bash scripts/ops/uptime-check.sh "${urls[@]}" | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Report
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ steps.check.outcome }}" = failure ]; then
+            {
+              echo "Not answering (checked from GitHub Actions, twice, 30 s apart):"
+              echo
+              echo "${{ steps.check.outputs.down }}"
+              echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+              echo
+              echo "What to do: karamoja-wp \`docs/operations.md\` and the deployment guide §10."
+            } > body.md
+            bash scripts/ops/report-issue.sh fail uptime "Site down" body.md
+            exit 1
+          fi
+          bash scripts/ops/report-issue.sh ok uptime "Back up at $(date -u '+%Y-%m-%d %H:%M UTC')."
