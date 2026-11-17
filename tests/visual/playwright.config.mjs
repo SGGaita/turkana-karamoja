@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import { browserUse } from '../pw-browser.mjs';
 
 /**
  * Visual check (FE-03 / FE-25): the same pages, desktop and mobile, compared with the "before" pictures taken from
@@ -7,8 +8,7 @@ import { defineConfig, devices } from '@playwright/test';
 const baseURL = process.env.VISUAL_URL || 'http://localhost:3000';
 // Browser: PW_CHROME_PATH (a chrome executable), or PW_CHANNEL ('chrome' / 'msedge': the one installed on this
 // computer, no download), or Playwright's own Chromium. run.mjs picks one and records it with the pictures.
-const launchOptions = process.env.PW_CHROME_PATH ? { executablePath: process.env.PW_CHROME_PATH } : {};
-const channel = process.env.PW_CHROME_PATH ? undefined : process.env.PW_CHANNEL || undefined;
+const { launchOptions = {}, channel } = browserUse();
 
 export default defineConfig({
   testDir: '.',
