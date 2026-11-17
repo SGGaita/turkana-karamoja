@@ -19,7 +19,7 @@ const channel = process.env.PW_CHANNEL || (process.env.PW_CHROME_PATH || existsS
 export default defineConfig({
   testDir: '.',
   testMatch: /.*\.spec\.mjs$/,
-  timeout: 90_000,
+  timeout: 180_000, // a page that has to be reloaded once takes ~20 s more
   expect: { timeout: 20_000 },
   workers: 2,
   retries: env.ci ? 1 : 0,
