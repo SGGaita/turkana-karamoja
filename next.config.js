@@ -8,7 +8,9 @@ if (process.env.NEXT_PUBLIC_WP_BASE_URL) {
   try {
     const wpUrl = new URL(process.env.NEXT_PUBLIC_WP_BASE_URL);
     const already = wpImagePatterns.some((p) => p.hostname === wpUrl.hostname);
-    if (!already) {
+    // A CMS on this machine counts as local too: only with ALLOW_LOCAL_WP_IMAGES (audit v3 N-4).
+    const local = /^(localhost|127\.\d+\.\d+\.\d+|\[::1\])$/.test(wpUrl.hostname);
+    if (!already && (!local || allowLocalImages)) {
       wpImagePatterns.push({
         protocol: wpUrl.protocol.replace(':', ''),
         hostname: wpUrl.hostname,
