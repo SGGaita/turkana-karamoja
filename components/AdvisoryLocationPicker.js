@@ -27,7 +27,7 @@ function MapShell({ height, children }) {
 function MapLoading({ height = 280 }) {
   return (
     <MapShell height={height}>
-      <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9A9A9A', fontSize: '0.85rem' }}>
+      <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6B6B6B', fontSize: '0.85rem' }}>
         Loading map…
       </Box>
     </MapShell>
@@ -145,7 +145,7 @@ export default function AdvisoryLocationPicker({
       <Typography sx={{ fontWeight: 600, fontSize: '0.88rem', mb: 0.5, color: '#3D2B1F' }}>
         Affected location *
       </Typography>
-      <Typography sx={{ fontSize: '0.75rem', color: '#9A9A9A', mb: 1.5, lineHeight: 1.5 }}>
+      <Typography sx={{ fontSize: '0.75rem', color: '#6B6B6B', mb: 1.5, lineHeight: 1.5 }}>
         Pin where this advisory applies. Use the expanded map for a wider view, or pick a known place below.
       </Typography>
 
@@ -156,7 +156,7 @@ export default function AdvisoryLocationPicker({
           startIcon={<FullscreenIcon />}
           disabled={disabled || !MapInner}
           onClick={() => setDialogOpen(true)}
-          sx={{ textTransform: 'none', fontSize: '0.78rem', borderColor: '#2E7BB4', color: '#2E7BB4' }}
+          sx={{ textTransform: 'none', fontSize: '0.78rem', borderColor: '#2E7BB4', color: '#296D9F' }}
         >
           Open wide map
         </Button>
@@ -216,7 +216,7 @@ export default function AdvisoryLocationPicker({
       </Box>
 
       {hasPin && (
-        <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A', mt: 1 }}>
+        <Typography sx={{ fontSize: '0.68rem', color: '#6B6B6B', mt: 1 }}>
           Coordinates: {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
         </Typography>
       )}

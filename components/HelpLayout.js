@@ -27,7 +27,7 @@ export const helpRichTextSx = {
   '& blockquote': { m: '0 0 1em', p: 2, bgcolor: '#FFF8E7', border: '1px solid #E8D5A0', borderRadius: 2 },
 };
 
-const sideHeadingSx = { fontSize: '0.7rem', fontWeight: 700, color: '#9A9A9A', letterSpacing: '0.08em', mb: 1, textTransform: 'uppercase' };
+const sideHeadingSx = { fontSize: '0.7rem', fontWeight: 700, color: '#6B6B6B', letterSpacing: '0.08em', mb: 1, textTransform: 'uppercase' };
 
 /** Left column: the guides (and the FAQ), then this page's headings. */
 function HelpSidebar({ guides = [], active, toc = [], faqLabel }) {
@@ -40,7 +40,7 @@ function HelpSidebar({ guides = [], active, toc = [], faqLabel }) {
       sx={{ alignSelf: 'start', border: '1px solid #E8E0D5', borderRadius: 2, p: 2, position: { md: 'sticky' }, top: { md: 100 }, maxHeight: { md: 'calc(100vh - 120px)' }, overflowY: { md: 'auto' } }}
     >
       <Typography sx={sideHeadingSx}>{t('help.guides')}</Typography>
-      <List dense disablePadding sx={{ mb: toc.length ? 2 : 0 }}>
+      <List component="nav" aria-label={t('help.guides')} dense disablePadding sx={{ mb: toc.length ? 2 : 0 }}>
         {[...guides.map((g) => ({ slug: g.slug, label: g.name, href: `/help/${g.slug}` })), ...(faqLabel ? [{ slug: 'faq', label: faqLabel, href: '/help/faq' }] : [])].map((item) => (
           <ListItemButton
             key={item.slug}
@@ -57,7 +57,7 @@ function HelpSidebar({ guides = [], active, toc = [], faqLabel }) {
         <>
           <Divider sx={{ my: 1.5 }} />
           <Typography sx={sideHeadingSx}>{t('help.on_this_page')}</Typography>
-          <List dense disablePadding>
+          <List component="nav" aria-label={t('help.on_this_page')} dense disablePadding>
             {toc.map((h) => (
               <ListItemButton key={h.id} component="a" href={`#${h.id}`} sx={{ borderRadius: 1, py: 0.5, pl: h.level > 2 ? 3 : 1 }}>
                 <ListItemText primary={h.text} primaryTypographyProps={{ fontSize: '0.8rem' }} />

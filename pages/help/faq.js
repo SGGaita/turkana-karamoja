@@ -7,6 +7,7 @@ import { pickLocale } from '../../lib/cms-alerts';
 import { inAllLocales, withPageLocale } from '../../lib/cms';
 import { faqJsonLd } from '../../lib/seo';
 import { GUIDES, faqFromCms, getHelpFaq, helpCopy, helpPageAllLocales, helpStaticProps, topicsAllLocales } from '../../lib/cms-help';
+import { badge } from '../../lib/contrast';
 
 export default function HelpFaq({ unavailable, faqByLocale, topicsByLocale, pageByLocale }) {
   const { locale, t } = useLanguage();
@@ -41,8 +42,8 @@ export default function HelpFaq({ unavailable, faqByLocale, topicsByLocale, page
       {categories.map((category) => (
         <Box component="section" key={category.slug} sx={{ mb: 5 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-            <Chip component="h2" label={category.name} sx={{ bgcolor: category.color, color: 'white', fontWeight: 700, fontSize: '0.85rem', px: 1 }} />
-            <Typography sx={{ fontSize: '0.75rem', color: '#9A9A9A' }}>{t('help.questions', { n: category.items.length })}</Typography>
+            <Chip component="h2" label={category.name} sx={{ ...badge(category.color), fontWeight: 700, fontSize: '0.85rem', px: 1 }} />
+            <Typography sx={{ fontSize: '0.75rem', color: '#6B6B6B' }}>{t('help.questions', { n: category.items.length })}</Typography>
           </Box>
           {category.items.map((faq) => (
             <Accordion

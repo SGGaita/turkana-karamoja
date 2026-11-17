@@ -64,7 +64,7 @@ function OrgHeaderCard({ org, onSectionChange, onChangePassword }) {
       }}
     >
       <Box>
-        <Typography sx={{ color: '#9A9A9A', fontSize: '0.7rem', letterSpacing: '0.08em', textTransform: 'uppercase', mb: 0.5 }}>
+        <Typography sx={{ color: '#6B6B6B', fontSize: '0.7rem', letterSpacing: '0.08em', textTransform: 'uppercase', mb: 0.5 }}>
           Partner organisation
         </Typography>
         <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontWeight: 700, fontSize: '1.3rem', color: 'white' }}>
@@ -422,8 +422,8 @@ export default function Dashboard({ pageByLocale = null }) {
                   </Box>
                 ))}
                 <Box sx={{ flex: '1 1 140px', bgcolor: 'white', border: '1px solid #E8E0D5', borderRadius: 2, p: 2.5, textAlign: 'center' }}>
-                  <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontWeight: 700, fontSize: '1.8rem', color: '#2E7BB4' }}>
-                    {stats.advisories}<Typography component="span" sx={{ fontSize: '1rem', color: '#9A9A9A' }}>/{stats.reports}</Typography>
+                  <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontWeight: 700, fontSize: '1.8rem', color: '#296D9F' }}>
+                    {stats.advisories}<Typography component="span" sx={{ fontSize: '1rem', color: '#6B6B6B' }}>/{stats.reports}</Typography>
                   </Typography>
                   <Typography sx={{ fontSize: '0.75rem', color: '#5A5A5A', mt: 0.5 }}>Advisories / Reports</Typography>
                 </Box>
@@ -518,7 +518,7 @@ export default function Dashboard({ pageByLocale = null }) {
                 <Button variant="contained" size="large" onClick={() => setLoginOpen(true)} sx={{ bgcolor: '#C1440E', px: 4 }}>
                   Sign in
                 </Button>
-                <Button variant="outlined" size="large" onClick={() => setRegistering(true)} sx={{ borderColor: '#2E7BB4', color: '#2E7BB4', px: 4 }}>
+                <Button variant="outlined" size="large" onClick={() => setRegistering(true)} sx={{ borderColor: '#2E7BB4', color: '#296D9F', px: 4 }}>
                   Register your organisation
                 </Button>
               </Box>

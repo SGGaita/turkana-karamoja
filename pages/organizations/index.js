@@ -11,6 +11,7 @@ import { pickLocale } from '../../lib/cms-alerts';
 import { pageCopy } from '../../lib/cms-community';
 import { orgFromCms, groupsFromCms } from '../../lib/cms-orgs';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { blend, ink } from '../../lib/contrast';
 
 const countryLabels = { KE: 'Kenya', UG: 'Uganda', INT: 'International' };
 
@@ -77,7 +78,7 @@ function CmsOrganizations({ itemsByLocale, pageByLocale }) {
 
         {organizations.length === 0 ? (
           <Box sx={{ bgcolor: 'white', border: '1px solid #E8E0D5', borderRadius: 2, p: 4, textAlign: 'center' }}>
-            <Typography sx={{ color: '#9A9A9A' }}>{section('empty').text}</Typography>
+            <Typography sx={{ color: '#6B6B6B' }}>{section('empty').text}</Typography>
           </Box>
         ) : (
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' }, gap: 2.5 }}>
@@ -91,17 +92,17 @@ function CmsOrganizations({ itemsByLocale, pageByLocale }) {
                   sx={{ bgcolor: 'white', border: '1px solid #E8E0D5', borderRadius: 2, p: 2.5, textDecoration: 'none', display: 'block', transition: 'all 0.2s', '&:hover': { borderColor: '#D4A96A', boxShadow: '0 4px 16px rgba(61,43,31,0.08)', transform: 'translateY(-2px)' } }}
                 >
                   <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, mb: 1.5 }}>
-                    <Box sx={{ width: 44, height: 44, borderRadius: 1.5, bgcolor: `${color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.72rem', color, flexShrink: 0, overflow: 'hidden' }}>
+                    <Box sx={{ width: 44, height: 44, borderRadius: 1.5, bgcolor: `${color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.72rem', color: ink(color, blend(color, 0x22 / 255)), flexShrink: 0, overflow: 'hidden' }}>
                       {org.abbr || org.name.slice(0, 2).toUpperCase()}
                     </Box>
                     <Box sx={{ minWidth: 0 }}>
                       <Typography component="h3" sx={{ fontWeight: 700, fontSize: '0.9rem', color: '#3D2B1F', lineHeight: 1.3 }}>{org.name}</Typography>
-                      {org.country && <Typography sx={{ fontSize: '0.72rem', color: '#9A9A9A', mt: 0.3 }}>{countryLabels[org.country] || org.country}</Typography>}
+                      {org.country && <Typography sx={{ fontSize: '0.72rem', color: '#6B6B6B', mt: 0.3 }}>{countryLabels[org.country] || org.country}</Typography>}
                     </Box>
                   </Box>
                   <Box sx={{ display: 'flex', gap: 0.8, flexWrap: 'wrap', mb: 1.5 }}>
                     {org.type && <Chip label={org.type} size="small" sx={{ bgcolor: '#FDF6EC', color: '#6B4226', fontSize: '0.62rem', height: 20 }} />}
-                    <Chip label={t('orgs.verified')} size="small" sx={{ bgcolor: '#E0F5E9', color: '#2E8B57', fontSize: '0.62rem', height: 20 }} />
+                    <Chip label={t('orgs.verified')} size="small" sx={{ bgcolor: '#E0F5E9', color: '#297B4D', fontSize: '0.62rem', height: 20 }} />
                   </Box>
                   {org.description && (
                     <Typography sx={{ fontSize: '0.78rem', color: '#5A5A5A', lineHeight: 1.55, mb: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>

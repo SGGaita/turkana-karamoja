@@ -12,6 +12,7 @@ import { pageCopy } from '../../lib/cms-community';
 import { profileFromCms } from '../../lib/cms-orgs';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { NotTranslatedBadge } from '../../components/NotTranslated';
+import { badge, blend, ink } from '../../lib/contrast';
 
 const countryLabels = { KE: 'Kenya', UG: 'Uganda', INT: 'International' };
 
@@ -28,13 +29,13 @@ function CmsProfile({ profileByLocale, pageByLocale, paths }) {
   const { organization: org, advisories, reports, counts } = profile;
   const color = partnerTypeColors[org.type] || '#2E7BB4';
   const subtitle = [org.type, countryLabels[org.country] || org.country].filter(Boolean).join(' · ') || heroCopy.fallback_subtitle || '';
-  const latest = (shown, n) => (n > shown ? <Typography sx={{ fontSize: '0.75rem', color: '#9A9A9A', mt: -1, mb: 2 }}>{t('orgs.latest', { shown, n })}</Typography> : null);
+  const latest = (shown, n) => (n > shown ? <Typography sx={{ fontSize: '0.75rem', color: '#6B6B6B', mt: -1, mb: 2 }}>{t('orgs.latest', { shown, n })}</Typography> : null);
 
   return (
     <Layout title={org.name}>
       <PageHero title={org.name} subtitle={subtitle} image={heroCopy.image?.url || ORG_HERO_IMAGE} breadcrumbs={['Organizations', org.abbr || org.name]} />
       <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, md: 4 }, py: { xs: 4, md: 6 } }}>
-        <Button component={Link} href="/organizations" startIcon={<ArrowBackIcon />} sx={{ color: '#2E7BB4', mb: 3, textTransform: 'none' }}>
+        <Button component={Link} href="/organizations" startIcon={<ArrowBackIcon />} sx={{ color: '#296D9F', mb: 3, textTransform: 'none' }}>
           {t('orgs.all')}
         </Button>
 
@@ -42,14 +43,14 @@ function CmsProfile({ profileByLocale, pageByLocale, paths }) {
           <Box sx={{ flex: '2 1 480px' }}>
             <Box sx={{ bgcolor: 'white', border: '1px solid #E8E0D5', borderRadius: 2, p: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                <Box sx={{ width: 56, height: 56, borderRadius: 2, bgcolor: `${color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color, flexShrink: 0 }}>
+                <Box sx={{ width: 56, height: 56, borderRadius: 2, bgcolor: `${color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: ink(color, blend(color, 0x22 / 255)), flexShrink: 0 }}>
                   {org.abbr || org.name.slice(0, 2).toUpperCase()}
                 </Box>
                 <Box>
                   <Typography component="h2" sx={{ fontFamily: '"Montserrat", sans-serif', fontWeight: 700, fontSize: '1.2rem', color: '#3D2B1F' }}>{org.name}</Typography>
                   <Box sx={{ display: 'flex', gap: 1, mt: 0.5, flexWrap: 'wrap' }}>
                     {org.type && <Chip label={org.type} size="small" sx={{ fontSize: '0.65rem', height: 22 }} />}
-                    {org.verified && <Chip label={t('orgs.verified_partner')} size="small" sx={{ bgcolor: '#E0F5E9', color: '#2E8B57', fontSize: '0.65rem', height: 22 }} />}
+                    {org.verified && <Chip label={t('orgs.verified_partner')} size="small" sx={{ bgcolor: '#E0F5E9', color: '#297B4D', fontSize: '0.65rem', height: 22 }} />}
                   </Box>
                 </Box>
               </Box>
@@ -59,15 +60,15 @@ function CmsProfile({ profileByLocale, pageByLocale, paths }) {
               )}
               {org.website && (
                 <Typography sx={{ fontSize: '0.85rem', mb: 2 }}>
-                  {t('orgs.website')}: <a href={org.website} target="_blank" rel="noopener noreferrer" style={{ color: '#2E7BB4' }}>{org.website.replace(/^https?:\/\//, '').replace(/\/$/, '')}</a>
+                  {t('orgs.website')}: <a href={org.website} target="_blank" rel="noopener noreferrer" style={{ color: '#296D9F' }}>{org.website.replace(/^https?:\/\//, '').replace(/\/$/, '')}</a>
                 </Typography>
               )}
               {(org.contactName || org.contactEmail || org.contactPhone) && (
                 <Box sx={{ pt: 2, borderTop: '1px solid #E8E0D5' }}>
-                  <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, color: '#9A9A9A', textTransform: 'uppercase', mb: 1 }}>{t('orgs.contact')}</Typography>
+                  <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, color: '#6B6B6B', textTransform: 'uppercase', mb: 1 }}>{t('orgs.contact')}</Typography>
                   {org.contactName && <Typography sx={{ fontSize: '0.85rem', color: '#3D2B1F' }}>{org.contactName}</Typography>}
-                  {org.contactEmail && <Typography component="a" href={`mailto:${org.contactEmail}`} sx={{ display: 'block', fontSize: '0.85rem', color: '#2E7BB4', textDecoration: 'none' }}>{org.contactEmail}</Typography>}
-                  {org.contactPhone && <Typography component="a" href={`tel:${org.contactPhone.replace(/[^\d+]/g, '')}`} sx={{ display: 'block', fontSize: '0.85rem', color: '#2E7BB4', textDecoration: 'none' }}>{org.contactPhone}</Typography>}
+                  {org.contactEmail && <Typography component="a" href={`mailto:${org.contactEmail}`} sx={{ display: 'block', fontSize: '0.85rem', color: '#296D9F', textDecoration: 'none' }}>{org.contactEmail}</Typography>}
+                  {org.contactPhone && <Typography component="a" href={`tel:${org.contactPhone.replace(/[^\d+]/g, '')}`} sx={{ display: 'block', fontSize: '0.85rem', color: '#296D9F', textDecoration: 'none' }}>{org.contactPhone}</Typography>}
                 </Box>
               )}
             </Box>
@@ -87,20 +88,20 @@ function CmsProfile({ profileByLocale, pageByLocale, paths }) {
         <Typography component="h2" sx={headingSx}>{t('orgs.advisories_heading', { n: counts.advisories })}</Typography>
         {latest(advisories.length, counts.advisories)}
         {advisories.length === 0 ? (
-          <Box sx={emptySx}><Typography sx={{ fontSize: '0.85rem', color: '#9A9A9A' }}>{t('orgs.no_advisories')}</Typography></Box>
+          <Box sx={emptySx}><Typography sx={{ fontSize: '0.85rem', color: '#6B6B6B' }}>{t('orgs.no_advisories')}</Typography></Box>
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 5 }}>
             {advisories.map((a) => (
               <Box key={a.id} component={Link} href={paths.alerts[a.id] || '/early-warnings'} sx={{ display: 'block', textDecoration: 'none', bgcolor: a.bg, border: `1px solid ${a.color}40`, borderLeft: `5px solid ${a.color}`, borderRadius: 2, p: 2.5, opacity: a.active ? 1 : 0.75 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1, flexWrap: 'wrap' }}>
-                  <Chip label={levelLabel(a.level, t)} size="small" sx={{ bgcolor: a.color, color: 'white', fontWeight: 700, fontSize: '0.62rem' }} />
+                  <Chip label={levelLabel(a.level, t)} size="small" sx={{ ...badge(a.color), fontWeight: 700, fontSize: '0.62rem' }} />
                   {!a.active && <Chip label={a.cancelled ? t('alerts.cancelled') : (a.replaced ? t('alerts.replaced') : t('alerts.ended'))} size="small" sx={{ bgcolor: '#5A5A5A', color: 'white', fontWeight: 700, fontSize: '0.62rem' }} />}
                   <Typography component="h3" sx={{ fontWeight: 700, fontSize: '0.95rem', color: '#3D2B1F' }}>{a.title}</Typography>
                 </Box>
                 {a.body && <Typography sx={{ fontSize: '0.82rem', color: '#5A5A5A', lineHeight: 1.65, mb: 1, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{a.body}</Typography>}
                 <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-                  {a.area && <Typography sx={{ fontSize: '0.72rem', color: '#9A9A9A' }}>{t('alerts.area_affected')}: <strong style={{ color: '#3D2B1F' }}>{a.area}</strong></Typography>}
-                  {a.issued && <Typography sx={{ fontSize: '0.72rem', color: '#9A9A9A' }}>{t('alerts.issued_on', { date: a.issued })}</Typography>}
+                  {a.area && <Typography sx={{ fontSize: '0.72rem', color: '#6B6B6B' }}>{t('alerts.area_affected')}: <strong style={{ color: '#3D2B1F' }}>{a.area}</strong></Typography>}
+                  {a.issued && <Typography sx={{ fontSize: '0.72rem', color: '#6B6B6B' }}>{t('alerts.issued_on', { date: a.issued })}</Typography>}
                 </Box>
               </Box>
             ))}
@@ -112,20 +113,20 @@ function CmsProfile({ profileByLocale, pageByLocale, paths }) {
         <Typography component="h2" sx={headingSx}>{t('orgs.reports_heading', { n: counts.reports })}</Typography>
         {latest(reports.length, counts.reports)}
         {reports.length === 0 ? (
-          <Box sx={emptySx}><Typography sx={{ fontSize: '0.85rem', color: '#9A9A9A' }}>{t('orgs.no_reports')}</Typography></Box>
+          <Box sx={emptySx}><Typography sx={{ fontSize: '0.85rem', color: '#6B6B6B' }}>{t('orgs.no_reports')}</Typography></Box>
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {reports.map((r) => (
               <Box key={r.id} sx={{ bgcolor: 'white', border: '1px solid #E8E0D5', borderRadius: 2, p: 2.5 }}>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.8, mb: 0.8 }}>
-                  <Chip label={r.tag} size="small" sx={{ bgcolor: r.tagColor, color: 'white', fontWeight: 600, fontSize: '0.62rem', height: 20 }} />
+                  <Chip label={r.tag} size="small" sx={{ ...badge(r.tagColor), fontWeight: 600, fontSize: '0.62rem', height: 20 }} />
                 </Box>
                 <Typography component={Link} href={paths.reports[r.id] || '/reports'} sx={{ display: 'block', fontWeight: 700, fontSize: '0.92rem', color: '#3D2B1F', mb: 0.6, textDecoration: 'none', '&:hover': { color: '#C1440E', textDecoration: 'underline' } }}>
                   {r.title}
                 </Typography>
                 {r.desc && <Typography sx={{ fontSize: '0.8rem', color: '#5A5A5A', lineHeight: 1.6, mb: 1 }}>{r.desc}</Typography>}
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-                  <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A' }}>{r.date}{r.size ? ` · ${r.size}` : ''}</Typography>
+                  <Typography sx={{ fontSize: '0.68rem', color: '#6B6B6B' }}>{r.date}{r.size ? ` · ${r.size}` : ''}</Typography>
                   <Button size="small" variant="contained" component={Link} href={paths.reports[r.id] || '/reports'} sx={{ bgcolor: '#3D2B1F', '&:hover': { bgcolor: '#C1440E' }, fontSize: '0.72rem' }}>
                     {t('orgs.view_report')}
                   </Button>

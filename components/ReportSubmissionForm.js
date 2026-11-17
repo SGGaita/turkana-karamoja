@@ -20,7 +20,7 @@ const inputSx = {
     '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#D4A96A' },
     '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2E7BB4' },
   },
-  '& .MuiInputLabel-root.Mui-focused': { color: '#2E7BB4' },
+  '& .MuiInputLabel-root.Mui-focused': { color: '#296D9F' },
 };
 
 const emptyReportForm = () => ({
@@ -178,7 +178,7 @@ export default function ReportSubmissionForm({
       </FormControl>
 
       <Typography sx={{ fontWeight: 600, fontSize: '0.88rem', mb: 0.5, color: '#3D2B1F' }}>Description / Summary *</Typography>
-      <Typography sx={{ fontSize: '0.75rem', color: '#9A9A9A', mb: 1, lineHeight: 1.5 }}>
+      <Typography sx={{ fontSize: '0.75rem', color: '#6B6B6B', mb: 1, lineHeight: 1.5 }}>
         Summarise what this report covers — key findings, scope, and why it matters.
       </Typography>
       <Box sx={{ mb: 2.5 }}>

@@ -6,8 +6,8 @@ export default function ReportDownloadStat({ count = 0, size = 'small' }) {
   const compact = size === 'small';
   return (
     <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.4 }}>
-      <DownloadIcon sx={{ fontSize: compact ? 14 : 16, color: '#9A9A9A' }} />
-      <Typography component="span" sx={{ fontSize: compact ? '0.68rem' : '0.78rem', color: '#9A9A9A' }}>
+      <DownloadIcon sx={{ fontSize: compact ? 14 : 16, color: '#6B6B6B' }} />
+      <Typography component="span" sx={{ fontSize: compact ? '0.68rem' : '0.78rem', color: '#6B6B6B' }}>
         {formatDownloadCount(count)}
       </Typography>
     </Box>

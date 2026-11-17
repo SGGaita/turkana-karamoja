@@ -116,7 +116,7 @@ export default function ReportDocumentsField({
       <Typography sx={{ fontWeight: 600, fontSize: '0.88rem', mb: 0.5, color: '#3D2B1F' }}>
         {title}
       </Typography>
-      <Typography sx={{ fontSize: '0.75rem', color: '#9A9A9A', mb: 2, lineHeight: 1.5 }}>
+      <Typography sx={{ fontSize: '0.75rem', color: '#6B6B6B', mb: 2, lineHeight: 1.5 }}>
         {hint}
       </Typography>
 
@@ -200,7 +200,7 @@ export default function ReportDocumentsField({
               {!doc.file ? (
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.75 }}>
                   <CloudUploadOutlinedIcon sx={{ color: dragOverId === doc.id ? '#C1440E' : '#C4A886', fontSize: 26 }} />
-                  <Typography sx={{ fontSize: '0.78rem', color: '#9A9A9A' }}>
+                  <Typography sx={{ fontSize: '0.78rem', color: '#6B6B6B' }}>
                     Drag &amp; drop a file here, or
                   </Typography>
                   <Button
@@ -221,7 +221,7 @@ export default function ReportDocumentsField({
                     onDelete={disabled ? undefined : () => updateRow(doc.id, { file: null })}
                     sx={{ bgcolor: '#C1440E', color: 'white', maxWidth: '100%' }}
                   />
-                  <Typography sx={{ fontSize: '0.7rem', color: '#9A9A9A' }}>{formatSize(doc.file.size)}</Typography>
+                  <Typography sx={{ fontSize: '0.7rem', color: '#6B6B6B' }}>{formatSize(doc.file.size)}</Typography>
                   <Button size="small" disabled={disabled} onClick={() => inputRefs.current[doc.id]?.click()} sx={{ fontSize: '0.72rem' }}>
                     Replace
                   </Button>
@@ -236,11 +236,11 @@ export default function ReportDocumentsField({
         startIcon={<AddIcon />}
         onClick={addRow}
         disabled={disabled || documents.length >= MAX_FILES}
-        sx={{ mt: 1.5, color: '#2E7BB4', textTransform: 'none', fontSize: '0.8rem' }}
+        sx={{ mt: 1.5, color: '#296D9F', textTransform: 'none', fontSize: '0.8rem' }}
       >
         Add another document
       </Button>
-      <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A', mt: 1 }}>
+      <Typography sx={{ fontSize: '0.68rem', color: '#6B6B6B', mt: 1 }}>
         {footnote}
       </Typography>
     </Box>

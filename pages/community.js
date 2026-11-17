@@ -56,8 +56,8 @@ function RadioCard({ station }) {
     <Box sx={{ flex: '1 1 calc(50% - 8px)', minWidth: { xs: '100%', sm: 'calc(50% - 8px)' }, bgcolor: '#3D2B1F', borderRadius: 2, p: 2.5 }}>
       <Typography sx={{ fontFamily: '"Montserrat", sans-serif', color: '#D4A96A', fontSize: '1.1rem', fontWeight: 700 }}>{station.name}</Typography>
       <Typography sx={{ color: '#F0D9B0', fontSize: '1.5rem', fontWeight: 700, fontFamily: '"Montserrat", sans-serif' }}>{station.frequency}</Typography>
-      <Typography sx={{ color: '#9A9A9A', fontSize: '0.75rem' }}>{station.languages}</Typography>
-      <Typography sx={{ color: '#9A9A9A', fontSize: '0.75rem' }}>{station.times}</Typography>
+      <Typography sx={{ color: '#B8A898', fontSize: '0.75rem' }}>{station.languages}</Typography>
+      <Typography sx={{ color: '#B8A898', fontSize: '0.75rem' }}>{station.times}</Typography>
     </Box>
   );
 }

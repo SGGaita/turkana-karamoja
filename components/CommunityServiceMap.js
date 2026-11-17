@@ -6,14 +6,15 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { WATER_POINT_STATUS_COLORS } from '../lib/community-services';
 import { useVocabLabel } from '../contexts/LanguageContext';
-import { getCartoTileUrl } from '../lib/map-tiles';
+import { getCartoTileUrl, MAP_SX } from '../lib/map-tiles';
 
 function makeMarkerIcon(color) {
   return L.divIcon({
-    html: `<div style="width:18px;height:18px;background:${color};border:2.5px solid white;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.35);"></div>`,
+    // An 18 px dot inside a 24 px area, so it is big enough to tap (WCAG 2.2 target size).
+    html: `<div style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;"><div style="width:18px;height:18px;background:${color};border:2.5px solid white;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.35);"></div></div>`,
     className: '',
-    iconSize: [18, 18],
-    iconAnchor: [9, 9],
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
     popupAnchor: [0, -12],
   });
 }
@@ -70,9 +71,9 @@ export default function CommunityServiceMap({ markers = [], apiStale = false, em
             <Typography sx={{ fontWeight: 700, color: '#3D2B1F', fontSize: '0.85rem', lineHeight: 1.25, pr: 1 }}>
               {selected.name}
             </Typography>
-            <Box onClick={() => setSelected(null)} sx={{ cursor: 'pointer', color: '#9A9A9A', fontSize: '1.1rem', lineHeight: 1 }}>×</Box>
+            <Box onClick={() => setSelected(null)} sx={{ cursor: 'pointer', color: '#6B6B6B', fontSize: '1.1rem', lineHeight: 1 }}>×</Box>
           </Box>
-          <Typography sx={{ fontSize: '0.7rem', color: '#9A9A9A', mb: 0.75 }}>{selected.region}</Typography>
+          <Typography sx={{ fontSize: '0.7rem', color: '#6B6B6B', mb: 0.75 }}>{selected.region}</Typography>
           <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color: markerColor(selected), mb: 1 }}>
             {markerSubtitle(selected, label)}
           </Typography>
@@ -86,12 +87,12 @@ export default function CommunityServiceMap({ markers = [], apiStale = false, em
             <Typography sx={{ fontSize: '0.68rem', color: '#5A5A5A', mt: 0.5 }}><strong>Contact:</strong> {selected.contact}</Typography>
           )}
           {selected.lastUpdated && (
-            <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A', mt: 0.5 }}>Updated: {selected.lastUpdated}</Typography>
+            <Typography sx={{ fontSize: '0.68rem', color: '#6B6B6B', mt: 0.5 }}>Updated: {selected.lastUpdated}</Typography>
           )}
         </Box>
       )}
 
-      <Box sx={{ height: { xs: 380, md: 520 } }}>
+      <Box sx={{ height: { xs: 380, md: 520 }, ...MAP_SX }}>
         <MapContainer center={[3.0, 34.8]} zoom={7} style={{ height: '100%', width: '100%' }} zoomControl={false} scrollWheelZoom={false}>
           <ZoomControl position="topright" />
           <TileLayer
@@ -105,6 +106,8 @@ export default function CommunityServiceMap({ markers = [], apiStale = false, em
               key={marker.id}
               position={[marker.lat, marker.lng]}
               icon={makeMarkerIcon(markerColor(marker))}
+              title={marker.name}
+              alt={marker.name}
               eventHandlers={{ click: () => setSelected(marker) }}
             >
               <Popup>

@@ -98,7 +98,7 @@ export default function HubRichTextEditor({
             '& p': { margin: '0 0 0.5em' },
             '& ul, & ol': { pl: 2.5, my: 0.5 },
             '& p.is-editor-empty:first-of-type::before': {
-              color: '#9A9A9A',
+              color: '#6B6B6B',
               content: 'attr(data-placeholder)',
               float: 'left',
               height: 0,

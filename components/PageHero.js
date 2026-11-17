@@ -54,7 +54,7 @@ export default function PageHero({ title, subtitle, image, breadcrumbs = [], con
             </Link>
             {breadcrumbs.map((b, i) =>
               i === breadcrumbs.length - 1 ? (
-                <Typography key={b} sx={{ color: '#9A9A9A', fontSize: '0.75rem' }}>
+                <Typography key={b} sx={{ color: '#B8A898', fontSize: '0.75rem' }}>
                   {b}
                 </Typography>
               ) : (

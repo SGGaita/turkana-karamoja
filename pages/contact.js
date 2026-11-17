@@ -62,7 +62,7 @@ function CmsContact({ pageByLocale, offices, social }) {
                 </Box>
               )}
               {shown('hotlines') && <TollFreeLines variant="dark" {...(hotlinesTitle ? { title: hotlinesTitle } : {})} />}
-              {box.note && <Typography sx={{ mt: 3, fontSize: '0.82rem', color: '#9A9A9A', lineHeight: 1.6 }}>{box.note}</Typography>}
+              {box.note && <Typography sx={{ mt: 3, fontSize: '0.82rem', color: '#B8A898', lineHeight: 1.6 }}>{box.note}</Typography>}
             </Box>
           )}
         </Box>

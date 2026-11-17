@@ -20,7 +20,7 @@ export default function Offline({ pageByLocale }) {
       <Head><meta name="robots" content="noindex" /></Head>
       <StatusPage pageByLocale={pageByLocale} section="message" fallback={FALLBACK}>
         <Box sx={{ mt: 3 }}>
-          <Link href="/saved" style={{ color: '#2E7BB4', fontWeight: 600 }}>{t('offline.saved_title')}</Link>
+          <Link href="/saved" style={{ color: '#296D9F', fontWeight: 600 }}>{t('offline.saved_title')}</Link>
         </Box>
         {/* Emergency numbers work without a connection (saved with this page). */}
         <TollFreeLines sx={{ mt: 5, textAlign: 'left' }} />

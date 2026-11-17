@@ -16,8 +16,8 @@ import { withPageLocale } from '../../lib/cms';
 
 const CARDS = [
   { slug: 'user-guide', icon: MenuBookOutlinedIcon, color: '#C1440E', copyKey: 'user_guide' },
-  { slug: 'partner-guide', icon: HandshakeOutlinedIcon, color: '#2E7BB4', copyKey: 'partner_guide' },
-  { slug: 'faq', icon: QuestionAnswerOutlinedIcon, color: '#2E8B57', copyKey: 'faq' },
+  { slug: 'partner-guide', icon: HandshakeOutlinedIcon, color: '#296D9F', copyKey: 'partner_guide' },
+  { slug: 'faq', icon: QuestionAnswerOutlinedIcon, color: '#297B4D', copyKey: 'faq' },
 ];
 
 function HelpSearch() {
@@ -63,7 +63,7 @@ function HelpSearch() {
         )}
         {state.status === 'done' && state.items.length > 0 && (
           <>
-            <Typography sx={{ fontSize: '0.8rem', color: '#9A9A9A', mb: 1 }}>{t('help.search_results', { n: state.items.length })}</Typography>
+            <Typography sx={{ fontSize: '0.8rem', color: '#6B6B6B', mb: 1 }}>{t('help.search_results', { n: state.items.length })}</Typography>
             <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0 }}>
               {state.items.map((item) => (
                 <Box component="li" key={item.slug} sx={{ py: 1.25, borderBottom: '1px solid #E8E0D5' }}>
@@ -120,7 +120,7 @@ export default function HelpHub({ unavailable, topicsByLocale, pageByLocale }) {
                         {copy.cards[copyKey] && (
                           <Typography sx={{ fontSize: '0.88rem', color: '#5A5A5A', lineHeight: 1.6, mb: 1.5 }}>{copy.cards[copyKey]}</Typography>
                         )}
-                        <Typography sx={{ fontSize: '0.75rem', color: '#9A9A9A' }}>{cardCount(slug)}</Typography>
+                        <Typography sx={{ fontSize: '0.75rem', color: '#6B6B6B' }}>{cardCount(slug)}</Typography>
                       </CardContent>
                     </CardActionArea>
                   </Card>

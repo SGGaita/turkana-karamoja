@@ -180,7 +180,7 @@ export default function ReportsFilterPanel({
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon sx={{ fontSize: 18, color: '#9A9A9A' }} />
+                  <SearchIcon sx={{ fontSize: 18, color: '#6B6B6B' }} />
                 </InputAdornment>
               ),
             }}
@@ -312,7 +312,7 @@ export default function ReportsFilterPanel({
                   label={t('reports.chip_category', { v: c })}
                   onDelete={() => onCategoriesChange(filterCategories.filter((x) => x !== c))}
                   size="small"
-                  sx={{ bgcolor: '#E0EFF8', color: '#2E7BB4', fontSize: '0.68rem', fontWeight: 600 }}
+                  sx={{ bgcolor: '#E0EFF8', color: '#296D9F', fontSize: '0.68rem', fontWeight: 600 }}
                 />
               ))}
               {filterOrg && (

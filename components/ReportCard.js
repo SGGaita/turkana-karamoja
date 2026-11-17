@@ -7,6 +7,7 @@ import ShareLinks from './ShareLinks';
 import { buildSlugPath, slugify } from '../lib/slug';
 import { useT } from '../contexts/LanguageContext';
 import { NotTranslatedBadge } from './NotTranslated';
+import { badge } from '../lib/contrast';
 
 export default function ReportCard({ report, onPreview, onDownloadTracked, compact = false }) {
   const t = useT();
@@ -25,7 +26,7 @@ export default function ReportCard({ report, onPreview, onDownloadTracked, compa
       }}
     >
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.8, mb: 0.8 }}>
-        <Chip label={report.tag} size="small" sx={{ bgcolor: report.tagColor, color: 'white', fontWeight: 600, fontSize: '0.62rem', height: 20 }} />
+        <Chip label={report.tag} size="small" sx={{ ...badge(report.tagColor), fontWeight: 600, fontSize: '0.62rem', height: 20 }} />
         {report.orgs?.map((o) => (
           <Chip key={o} label={o} size="small" sx={{ bgcolor: '#F0D9B0', color: '#6B4226', fontSize: '0.62rem', height: 20 }} />
         ))}
@@ -36,7 +37,7 @@ export default function ReportCard({ report, onPreview, onDownloadTracked, compa
             key={keyword}
             label={keyword}
             size="small"
-            sx={{ bgcolor: '#F0F8FF', color: '#2E7BB4', fontSize: '0.6rem', height: 20, fontWeight: 600 }}
+            sx={{ bgcolor: '#F0F8FF', color: '#296D9F', fontSize: '0.6rem', height: 20, fontWeight: 600 }}
           />
         ))}
         {files.length > 1 && (
@@ -79,7 +80,7 @@ export default function ReportCard({ report, onPreview, onDownloadTracked, compa
 
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, mb: 1.25 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
-          <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A' }}>
+          <Typography sx={{ fontSize: '0.68rem', color: '#6B6B6B' }}>
             {report.date}
           </Typography>
           <ReportDownloadStat count={report.downloadCount} />
@@ -87,7 +88,8 @@ export default function ReportCard({ report, onPreview, onDownloadTracked, compa
         <Typography
           component={Link}
           href={reportPath}
-          sx={{ fontSize: '0.72rem', color: '#2E7BB4', fontWeight: 600, textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+          aria-label={`${t('common.read_more')}: ${report.title}`}
+          sx={{ fontSize: '0.72rem', color: '#296D9F', fontWeight: 600, textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
         >
           {t('common.read_more_arrow')}
         </Typography>
@@ -123,7 +125,7 @@ export function OrgGroupHeader({ group }) {
         <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontWeight: 700, fontSize: '1rem', color: '#3D2B1F' }}>
           {group.name}
         </Typography>
-        <Typography sx={{ fontSize: '0.75rem', color: '#9A9A9A' }}>
+        <Typography sx={{ fontSize: '0.75rem', color: '#6B6B6B' }}>
           {t('reports.count', { n: group.items.length })}
         </Typography>
       </Box>
@@ -132,7 +134,7 @@ export function OrgGroupHeader({ group }) {
           component={Link}
           href={profileHref}
           size="small"
-          sx={{ color: '#2E7BB4', fontSize: '0.75rem', textTransform: 'none' }}
+          sx={{ color: '#296D9F', fontSize: '0.75rem', textTransform: 'none' }}
         >
           {t('reports.view_org')}
         </Button>

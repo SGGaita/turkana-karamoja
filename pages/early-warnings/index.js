@@ -14,6 +14,7 @@ import { cmsStaticProps, getCollection, getPageAllLocales, inAllLocales, isPubli
 import { pickLocale, splitAlerts, levelLabel, validityLabel } from '../../lib/cms-alerts';
 import { useLanguage, useT } from '../../contexts/LanguageContext';
 import { NotTranslatedBadge } from '../../components/NotTranslated';
+import { badge, ink } from '../../lib/contrast';
 
 const HERO_IMAGE = 'https://images.unsplash.com/photo-1504608524841-42584120d693?w=1400&q=70';
 
@@ -36,7 +37,7 @@ function AlertCard({ a, ended = false }) {
   return (
     <Box
       sx={{
-        opacity: ended ? 0.85 : 1,
+        opacity: 1, // ended cards are greyed by their background; fading them made their text too faint
         bgcolor: ended ? '#FAFAFA' : a.bg,
         border: `1px solid ${a.color}40`,
         borderLeft: `5px solid ${a.color}`,
@@ -50,7 +51,7 @@ function AlertCard({ a, ended = false }) {
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, px: 3, py: 2, flexWrap: 'wrap' }}>
-        <Chip label={levelLabel(a.level, t)} size="small" sx={{ bgcolor: a.color, color: 'white', fontWeight: 700, fontSize: '0.65rem' }} />
+        <Chip label={levelLabel(a.level, t)} size="small" sx={{ ...badge(a.color), fontWeight: 700, fontSize: '0.65rem' }} />
         {ended && (
           <Chip label={a.cancelled ? t('alerts.cancelled') : (a.replaced ? t('alerts.replaced') : t('alerts.ended'))} size="small" sx={{ bgcolor: '#5A5A5A', color: 'white', fontWeight: 700, fontSize: '0.65rem' }} />
         )}
@@ -63,7 +64,7 @@ function AlertCard({ a, ended = false }) {
             color: '#3D2B1F',
             flex: 1,
             textDecoration: 'none',
-            '&:hover': href ? { color: a.color, textDecoration: 'underline' } : undefined,
+            '&:hover': href ? { color: ink(a.color, a.bg), textDecoration: 'underline' } : undefined,
           }}
         >
           {a.title}
@@ -76,7 +77,7 @@ function AlertCard({ a, ended = false }) {
             endIcon={<ArrowForwardIcon />}
             component={Link}
             href={href}
-            sx={{ borderColor: a.color, color: a.color, fontSize: '0.72rem', textTransform: 'none' }}
+            sx={{ borderColor: a.color, color: ink(a.color, a.bg), fontSize: '0.72rem', textTransform: 'none' }}
           >
             {t('alerts.view_full')}
           </Button>
@@ -94,15 +95,15 @@ function AlertCard({ a, ended = false }) {
           <Typography sx={{ fontSize: '0.82rem', color: '#5A5A5A', lineHeight: 1.7 }}>{bodyPreview}</Typography>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, mt: 2 }}>
             <Box>
-              <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A', fontFamily: '"Montserrat", sans-serif', textTransform: 'uppercase' }}>{t('alerts.source')}</Typography>
-              <Typography sx={{ fontSize: '0.78rem', color: '#2E7BB4', fontWeight: 500 }}>{a.source}</Typography>
+              <Typography sx={{ fontSize: '0.68rem', color: '#6B6B6B', fontFamily: '"Montserrat", sans-serif', textTransform: 'uppercase' }}>{t('alerts.source')}</Typography>
+              <Typography sx={{ fontSize: '0.78rem', color: '#296D9F', fontWeight: 500 }}>{a.source}</Typography>
             </Box>
             <Box>
-              <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A', fontFamily: '"Montserrat", sans-serif', textTransform: 'uppercase' }}>{t('alerts.issued')}</Typography>
+              <Typography sx={{ fontSize: '0.68rem', color: '#6B6B6B', fontFamily: '"Montserrat", sans-serif', textTransform: 'uppercase' }}>{t('alerts.issued')}</Typography>
               <Typography sx={{ fontSize: '0.78rem', color: '#3D2B1F', fontWeight: 500 }}>{a.issued}</Typography>
             </Box>
             <Box>
-              <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A', fontFamily: '"Montserrat", sans-serif', textTransform: 'uppercase' }}>{t('alerts.valid')}</Typography>
+              <Typography sx={{ fontSize: '0.68rem', color: '#6B6B6B', fontFamily: '"Montserrat", sans-serif', textTransform: 'uppercase' }}>{t('alerts.valid')}</Typography>
               <Typography sx={{ fontSize: '0.78rem', color: '#3D2B1F', fontWeight: 500 }}>{validityLabel(a, t)}</Typography>
             </Box>
           </Box>
@@ -118,7 +119,7 @@ function AlertCard({ a, ended = false }) {
                 </Box>
               ))}
               {a.actions.length > 3 && (
-                <Typography sx={{ fontSize: '0.72rem', color: a.color, fontWeight: 600, mt: 0.5 }}>
+                <Typography sx={{ fontSize: '0.72rem', color: ink(a.color, a.bg), fontWeight: 600, mt: 0.5 }}>
                   {t('alerts.more_actions', { n: a.actions.length - 3 })}
                 </Typography>
               )}

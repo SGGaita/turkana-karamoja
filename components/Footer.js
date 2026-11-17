@@ -6,7 +6,7 @@ import { useLocalizedHomeSections, useShell, useT } from '../contexts/LanguageCo
 import { askConsentAgain } from '../lib/analytics';
 import LinkBehavior from './LinkBehavior';
 
-const smallLink = { fontSize: '0.65rem', color: '#5A5A5A', textDecoration: 'none', '&:hover': { color: '#9A9A9A' } };
+const smallLink = { fontSize: '0.65rem', color: '#9A8B7C', textDecoration: 'none', '&:hover': { color: '#9A9A9A' } };
 import OfflineDownload from './OfflineDownload';
 import { InstallAppButton } from '../contexts/InstallContext';
 
@@ -187,7 +187,7 @@ export default function Footer() {
               {data.contactLines.map((c) => (
                 <Box key={c.text}>
                   <Typography sx={{ fontSize: '0.78rem', color: '#9A9A9A', lineHeight: 1.5 }}>{c.text}</Typography>
-                  {c.note && <Typography sx={{ fontSize: '0.68rem', color: '#6B4226' }}>{c.note}</Typography>}
+                  {c.note && <Typography sx={{ fontSize: '0.68rem', color: '#D4A96A' }}>{c.note}</Typography>}
                 </Box>
               ))}
             </Box>
@@ -219,7 +219,7 @@ export default function Footer() {
         }}
       >
         <Typography
-          sx={{ fontSize: '0.68rem', color: '#5A5A5A', fontFamily: '"Montserrat", sans-serif' }}
+          sx={{ fontSize: '0.68rem', color: '#9A8B7C', fontFamily: '"Montserrat", sans-serif' }}
         >
           {data.copyright}
         </Typography>

@@ -52,7 +52,7 @@ function regionStyle(color) {
 export default function ClusterCoverageMap({ areas = null }) {
   const cmsFeatures = useMemo(
     () => (areas && areas.length
-      ? areas.map((a) => ({ region: { id: a.id, number: a.number, color: a.color, fill: a.color, centre: a.centre }, feature: a.outline }))
+      ? areas.map((a) => ({ region: { id: a.id, number: a.number, name: a.name, color: a.color, fill: a.color, centre: a.centre }, feature: a.outline }))
       : null),
     [areas],
   );
@@ -171,7 +171,7 @@ export default function ClusterCoverageMap({ areas = null }) {
             <Typography sx={{ fontSize: '0.7rem', color: '#5A5A5A', pl: 2.75, mb: 0.25 }}>
               {group.areas}
             </Typography>
-            <Typography sx={{ fontSize: '0.65rem', color: '#9A9A9A', pl: 2.75 }}>
+            <Typography sx={{ fontSize: '0.65rem', color: '#6B6B6B', pl: 2.75 }}>
               {group.numbers.map((n) => `#${n}`).join(' · ')}
             </Typography>
           </Box>
@@ -181,7 +181,7 @@ export default function ClusterCoverageMap({ areas = null }) {
       <Box sx={{ height: { xs: 320, md: 440 } }}>
         {loading ? (
           <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#F5F0E8' }}>
-            <Typography sx={{ color: '#9A9A9A', fontSize: '0.85rem' }}>Loading cluster map…</Typography>
+            <Typography sx={{ color: '#6B6B6B', fontSize: '0.85rem' }}>Loading cluster map…</Typography>
           </Box>
         ) : (
           <MapContainer
@@ -206,6 +206,8 @@ export default function ClusterCoverageMap({ areas = null }) {
                 key={`label-${region.id}`}
                 position={[center.lat, center.lng]}
                 icon={makeNumberIcon(region.number, region.color)}
+                title={region.name || region.label || String(region.number)}
+                alt={region.name || region.label || String(region.number)}
                 zIndexOffset={500}
               />
             ))}

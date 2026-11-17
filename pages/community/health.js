@@ -11,6 +11,7 @@ import { cmsStaticProps } from '../../lib/cms';
 import { listCmsProps, pageCopy, healthAlertFromCms, telParts } from '../../lib/cms-community';
 import { pickLocale, levelLabel } from '../../lib/cms-alerts';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { badge, ink } from '../../lib/contrast';
 
 const ORDER = { RED: 0, ORANGE: 1, YELLOW: 2, GREEN: 3 };
 
@@ -52,7 +53,7 @@ function HealthAlertsPageBody({ itemsByLocale, pageByLocale }) {
 
         <IntroBox title={intro.title} text={intro.text} color="#D63030" bg="#FFF0F0">
           {intro.text && telParts(intro.text).map((part, i) => (part.tel ? (
-            <Box key={i} component="a" href={`tel:${part.tel}`} sx={{ color: '#D63030', fontWeight: 700, textDecoration: 'none' }}>{part.text}</Box>
+            <Box key={i} component="a" href={`tel:${part.tel}`} sx={{ color: '#B42424', fontWeight: 700, textDecoration: 'none' }}>{part.text}</Box>
           ) : part.text))}
         </IntroBox>
 
@@ -86,13 +87,13 @@ function HealthAlertsPageBody({ itemsByLocale, pageByLocale }) {
                   }}
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, px: 3, py: 2, flexWrap: 'wrap' }}>
-                    <Chip label={levelLabel(a.level, t)} size="small" sx={{ bgcolor: a.color, color: 'white', fontWeight: 700, fontSize: '0.65rem' }} />
+                    <Chip label={levelLabel(a.level, t)} size="small" sx={{ ...badge(a.color), fontWeight: 700, fontSize: '0.65rem' }} />
                     {a.advisoryType && (
                       <Chip label={a.advisoryType} size="small" variant="outlined" sx={{ fontSize: '0.65rem', borderColor: `${a.color}60`, color: '#5A5A5A' }} />
                     )}
                     <Typography sx={{ fontWeight: 700, fontSize: '1rem', color: '#3D2B1F', flex: 1 }}>{a.title}</Typography>
                     {href && (
-                      <Button size="small" variant="outlined" endIcon={<ArrowForwardIcon />} component="span" sx={{ borderColor: a.color, color: a.color, fontSize: '0.72rem', textTransform: 'none', pointerEvents: 'none' }}>
+                      <Button size="small" variant="outlined" endIcon={<ArrowForwardIcon />} component="span" sx={{ borderColor: a.color, color: ink(a.color, a.bg || '#FFFFFF'), fontSize: '0.72rem', textTransform: 'none', pointerEvents: 'none' }}>
                         {t('alerts.view')}
                       </Button>
                     )}
@@ -104,11 +105,11 @@ function HealthAlertsPageBody({ itemsByLocale, pageByLocale }) {
                     <Typography sx={{ fontSize: '0.82rem', color: '#5A5A5A', lineHeight: 1.7 }}>{bodyPreview}</Typography>
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, mt: 2 }}>
                       <Box>
-                        <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A', textTransform: 'uppercase' }}>{t('alerts.source')}</Typography>
-                        <Typography sx={{ fontSize: '0.78rem', color: '#2E7BB4', fontWeight: 500 }}>{a.source}</Typography>
+                        <Typography sx={{ fontSize: '0.68rem', color: '#6B6B6B', textTransform: 'uppercase' }}>{t('alerts.source')}</Typography>
+                        <Typography sx={{ fontSize: '0.78rem', color: '#296D9F', fontWeight: 500 }}>{a.source}</Typography>
                       </Box>
                       <Box>
-                        <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A', textTransform: 'uppercase' }}>{t('alerts.issued')}</Typography>
+                        <Typography sx={{ fontSize: '0.68rem', color: '#6B6B6B', textTransform: 'uppercase' }}>{t('alerts.issued')}</Typography>
                         <Typography sx={{ fontSize: '0.78rem', color: '#3D2B1F', fontWeight: 500 }}>{a.issued}</Typography>
                       </Box>
                     </Box>

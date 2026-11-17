@@ -22,7 +22,7 @@ export default function StatusPage({ pageByLocale, section, fallback, code, chil
   return (
     <Layout title={title} noindex>
       <Box sx={{ maxWidth: 640, mx: 'auto', px: 2, py: { xs: 8, md: 12 }, textAlign: 'center' }}>
-        {code && <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontWeight: 800, fontSize: '3rem', color: '#D4A96A', lineHeight: 1 }}>{code}</Typography>}
+        {code && <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontWeight: 800, fontSize: '3rem', color: '#A68453', lineHeight: 1 }}>{code}</Typography>}
         <Typography component="h1" sx={{ fontFamily: '"Montserrat", sans-serif', fontWeight: 700, fontSize: { xs: '1.6rem', md: '2rem' }, color: '#3D2B1F', mt: 2, mb: 1.5 }}>{title}</Typography>
         {str(msg?.text) && <Typography sx={{ fontSize: '1rem', color: '#5A5A5A', lineHeight: 1.7, mb: 4 }}>{msg.text}</Typography>}
         {href && (
