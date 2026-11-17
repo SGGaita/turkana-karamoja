@@ -1,6 +1,7 @@
 import { Box, Typography, Breadcrumbs } from '@mui/material';
 import Link from 'next/link';
 import { PageTranslationNote } from './NotTranslated';
+import Picture from './Picture';
 
 export default function PageHero({ title, subtitle, image, breadcrumbs = [], contentMaxWidth = 1200 }) {
   return (
@@ -17,19 +18,7 @@ export default function PageHero({ title, subtitle, image, breadcrumbs = [], con
     >
       {/* Background */}
       {image && (
-        <Box
-          component="img"
-          src={image}
-          alt={title}
-          sx={{
-            position: 'absolute',
-            inset: 0,
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            opacity: 0.25,
-          }}
-        />
+        <Picture src={image} alt={title} priority sx={{ position: 'absolute', inset: 0 }} imgSx={{ opacity: 0.25 }} />
       )}
       {/* Pattern overlay */}
       <Box

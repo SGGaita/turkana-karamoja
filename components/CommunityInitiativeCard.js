@@ -1,8 +1,9 @@
 import Link from 'next/link';
-import { Box, Typography, Button, Card, CardMedia, CardContent, Chip } from '@mui/material';
+import { Box, Typography, Button, Card, CardContent, Chip } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ShareLinks from './ShareLinks';
 import { useT } from '../contexts/LanguageContext';
+import Picture from './Picture';
 
 export default function CommunityInitiativeCard({ item, compact = false }) {
   const t = useT();
@@ -20,11 +21,11 @@ export default function CommunityInitiativeCard({ item, compact = false }) {
       }}
     >
       {item.img && (
-        <CardMedia
-          component="img"
-          image={item.img}
+        <Picture
+          src={item.img}
           alt={item.title}
-          sx={{ height: compact ? 160 : 200, objectFit: 'cover' }}
+          sizes="(min-width: 900px) 33vw, (min-width: 600px) 50vw, 100vw"
+          sx={{ height: compact ? 160 : 200, flexShrink: 0 }}
         />
       )}
       <CardContent sx={{ flex: 1, p: compact ? 2 : 2.5, display: 'flex', flexDirection: 'column' }}>
