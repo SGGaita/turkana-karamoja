@@ -117,6 +117,9 @@ describe('security headers', () => {
     expect(csp).toContain('https://*.google-analytics.com');
     expect(csp).not.toContain('unsafe-eval');
     expect(csp).toContain("connect-src 'self' https://cms.example https://challenges.cloudflare.com");
+    // The offline service worker fetches map tiles itself, so their hosts must be in connect-src.
+    expect(csp).toMatch(/connect-src [^;]*https:\/\/\*\.basemaps\.cartocdn\.com/);
+    expect(csp).toMatch(/connect-src [^;]*https:\/\/\*\.tile\.openstreetmap\.org/);
     expect(csp).toContain("frame-ancestors 'none'");
     expect(csp).toContain("object-src 'none'");
     expect(csp).toContain('upgrade-insecure-requests');
