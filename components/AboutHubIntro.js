@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useSiteHeader } from '../contexts/SiteHeaderContext';
 import { useLocalizedHomeSections } from '../contexts/LanguageContext';
 import { PAGE_IMAGES } from '../lib/defaults';
+import Picture from './Picture';
 
 export default function AboutHubIntro({ showCta = false, excludeCommissionedHighlight = false }) {
   const { branding } = useSiteHeader();
@@ -33,18 +34,11 @@ export default function AboutHubIntro({ showCta = false, excludeCommissionedHigh
           position: 'relative',
         }}
       >
-        <Box
-          component="img"
+        <Picture
           src={about.image || PAGE_IMAGES.aboutHub}
           alt="Turkana river and greenery"
-          sx={{
-            width: '100%',
-            height: { xs: 280, md: 460 },
-            objectFit: 'cover',
-            borderRadius: 3,
-            display: 'block',
-            boxShadow: '0 16px 48px rgba(61,43,31,0.18)',
-          }}
+          sizes="(min-width: 900px) 45vw, 100vw"
+          sx={{ width: '100%', height: { xs: 280, md: 460 }, borderRadius: 3, boxShadow: '0 16px 48px rgba(61,43,31,0.18)' }}
         />
         <Box
           sx={{

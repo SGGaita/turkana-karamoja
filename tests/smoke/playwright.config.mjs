@@ -1,4 +1,5 @@
-import { defineConfig, devices } from '@playwright/test';
+import { existsSync } from 'node:fs';
+import { chromium, defineConfig, devices } from '@playwright/test';
 import { smokeEnv } from './env.mjs';
 
 /**
@@ -10,6 +11,10 @@ import { smokeEnv } from './env.mjs';
  * Settings and what each check covers: tests/smoke/README.md.
  */
 const env = smokeEnv();
+
+// Playwright's own Chromium isn't downloaded on every machine (`npx playwright install chromium`): then use the
+// installed Google Chrome, unless PW_CHANNEL / PW_CHROME_PATH say otherwise.
+const channel = process.env.PW_CHANNEL || (process.env.PW_CHROME_PATH || existsSync(chromium.executablePath()) ? '' : 'chrome');
 
 export default defineConfig({
   testDir: '.',
@@ -24,7 +29,7 @@ export default defineConfig({
     baseURL: env.site,
     serviceWorkers: 'allow',
     ...devices['Desktop Chrome'],
-    ...(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL } : {}),
+    ...(channel ? { channel } : {}),
     ...(process.env.PW_CHROME_PATH ? { launchOptions: { executablePath: process.env.PW_CHROME_PATH } } : {}),
   },
   projects: [

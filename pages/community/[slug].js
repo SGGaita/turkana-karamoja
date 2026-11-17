@@ -15,6 +15,7 @@ import { initiativeFromCms, sameSlugs } from '../../lib/cms-community';
 import { pickLocale } from '../../lib/cms-alerts';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { NotTranslatedBadge } from '../../components/NotTranslated';
+import Picture from '../../components/Picture';
 
 const HERO_IMAGE = 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1400&q=70';
 
@@ -106,11 +107,12 @@ export default function CommunityInitiativeDetail({ unavailable, articleByLocale
             </Box>
 
             {article.img && (
-              <Box
-                component="img"
+              <Picture
                 src={article.img}
                 alt={article.title}
-                sx={{ width: '100%', maxHeight: 420, objectFit: 'cover', borderRadius: 2, mb: 3 }}
+                priority
+                sizes="(min-width: 900px) 800px, 100vw"
+                sx={{ width: '100%', height: { xs: 240, md: 420 }, borderRadius: 2, mb: 3 }}
               />
             )}
 
