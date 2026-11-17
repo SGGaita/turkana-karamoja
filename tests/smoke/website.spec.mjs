@@ -23,15 +23,16 @@ async function open(page, path) {
 async function checkPage(page, path, { h1 = true } = {}) {
   let { res, problems } = await open(page, path);
   expect(res?.status(), `${path} answered`).toBeLessThan(400);
-  if (UNAVAILABLE && (await page.getByText(UNAVAILABLE).count())) {
-    // A page the build couldn't fill (WordPress slow or down while building) refills on the next visit; a slow CMS
-    // (XAMPP, ~3 s a call) does this right after `npm run build`. Give it one chance, as a visitor's reload would.
-    test.info().annotations.push({ type: 'retried', description: `${path} said "${UNAVAILABLE}" at first; reloaded after 15 s` });
+  // A page the build couldn't fill (WordPress slow or down while building) refills in the background after the
+  // next visit; with a slow CMS (XAMPP, ~3 s a call, several calls for an organisation page) that takes up to ~40 s
+  // after `npm run build`. Reload up to three times, 15 s apart, as a visitor would.
+  for (let attempt = 1; UNAVAILABLE && attempt <= 3 && (await page.getByText(UNAVAILABLE).count()); attempt += 1) {
+    test.info().annotations.push({ type: 'retried', description: `${path} said "${UNAVAILABLE}"; reload ${attempt} after 15 s` });
     await page.waitForTimeout(15_000);
     ({ res, problems } = await open(page, path));
     expect(res?.status(), `${path} answered`).toBeLessThan(400);
-    await expect(page.getByText(UNAVAILABLE), `${path} still can't be shown: is WordPress reachable from the website?`).toHaveCount(0);
   }
+  if (UNAVAILABLE) await expect(page.getByText(UNAVAILABLE), `${path} still can't be shown after 45 s: is WordPress reachable from the website?`).toHaveCount(0);
   if (h1) await expect(page.locator('h1').first()).toBeVisible();
   // Phones must never scroll sideways (FE-25).
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
