@@ -102,10 +102,18 @@ PUSH_BROADCAST_SECRET=your-secret
 4. Activate Karamoja Core in WordPress (see the `karamoja-wp` repository and the deployment guide).
 5. Run `npm run dev` — frontend starts at `http://localhost:3000`.
 
-Tests:
-- `npm test`: unit tests (Vitest), also run by CI on every push.
+Checks (CI runs the first three on every push and pull request: `.github/workflows/test.yml`):
+- `npm run lint`: ESLint with Next.js's Core Web Vitals rules (`eslint.config.mjs`); CI fails on any warning.
+- `npm test`: unit tests (Vitest).
+- `npm run build`: a production build; CI builds without a CMS (pages say "can't be shown just now"), to catch
+  anything that breaks `next build`.
+- `npm run test:smoke` and `npm run test:lighthouse`: read-only checks of a running site and its CMS, incl.
+  accessibility, after a deployment (`tests/smoke/README.md`).
 - `npm run test:visual`: compares every public page, desktop and mobile, with the "before" pictures of the frozen
-  sandbox (Playwright; see `tests/visual/README.md`). Run `npx playwright install chromium` once first.
+  sandbox (Playwright; see `tests/visual/README.md`).
+- `npm run test:offline`: the site works offline after a visit.
+
+Playwright uses its own Chromium if downloaded (`npx playwright install chromium`), otherwise the installed Chrome.
 
 > **Note:** Without WordPress the public pages can't be built with content: they show "This page can't be shown just
 > now". There is no made-up fallback content.

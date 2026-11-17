@@ -97,7 +97,6 @@ export default function HomeOverview() {
             </Tile>
           )}
           {(ov.metrics || []).map((m, i) => (
-            // eslint-disable-next-line react/no-array-index-key
             <Tile key={i} color={m.color} value={m.val} label={m.label} note={m.sub} />
           ))}
         </Box>

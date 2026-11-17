@@ -7,6 +7,7 @@
     "prebuild": "node scripts/fetch-site-header.js && node scripts/fetch-pwa.js",
     "build": "next build",
     "start": "next start",
+    "lint": "eslint .",
     "test": "vitest run",
     "test:visual": "node tests/visual/run.mjs compare",
     "test:visual:baseline": "node tests/visual/run.mjs baseline",
@@ -40,8 +41,11 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
+    "@eslint/eslintrc": "^3.3.7",
     "@playwright/test": "^1.65.1",
     "chrome-launcher": "^1.2.3",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^15.5.29",
     "lighthouse": "^12.8.2",
     "vitest": "^5.1.0"
   },

@@ -23,10 +23,8 @@ async function fetchGlobals(base) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
     try {
-      // eslint-disable-next-line no-await-in-loop
       const res = await fetch(`${base}/wp-json/karamoja/v1/globals?lang=${locale}`, { signal: controller.signal });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      // eslint-disable-next-line no-await-in-loop
       const g = await res.json();
       // Kept even before Site settings are saved: the interface text (ui_strings) is used from day one; the header and
       // footer still wait for the first save (shellFromGlobals checks updated_at).
