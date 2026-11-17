@@ -22,3 +22,4 @@ public/fallback-*.js
 
 # App icons downloaded from the CMS at build time (scripts/fetch-pwa.js, FE-08)
 /public/icons/cms/
+/reports/lighthouse/html/

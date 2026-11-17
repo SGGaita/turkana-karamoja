@@ -32,6 +32,7 @@ cut-over (FE-28).
 | User guide is a list of articles instead of one long page | `/help/user-guide` | Help portal (§8 7g) |
 | Initiative pictures show whole (the sandbox cropped them to a strip), no `[&hellip;]` in the header | Community, initiative pages | FE-19 |
 | Top-bar logo slightly narrower on phones | Mobile | The fix for sideways scrolling above |
+| Header at 1440 px: the hub's name is no longer beside the logo (FE-28) | Desktop | The full menu used to show from 900 px and ran off the page below ~1400 px (e.g. 1280 / 1366 px laptops). Now: menu button below 1280 px; full menu from 1280 px (smaller logo below 1440 px); the name beside the logo below 1280 px and from 1720 px |
 
 ## Not differences (the test copy)
 

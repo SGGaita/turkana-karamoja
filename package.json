@@ -11,6 +11,8 @@
     "test:visual": "node tests/visual/run.mjs compare",
     "test:visual:baseline": "node tests/visual/run.mjs baseline",
     "test:offline": "playwright test -c tests/offline/playwright.config.mjs",
+    "test:smoke": "playwright test -c tests/smoke/playwright.config.mjs",
+    "test:lighthouse": "node tests/smoke/lighthouse.mjs",
     "cms:schema": "node scripts/cms-schema.js",
     "help:shots": "playwright test -c tests/help-shots/playwright.config.mjs"
   },
@@ -38,6 +40,8 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.65.1",
+    "chrome-launcher": "^1.2.3",
+    "lighthouse": "^12.8.2",
     "vitest": "^5.1.0"
   },
   "engines": {

@@ -24,6 +24,16 @@ import PushSubscribeButton from './PushSubscribeButton';
 import { resolveTopbarLink, isRetiredLink } from '../lib/topbar-links';
 import { InstallAppButton } from '../contexts/InstallContext';
 
+/**
+ * The full menu needs the room (from 900 px it used to show and, below ~1400 px, run off the page). From MENU px it
+ * shows with a smaller logo and tighter links (Kiswahili needs ~1205 px); from FULL_LOGO px at full size; and only
+ * from BRAND_TEXT px with the hub's name beside the logo (also shown at 900 px–MENU, where the menu button is used).
+ */
+const MENU = 1280;
+const FULL_LOGO = 1440;
+const BRAND_TEXT = 1720;
+const from = (px) => `@media (min-width:${px}px)`;
+
 export default function Navbar({ urgentBanner = null }) {
   const { branding, topbar, navLinks } = useSiteHeader();
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -104,6 +114,8 @@ export default function Navbar({ urgentBanner = null }) {
             <Box
               sx={{
                 height: { xs: 56, md: 76 },
+                [from(MENU)]: { height: 60 },
+                [from(FULL_LOGO)]: { height: 76 },
                 display: 'flex',
                 alignItems: 'center',
                 minWidth: 0,
@@ -111,7 +123,7 @@ export default function Navbar({ urgentBanner = null }) {
             >
               <BrandLogo src={branding.logoUrl} alt={branding.title} priority style={{ maxWidth: '100%' }} />
             </Box>
-            <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+            <Box sx={{ display: { xs: 'none', md: 'block' }, [from(MENU)]: { display: 'none' }, [from(BRAND_TEXT)]: { display: 'block' } }}>
               <Typography
                 sx={{
                   fontFamily: '"Montserrat", sans-serif',
@@ -143,7 +155,7 @@ export default function Navbar({ urgentBanner = null }) {
 
           {/* Desktop links and the phone menu button are both in the page and shown by screen width (CSS), so the
               server's HTML matches the first render on every screen. */}
-          <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 0.5 }}>
+          <Box sx={{ display: 'none', [from(MENU)]: { display: 'flex' }, alignItems: 'center', gap: 0.5, flexShrink: 0 }}>
             {navLinks.map((link) => {
               const isActive = router.pathname === link.href;
               return (
@@ -153,9 +165,11 @@ export default function Navbar({ urgentBanner = null }) {
                   href={link.href}
                   sx={{
                     color: isActive ? '#C1440E' : '#3D2B1F',
-                    fontSize: '0.85rem',
+                    fontSize: '0.8rem',
+                    [from(FULL_LOGO)]: { fontSize: '0.85rem', px: 1.2 },
                     fontWeight: isActive ? 700 : 500,
-                    px: 1.2,
+                    whiteSpace: 'nowrap',
+                    px: 0.7,
                     py: 0.8,
                     borderBottom: isActive ? '2px solid #C1440E' : '2px solid transparent',
                     borderRadius: 0,
@@ -170,7 +184,7 @@ export default function Navbar({ urgentBanner = null }) {
 
           <IconButton
             onClick={() => setDrawerOpen(true)}
-            sx={{ color: '#3D2B1F', display: { xs: 'inline-flex', md: 'none' } }}
+            sx={{ color: '#3D2B1F', display: 'inline-flex', [from(MENU)]: { display: 'none' } }}
             aria-label="Open menu"
           >
             <MenuIcon />
@@ -186,7 +200,7 @@ export default function Navbar({ urgentBanner = null }) {
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         ModalProps={{ keepMounted: true }}
-        sx={{ display: { xs: 'block', md: 'none' } }}
+        sx={{ display: 'block', [from(MENU)]: { display: 'none' } }}
       >
         <Box sx={{ width: 260, bgcolor: '#FFFFFF', minHeight: '100vh' }}>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
