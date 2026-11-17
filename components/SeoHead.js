@@ -43,7 +43,7 @@ export default function SeoHead({ type = 'website', image = '', noindex = false,
         <script
           type="application/ld+json"
           key="jsonld"
-          // eslint-disable-next-line react/no-danger -- JSON from our own data, escaped below.
+          // JSON from our own data, escaped below.
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
         />
       )}

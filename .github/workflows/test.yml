@@ -19,3 +19,31 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint -- --max-warnings=0
+
+  # A production build, so a change that breaks `next build` fails here and not on the day of a deployment. There is
+  # no CMS in CI: the build is made to cope (pages say "can't be shown just now" until they refill), which is also
+  # what it does when WordPress is down during a real build.
+  build:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_WP_BASE_URL: https://cms.example.invalid
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run build

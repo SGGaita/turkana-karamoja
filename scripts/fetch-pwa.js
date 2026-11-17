@@ -92,11 +92,9 @@ async function download(pwa) {
     badge: await local(icons.badge),
   };
   for (const i of icons.manifest || []) {
-    // eslint-disable-next-line no-await-in-loop
     files.manifest.push({ ...i, src: await local(i.src) });
   }
   for (const f of icons.favicon || []) {
-    // eslint-disable-next-line no-await-in-loop
     files.favicon.push(await local(f));
   }
   fs.rmSync(dir, { recursive: true, force: true });
