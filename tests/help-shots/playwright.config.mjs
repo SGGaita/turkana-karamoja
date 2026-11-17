@@ -1,4 +1,5 @@
 import { defineConfig } from '@playwright/test';
+import { browserUse } from '../pw-browser.mjs';
 
 /** Help screenshots (WP-44): `npm run help:shots`. See README.md in this folder. */
 export default defineConfig({
@@ -9,7 +10,6 @@ export default defineConfig({
   reporter: [['list']],
   outputDir: '../../test-results/help-shots',
   use: {
-    ...(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL } : {}),
-    ...(process.env.PW_CHROME_PATH ? { launchOptions: { executablePath: process.env.PW_CHROME_PATH } } : {}),
+    ...browserUse(),
   },
 });
