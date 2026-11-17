@@ -5,7 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { HUB_MAP_LOCATIONS } from '../lib/hub-locations';
-import { getCartoTileUrl, MAP_SX } from '../lib/map-tiles';
+import { getCartoTileUrl } from '../lib/map-tiles';
 import { useT } from '../contexts/LanguageContext';
 import LinkBehavior from './LinkBehavior';
 import { blend, ink } from '../lib/contrast';
@@ -214,7 +214,7 @@ export default function RegionalMap({ liveAdvisories = [], apiStale = false }) {
         </Box>
       )}
 
-      <Box sx={{ height: { xs: 380, md: 560 }, ...MAP_SX }}>
+      <Box sx={{ height: { xs: 380, md: 560 } }}>
         <MapContainer
           center={[3.0, 34.8]}
           zoom={7}

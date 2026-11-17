@@ -1,0 +1,8 @@
+/*
+ * Every map: the credits' links (Leaflet, OpenStreetMap, CARTO) are underlined, so they are told apart from the
+ * credit text by more than colour (WCAG 1.4.1, axe "link-in-text-block"). More specific than Leaflet's own
+ * ".leaflet-control-attribution a { text-decoration: none }", which loads later with each map.
+ */
+.leaflet-container .leaflet-control-attribution a {
+  text-decoration: underline;
+}
