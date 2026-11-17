@@ -14,7 +14,7 @@
  * Measure a production build (`npm run build && npm start`) or the live site, never `npm run dev`.
  * Local scores are only a guide: the live site runs on Vercel's network and CDN.
  */
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import lighthouse from 'lighthouse';
 import * as chromeLauncher from 'chrome-launcher';
@@ -35,7 +35,8 @@ async function chromePath() {
   if (process.env.PW_CHROME_PATH) return process.env.PW_CHROME_PATH;
   try {
     const { chromium } = await import('@playwright/test');
-    return chromium.executablePath();
+    const path = chromium.executablePath();
+    return existsSync(path) ? path : undefined; // not downloaded: chrome-launcher finds the installed Chrome
   } catch {
     return undefined; // chrome-launcher looks for an installed Chrome
   }
