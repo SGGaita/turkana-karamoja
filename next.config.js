@@ -20,6 +20,9 @@ if (process.env.NEXT_PUBLIC_WP_BASE_URL) {
   }
 }
 
+// The same hosts, for components/Picture.js in the browser (which pictures can go through the optimiser).
+const imageHosts = ['images.unsplash.com', ...wpImagePatterns.map((p) => p.hostname)];
+
 const { securityHeaders } = require('./lib/security-headers');
 const { SITE_LOCALES, DEFAULT_LOCALE } = require('./lib/locales');
 
@@ -32,6 +35,7 @@ const nextConfig = {
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders() }];
   },
+  env: { KC_IMAGE_HOSTS: [...new Set(imageHosts)].join(',') },
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },

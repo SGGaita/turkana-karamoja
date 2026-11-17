@@ -3,6 +3,7 @@ import { PageTranslationNote } from './NotTranslated';
 import Link from 'next/link';
 import { DEFAULT_HERO as fallbackHero } from '../lib/defaults';
 import { useLocalizedHero } from '../contexts/LanguageContext';
+import Picture from './Picture';
 
 export default function Hero() {
   const hero = useLocalizedHero(fallbackHero);
@@ -21,19 +22,12 @@ export default function Hero() {
       }}
     >
       {hero.backgroundImage && (
-        <Box
-          component="img"
+        <Picture
           src={hero.backgroundImage}
           alt=""
-          sx={{
-            position: 'absolute',
-            inset: 0,
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            objectPosition: 'center 40%',
-            opacity: 0.32,
-          }}
+          priority
+          sx={{ position: 'absolute', inset: 0 }}
+          imgSx={{ objectPosition: 'center 40%', opacity: 0.32 }}
         />
       )}
       <Box

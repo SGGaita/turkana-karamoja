@@ -1,8 +1,9 @@
 import Link from 'next/link';
-import { Box, Typography, Button, Card, CardMedia, CardContent, Chip } from '@mui/material';
+import { Box, Typography, Button, Card, CardContent, Chip } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { useLocalizedHomeSections } from '../contexts/LanguageContext';
+import Picture from './Picture';
 
 function initiativeHref(init) {
   if (init.slugPath) return `/community/${init.slugPath}`;
@@ -68,7 +69,7 @@ export default function InitiativesSection({ initiatives: initiativesProp }) {
                 <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', border: '1px solid #E8E0D5', transition: 'all 0.25s', '&:hover': { transform: 'translateY(-4px)', boxShadow: '0 16px 40px rgba(61,43,31,0.14)' } }}>
                   <Box component={Link} href={href} sx={{ position: 'relative', overflow: 'hidden', textDecoration: 'none', color: 'inherit', display: 'block' }}>
                     {init.img && (
-                      <CardMedia component="img" image={init.img} alt={init.title} sx={{ height: 200, objectFit: 'cover' }} />
+                      <Picture src={init.img} alt={init.title} sizes="(min-width: 900px) 33vw, (min-width: 600px) 50vw, 100vw" sx={{ height: 200 }} />
                     )}
                     <Box sx={{ position: 'absolute', top: 12, left: 12 }}>
                       <Chip label={init.tag} size="small" sx={{ bgcolor: init.tagColor, color: 'white', fontWeight: 600, fontSize: '0.68rem' }} />
