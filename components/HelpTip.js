@@ -31,7 +31,7 @@ export default function HelpTip({ contextKey, sx }) {
         onClick={open}
         aria-label={t('help.tip')}
         title={t('help.tip')}
-        sx={{ color: '#2E7BB4', p: 0.5, ...sx }}
+        sx={{ color: '#296D9F', p: 0.5, ...sx }}
       >
         <HelpOutlineIcon fontSize="small" />
       </IconButton>
@@ -50,7 +50,7 @@ export default function HelpTip({ contextKey, sx }) {
         )}
         {(failed || (articles && !articles.length)) && (
           <Typography sx={{ fontSize: '0.85rem' }}>
-            <a href="/help/partner-guide" target="_blank" rel="noopener" style={{ color: '#2E7BB4', fontWeight: 600 }}>{t('help.partner_guide')}</a>
+            <a href="/help/partner-guide" target="_blank" rel="noopener" style={{ color: '#296D9F', fontWeight: 600 }}>{t('help.partner_guide')}</a>
           </Typography>
         )}
         {articles?.map((a) => (
@@ -58,7 +58,7 @@ export default function HelpTip({ contextKey, sx }) {
             <Typography sx={{ fontWeight: 700, fontSize: '0.9rem', color: '#3D2B1F' }}>{a.title}</Typography>
             {a.excerpt && <Typography sx={{ fontSize: '0.82rem', color: '#5A5A5A', mt: 0.5 }}>{a.excerpt}</Typography>}
             <Typography sx={{ mt: 0.75, fontSize: '0.82rem' }}>
-              <a href={`/help/${a.key}`} target="_blank" rel="noopener" style={{ color: '#2E7BB4', fontWeight: 600 }}>{t('help.read_more')} →</a>
+              <a href={`/help/${a.key}`} target="_blank" rel="noopener" style={{ color: '#296D9F', fontWeight: 600 }}>{t('help.read_more')} →</a>
             </Typography>
           </Box>
         ))}

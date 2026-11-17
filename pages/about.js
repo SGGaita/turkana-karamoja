@@ -94,7 +94,7 @@ function CmsAbout({ pageByLocale, areas }) {
               >
                 {o.abbr && <Typography sx={{ fontWeight: 800, color: '#C1440E', fontSize: '0.95rem' }}>{o.abbr}</Typography>}
                 <Typography sx={{ fontWeight: 600, color: '#3D2B1F', fontSize: '0.85rem', lineHeight: 1.4 }}>{o.name}</Typography>
-                {o.type && <Typography sx={{ color: '#9A9A9A', fontSize: '0.75rem', mt: 0.5 }}>{o.type}</Typography>}
+                {o.type && <Typography sx={{ color: '#6B6B6B', fontSize: '0.75rem', mt: 0.5 }}>{o.type}</Typography>}
               </Box>
             ))}
           </Box>

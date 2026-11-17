@@ -57,7 +57,7 @@ export default function ShareLinks({ title, path, size = 'small' }) {
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
-      <Typography sx={{ fontSize: '0.72rem', color: '#9A9A9A', fontWeight: 600, mr: 0.5 }}>
+      <Typography sx={{ fontSize: '0.72rem', color: '#6B6B6B', fontWeight: 600, mr: 0.5 }}>
         {t('share.label')}
       </Typography>
       <Tooltip title={t('share.facebook')}>

@@ -20,7 +20,7 @@ const ClusterCoverageMap = dynamic(() => import('./ClusterCoverageMap'), {
         border: '2px solid #E8E0D5',
       }}
     >
-      <Typography sx={{ color: '#9A9A9A', fontSize: '0.85rem' }}>Loading cluster map…</Typography>
+      <Typography sx={{ color: '#6B6B6B', fontSize: '0.85rem' }}>Loading cluster map…</Typography>
     </Box>
   ),
 });
@@ -124,7 +124,7 @@ export default function GeographicCoverageSection({ areas = null }) {
       <ClusterCoverageMap areas={areas} />
 
       {!(areas && areas.length) && (
-        <Typography sx={{ fontSize: '0.75rem', color: '#9A9A9A', mt: 2, textAlign: 'center' }}>
+        <Typography sx={{ fontSize: '0.75rem', color: '#6B6B6B', mt: 2, textAlign: 'center' }}>
           {COVERAGE_MAP_LEGEND}
         </Typography>
       )}

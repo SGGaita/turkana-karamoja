@@ -41,7 +41,7 @@ function SidebarContent({ orgRecord, section, onSectionChange, onLogout, onNavig
       <Divider sx={{ borderColor: 'rgba(255,255,255,0.12)' }} />
 
       <Box sx={{ p: 2, pb: 1 }}>
-        <Typography sx={{ color: '#9A9A9A', fontSize: '0.65rem', letterSpacing: '0.08em', textTransform: 'uppercase', mb: 0.5 }}>
+        <Typography sx={{ color: '#B8A898', fontSize: '0.65rem', letterSpacing: '0.08em', textTransform: 'uppercase', mb: 0.5 }}>
           Organisation
         </Typography>
         <Typography sx={{ fontWeight: 700, fontSize: '0.9rem', color: 'white', mb: 0.5, wordBreak: 'break-word' }}>

@@ -1,6 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { ALERT_LEGEND as fallbackAlertLegend } from '../lib/defaults';
 import { useShell } from '../contexts/LanguageContext';
+import { ink } from '../lib/contrast';
 
 export const ALERT_LEVEL_LEGEND = fallbackAlertLegend.items;
 
@@ -66,7 +67,7 @@ export default function AlertLevelLegend({ title, items, compact = false }) {
                   flexShrink: 0,
                 }}
               />
-              <Typography component="span" sx={{ fontWeight: 800, fontSize: '0.72rem', color: item.color, letterSpacing: '0.04em' }}>
+              <Typography component="span" sx={{ fontWeight: 800, fontSize: '0.72rem', color: ink(item.color, item.bg || '#FFFFFF'), letterSpacing: '0.04em' }}>
                 {item.level}
               </Typography>
             </Box>

@@ -33,7 +33,7 @@ const inputSx = {
     '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#D4A96A' },
     '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2E7BB4' },
   },
-  '& .MuiInputLabel-root.Mui-focused': { color: '#2E7BB4' },
+  '& .MuiInputLabel-root.Mui-focused': { color: '#296D9F' },
 };
 
 /** Public organisation-registration form. No login required — this is how a new

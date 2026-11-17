@@ -32,7 +32,7 @@ export default function ReportKeywordsField({
       <Typography sx={{ fontWeight: 600, fontSize: '0.88rem', mb: 0.5, color: '#3D2B1F' }}>
         {title}
       </Typography>
-      <Typography sx={{ fontSize: '0.75rem', color: '#9A9A9A', mb: 1.5, lineHeight: 1.5 }}>
+      <Typography sx={{ fontSize: '0.75rem', color: '#6B6B6B', mb: 1.5, lineHeight: 1.5 }}>
         {hint}
       </Typography>
 
@@ -61,7 +61,7 @@ export default function ReportKeywordsField({
               key={option}
               label={option}
               size="small"
-              sx={{ bgcolor: '#F0F8FF', color: '#2E7BB4', fontWeight: 600, fontSize: '0.72rem' }}
+              sx={{ bgcolor: '#F0F8FF', color: '#296D9F', fontWeight: 600, fontSize: '0.72rem' }}
             />
           ))
         }
@@ -80,7 +80,7 @@ export default function ReportKeywordsField({
           />
         )}
       />
-      <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A', mt: 0.8 }}>
+      <Typography sx={{ fontSize: '0.68rem', color: '#6B6B6B', mt: 0.8 }}>
         Up to {MAX_KEYWORDS} keywords · choose from suggestions or type your own
       </Typography>
     </Box>

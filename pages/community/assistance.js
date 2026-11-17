@@ -103,7 +103,7 @@ function AssistancePageBody({ itemsByLocale, pageByLocale }) {
                 {site.agency && <StatusPill label={site.agency} color="#E87010" />}
                 {site.siteType && <StatusPill label={typeLabel(site.siteType)} color="#2E7BB4" />}
               </Box>
-              <Typography sx={{ fontSize: '0.78rem', color: '#9A9A9A', mb: 0.5 }}>{site.region}{site.locationLabel ? ` · ${site.locationLabel}` : ''}</Typography>
+              <Typography sx={{ fontSize: '0.78rem', color: '#6B6B6B', mb: 0.5 }}>{site.region}{site.locationLabel ? ` · ${site.locationLabel}` : ''}</Typography>
               <Typography sx={{ fontSize: '0.82rem', color: '#5A5A5A', lineHeight: 1.6, mb: 1 }}>{site.desc}</Typography>
               {site.schedule && <Typography sx={{ fontSize: '0.75rem', color: '#3D2B1F' }}><strong>{t('community.schedule')}</strong> {site.schedule}</Typography>}
               {site.contact && <Typography sx={{ fontSize: '0.75rem', color: '#5A5A5A', mt: 0.5 }}><strong>{t('community.contact')}</strong> {site.contact}</Typography>}

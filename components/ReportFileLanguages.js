@@ -20,7 +20,7 @@ export default function ReportFileLanguages({ files, report, onPreview, onDownlo
   return (
     <Box>
       {files.length > 1 && (
-        <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A', mb: 0.6 }}>
+        <Typography sx={{ fontSize: '0.68rem', color: '#6B6B6B', mb: 0.6 }}>
           Select a language, then click Download to get that version of the report.
         </Typography>
       )}
@@ -54,7 +54,7 @@ export default function ReportFileLanguages({ files, report, onPreview, onDownlo
       >
         <Typography
           sx={{
-            fontSize: '0.68rem', color: '#9A9A9A', overflow: 'hidden',
+            fontSize: '0.68rem', color: '#6B6B6B', overflow: 'hidden',
             textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0,
           }}
           title={file.filename || undefined}

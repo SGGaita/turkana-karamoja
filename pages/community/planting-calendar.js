@@ -58,20 +58,20 @@ function PlantingCalendarPageBody({ itemsByLocale, pageByLocale }) {
               {rows.map((row) => {
                 const status = PLANTING_STATUS_COLORS[row.status]
                   ? { label: t(`community.planting_${row.status}`), color: PLANTING_STATUS_COLORS[row.status] }
-                  : { label: row.status, color: '#9A9A9A' };
+                  : { label: row.status, color: '#6B6B6B' };
                 return (
                   <Box key={row.id} sx={{ flex: '1 1 calc(50% - 8px)', minWidth: { xs: '100%', md: 'calc(50% - 8px)' }, bgcolor: 'white', border: '1px solid #E8E0D5', borderRadius: 2, p: 2.5 }}>
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 1 }}>
                       <Typography sx={{ fontWeight: 700, fontSize: '0.95rem', color: '#3D2B1F', flex: 1 }}>{row.crop}</Typography>
                       <StatusPill label={status.label} color={status.color} />
                     </Box>
-                    <Typography sx={{ fontSize: '0.78rem', color: '#9A9A9A', mb: 1 }}>{row.region}</Typography>
+                    <Typography sx={{ fontSize: '0.78rem', color: '#6B6B6B', mb: 1 }}>{row.region}</Typography>
                     <Typography sx={{ fontSize: '0.8rem', color: '#3D2B1F', fontWeight: 600, mb: 1 }}>
                       {t('community.planting_window', { range: formatDateRange(row.windowStart, row.windowEnd) })}
                     </Typography>
                     <Typography sx={{ fontSize: '0.82rem', color: '#5A5A5A', lineHeight: 1.65, mb: 1.5 }}>{row.desc}</Typography>
                     {row.agroDealer && (
-                      <Typography sx={{ fontSize: '0.75rem', color: '#2E8B57', fontWeight: 600 }}>{t('community.agro_dealer', { name: row.agroDealer })}</Typography>
+                      <Typography sx={{ fontSize: '0.75rem', color: '#297B4D', fontWeight: 600 }}>{t('community.agro_dealer', { name: row.agroDealer })}</Typography>
                     )}
                     {row.langs?.length > 0 && (
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.6, mt: 1.5 }}>

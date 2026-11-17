@@ -24,6 +24,7 @@ import { getReportFiles, applyReportDownloadStats } from '../../lib/report-utils
 import { buildSlugPath, extractIdFromSlugPath, slugify } from '../../lib/slug';
 import { getCountryLabel } from '../../lib/countries';
 import { NotTranslatedBadge } from '../../components/NotTranslated';
+import { badge } from '../../lib/contrast';
 
 const richTextSx = {
   fontSize: '0.9rem',
@@ -92,7 +93,7 @@ function ReportPage({ reportByLocale, pageByLocale }) {
       <Layout title={t('reports.loading')}>
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 12 }}>
           <CircularProgress sx={{ color: '#C1440E', mb: 2 }} />
-          <Typography sx={{ color: '#9A9A9A', fontSize: '0.9rem' }}>{t('reports.loading')}</Typography>
+          <Typography sx={{ color: '#6B6B6B', fontSize: '0.9rem' }}>{t('reports.loading')}</Typography>
         </Box>
       </Layout>
     );
@@ -124,7 +125,7 @@ function ReportPage({ reportByLocale, pageByLocale }) {
 
       <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, md: 4 }, py: { xs: 4, md: 6 } }}>
 
-        <Button component={Link} href="/reports" startIcon={<ArrowBackIcon />} sx={{ color: '#2E7BB4', mb: 3, textTransform: 'none' }}>
+        <Button component={Link} href="/reports" startIcon={<ArrowBackIcon />} sx={{ color: '#296D9F', mb: 3, textTransform: 'none' }}>
           {t('reports.all')}
         </Button>
 
@@ -150,7 +151,7 @@ function ReportPage({ reportByLocale, pageByLocale }) {
           >
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.8, mb: 2 }}>
               {(current.categories?.length ? current.categories : [current.tag]).filter(Boolean).map((c) => (
-                <Chip key={c} label={c} size="small" sx={{ bgcolor: current.tagColor, color: 'white', fontWeight: 600, fontSize: '0.68rem' }} />
+                <Chip key={c} label={c} size="small" sx={{ ...badge(current.tagColor), fontWeight: 600, fontSize: '0.68rem' }} />
               ))}
               {current.isNew && <Chip label={t('reports.new')} size="small" sx={{ bgcolor: '#C1440E', color: 'white', fontWeight: 700, fontSize: '0.65rem' }} />}
               {current.isUpdated && <Chip label={t('reports.updated')} size="small" sx={{ bgcolor: '#2E7BB4', color: 'white', fontWeight: 700, fontSize: '0.65rem' }} />}
@@ -168,7 +169,7 @@ function ReportPage({ reportByLocale, pageByLocale }) {
               {current.countries?.map((c) => (
                 <Chip key={c} label={getCountryLabel(c)} size="small" sx={{ bgcolor: '#EAF3EC', color: '#2E7040', fontSize: '0.7rem' }} />
               ))}
-              <Typography sx={{ fontSize: '0.75rem', color: '#9A9A9A' }}>{current.date}{current.size ? ` · ${current.size}` : ''}</Typography>
+              <Typography sx={{ fontSize: '0.75rem', color: '#6B6B6B' }}>{current.date}{current.size ? ` · ${current.size}` : ''}</Typography>
               <ReportDownloadStat count={current.downloadCount} size="medium" />
             </Box>
 
@@ -243,7 +244,7 @@ function ReportPage({ reportByLocale, pageByLocale }) {
                         key={k}
                         label={k}
                         size="small"
-                        sx={{ bgcolor: '#F0F8FF', color: '#2E7BB4', fontWeight: 600, fontSize: '0.68rem' }}
+                        sx={{ bgcolor: '#F0F8FF', color: '#296D9F', fontWeight: 600, fontSize: '0.68rem' }}
                       />
                     ))}
                   </Box>

@@ -34,7 +34,7 @@ const alertLevels = [
   { val: 'red', label: 'RED - Severe / Extreme', color: '#D63030' },
   { val: 'orange', label: 'ORANGE - High', color: '#E87010' },
   { val: 'yellow', label: 'YELLOW - Moderate / Watch', color: '#B8860B' },
-  { val: 'green', label: 'GREEN - Normal / Information', color: '#2E8B57' },
+  { val: 'green', label: 'GREEN - Normal / Information', color: '#297B4D' },
 ];
 
 const regions = ADVISORY_REGION_OPTIONS;
@@ -45,7 +45,7 @@ const inputSx = {
     '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#D4A96A' },
     '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2E7BB4' },
   },
-  '& .MuiInputLabel-root.Mui-focused': { color: '#2E7BB4' },
+  '& .MuiInputLabel-root.Mui-focused': { color: '#296D9F' },
 };
 
 const emptyAdvisoryForm = () => ({
@@ -198,7 +198,7 @@ export default function AdvisorySubmissionForm({ token, orgRecord, onNotify, onS
       <TextField label="Advisory Title *" fullWidth required value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} sx={{ ...inputSx, mb: 2.5 }} size="small" placeholder="Short, specific headline — e.g. Flash flood risk in Lodwar lowlands" />
 
       <Typography sx={{ fontWeight: 600, fontSize: '0.88rem', mb: 0.5, color: '#3D2B1F' }}>Situation *</Typography>
-      <Typography sx={{ fontSize: '0.75rem', color: '#9A9A9A', mb: 1, lineHeight: 1.5 }}>
+      <Typography sx={{ fontSize: '0.75rem', color: '#6B6B6B', mb: 1, lineHeight: 1.5 }}>
         What is happening, where, and how severe? Be factual and specific.
       </Typography>
       <Box sx={{ mb: 2.5 }}>
@@ -211,7 +211,7 @@ export default function AdvisorySubmissionForm({ token, orgRecord, onNotify, onS
       </Box>
 
       <Typography sx={{ fontWeight: 600, fontSize: '0.88rem', mb: 0.5, color: '#3D2B1F' }}>Recommended actions *</Typography>
-      <Typography sx={{ fontSize: '0.75rem', color: '#9A9A9A', mb: 1, lineHeight: 1.5 }}>
+      <Typography sx={{ fontSize: '0.75rem', color: '#6B6B6B', mb: 1, lineHeight: 1.5 }}>
         Use a bullet list — each item should be a clear, actionable step (e.g. &quot;Move livestock to higher ground before nightfall&quot;).
       </Typography>
       <Box sx={{ mb: 2.5 }}>

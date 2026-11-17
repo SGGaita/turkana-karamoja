@@ -19,7 +19,7 @@ export default function AdvisoryValidityField({
       <Typography sx={{ fontWeight: 600, fontSize: '0.88rem', mb: 0.5, color: '#3D2B1F' }}>
         Validity period *
       </Typography>
-      <Typography sx={{ fontSize: '0.75rem', color: '#9A9A9A', mb: 1.5, lineHeight: 1.5 }}>
+      <Typography sx={{ fontSize: '0.75rem', color: '#6B6B6B', mb: 1.5, lineHeight: 1.5 }}>
         When does this advisory apply? Pick an end date, a date range, or a duration so communities know how long to act.
       </Typography>
 
@@ -106,7 +106,7 @@ export default function AdvisoryValidityField({
       )}
 
       {preview && (
-        <Typography sx={{ fontSize: '0.72rem', color: '#2E7BB4', mt: 1.5, fontWeight: 600 }}>
+        <Typography sx={{ fontSize: '0.72rem', color: '#296D9F', mt: 1.5, fontWeight: 600 }}>
           Will display as: {preview}
         </Typography>
       )}

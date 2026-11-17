@@ -211,12 +211,12 @@ function ReportsLibrary({ reportsByLocale = null, pageByLocale = null }) {
           <Box sx={{ flex: 1, minWidth: 0, width: '100%' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, flexWrap: 'wrap', gap: 2 }}>
               <Box>
-                <Typography sx={{ fontSize: '0.82rem', color: '#9A9A9A' }}>
+                <Typography sx={{ fontSize: '0.82rem', color: '#6B6B6B' }}>
                   {t('reports.showing', { shown: filtered.length, total: reports.length })}
                   {viewMode === 'by-org' && orgGroups.length > 0 && ` · ${t('reports.organisations', { n: orgGroups.length })}`}
                 </Typography>
                 {filtered.length > 0 && (
-                  <Typography sx={{ fontSize: '0.72rem', color: '#B0A090', mt: 0.3 }}>
+                  <Typography sx={{ fontSize: '0.72rem', color: '#796E63', mt: 0.3 }}>
                     {viewMode === 'list'
                       ? t('reports.page_reports', { page, pages: totalPages, from: pageStart, to: pageEnd })
                       : t('reports.page_groups', { page, pages: totalPages, from: pageStart, to: pageEnd })}
@@ -261,7 +261,7 @@ function ReportsLibrary({ reportsByLocale = null, pageByLocale = null }) {
 
             {filtered.length === 0 ? (
               <Box sx={{ bgcolor: 'white', border: '1px solid #E8E0D5', borderRadius: 2, p: 5, textAlign: 'center' }}>
-                <Typography sx={{ color: '#9A9A9A', fontSize: '0.9rem', mb: 1 }}>
+                <Typography sx={{ color: '#6B6B6B', fontSize: '0.9rem', mb: 1 }}>
                   {!reports.length && sections?.empty?.text ? sections.empty.text : t('reports.none_found')}
                 </Typography>
                 <Button size="small" onClick={clearFilters} sx={{ color: '#C1440E', textTransform: 'none' }}>{t('reports.clear_filters')}</Button>
@@ -302,7 +302,7 @@ function ReportsLibrary({ reportsByLocale = null, pageByLocale = null }) {
                     '& .MuiPaginationItem-root.Mui-selected': { bgcolor: '#C1440E', color: 'white', '&:hover': { bgcolor: '#A33A0C' } },
                   }}
                 />
-                <Typography sx={{ fontSize: '0.72rem', color: '#9A9A9A' }}>
+                <Typography sx={{ fontSize: '0.72rem', color: '#6B6B6B' }}>
                   {viewMode === 'list'
                     ? `${REPORT_PAGE_SIZE} reports per page`
                     : `${ORG_GROUP_PAGE_SIZE} organisation groups per page`}

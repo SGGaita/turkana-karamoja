@@ -74,10 +74,10 @@ function WaterPointsPageBody({ itemsByLocale, pageByLocale }) {
                   <StatusPill label={status.label} color={status.color} />
                   {wp.pointType && <StatusPill label={typeLabel(wp.pointType)} color="#2E7BB4" />}
                 </Box>
-                <Typography sx={{ fontSize: '0.78rem', color: '#9A9A9A', mb: 0.5 }}>{wp.region}{wp.locationLabel ? ` · ${wp.locationLabel}` : ''}</Typography>
+                <Typography sx={{ fontSize: '0.78rem', color: '#6B6B6B', mb: 0.5 }}>{wp.region}{wp.locationLabel ? ` · ${wp.locationLabel}` : ''}</Typography>
                 <Typography sx={{ fontSize: '0.82rem', color: '#5A5A5A', lineHeight: 1.6 }}>{wp.desc}</Typography>
                 {wp.lastUpdated && (
-                  <Typography sx={{ fontSize: '0.68rem', color: wp.stale ? '#B85C00' : '#9A9A9A', mt: 1 }}>
+                  <Typography sx={{ fontSize: '0.68rem', color: wp.stale ? '#A65300' : '#6B6B6B', mt: 1 }}>
                     {t('common.last_updated', { date: wp.lastUpdated })}{wp.stale ? ` · ${t('common.out_of_date')}` : ''}
                   </Typography>
                 )}

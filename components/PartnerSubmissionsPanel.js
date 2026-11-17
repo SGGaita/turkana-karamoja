@@ -18,6 +18,7 @@ import { formatFileSize } from '../lib/report-utils';
 import HelpStepLink from './HelpStepLink';
 import HelpTip from './HelpTip';
 import { htmlToText } from '../lib/cms-alerts';
+import { ink } from '../lib/contrast';
 
 function excerpt(html) {
   const text = htmlToText(html || '').replace(/\s+/g, ' ').trim();
@@ -53,7 +54,7 @@ function StatusBadge({ status }) {
       size="small"
       sx={{
         bgcolor: s.bg,
-        color: s.color,
+        color: ink(s.color, s.bg),
         border: `1px solid ${s.border}`,
         fontWeight: 700,
         fontSize: '0.62rem',
@@ -266,12 +267,12 @@ export default function PartnerSubmissionsPanel({
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}><CircularProgress sx={{ color: '#C1440E' }} /></Box>
       ) : items.length === 0 ? (
         <Box sx={{ bgcolor: '#FDF9F4', border: '1px dashed #E8E0D5', borderRadius: 2, p: 4, textAlign: 'center' }}>
-          <Typography sx={{ color: '#9A9A9A', fontSize: '0.9rem' }}>No submissions yet. Use the advisory or report tabs to submit content.</Typography>
+          <Typography sx={{ color: '#6B6B6B', fontSize: '0.9rem' }}>No submissions yet. Use the advisory or report tabs to submit content.</Typography>
           <HelpStepLink article="partner-submit-advisory" sx={{ mt: 1 }} />
         </Box>
       ) : visibleItems.length === 0 ? (
         <Box sx={{ bgcolor: '#FDF9F4', border: '1px dashed #E8E0D5', borderRadius: 2, p: 4, textAlign: 'center' }}>
-          <Typography sx={{ color: '#9A9A9A', fontSize: '0.9rem' }}>No submissions match this filter.</Typography>
+          <Typography sx={{ color: '#6B6B6B', fontSize: '0.9rem' }}>No submissions match this filter.</Typography>
         </Box>
       ) : (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -280,8 +281,8 @@ export default function PartnerSubmissionsPanel({
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center', mb: 1 }}>
                 <Chip label={item.type === 'advisory' ? 'Advisory' : 'Report'} size="small" sx={{ fontWeight: 700, fontSize: '0.65rem' }} />
                 <StatusBadge status={item.review_status} />
-                <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A' }}>{item.reference}</Typography>
-                <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A', ml: 'auto' }}>{formatDate(item.submitted_at)}</Typography>
+                <Typography sx={{ fontSize: '0.68rem', color: '#6B6B6B' }}>{item.reference}</Typography>
+                <Typography sx={{ fontSize: '0.68rem', color: '#6B6B6B', ml: 'auto' }}>{formatDate(item.submitted_at)}</Typography>
               </Box>
               <Typography sx={{ fontWeight: 700, fontSize: '0.92rem', color: '#3D2B1F', mb: 0.5 }}>{item.title}</Typography>
               <Typography sx={{ fontSize: '0.8rem', color: '#5A5A5A', mb: 1.5, lineHeight: 1.5 }}>
@@ -291,7 +292,7 @@ export default function PartnerSubmissionsPanel({
               {item.type === 'report' && item.files?.length > 0 && (
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.6, mb: 1.5 }}>
                   {item.files.map((f) => (
-                    <Chip key={`${f.url}-${f.language}`} label={f.label || f.language} size="small" sx={{ fontSize: '0.62rem', bgcolor: '#F0F8FF', color: '#2E7BB4' }} />
+                    <Chip key={`${f.url}-${f.language}`} label={f.label || f.language} size="small" sx={{ fontSize: '0.62rem', bgcolor: '#F0F8FF', color: '#296D9F' }} />
                   ))}
                 </Box>
               )}
@@ -307,7 +308,7 @@ export default function PartnerSubmissionsPanel({
                     variant="outlined"
                     startIcon={<FolderOpenOutlinedIcon />}
                     onClick={() => { setAddDocsItem(item); setNewDoc({ file: null, language: nextAvailableLanguage(item.files) }); }}
-                    sx={{ fontSize: '0.72rem', borderColor: '#2E7BB4', color: '#2E7BB4' }}
+                    sx={{ fontSize: '0.72rem', borderColor: '#2E7BB4', color: '#296D9F' }}
                   >
                     Manage documents
                   </Button>
@@ -360,7 +361,7 @@ export default function PartnerSubmissionsPanel({
                       border: '1px solid #F0EBE3', borderRadius: 1, px: 1.2, py: 0.8,
                     }}
                   >
-                    <Chip label={f.label || f.language} size="small" sx={{ fontSize: '0.6rem', bgcolor: '#F0F8FF', color: '#2E7BB4', flexShrink: 0 }} />
+                    <Chip label={f.label || f.language} size="small" sx={{ fontSize: '0.6rem', bgcolor: '#F0F8FF', color: '#296D9F', flexShrink: 0 }} />
                     <Typography sx={{ fontSize: '0.72rem', color: '#5A5A5A', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {f.filename || 'Document'}{f.size ? ` · ${f.size}` : ''}
                     </Typography>

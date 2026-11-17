@@ -8,7 +8,7 @@ function MapLoading() {
   const t = useT();
   return (
     <Box sx={{ height: { xs: 380, md: 520 }, bgcolor: '#F5F0E8', borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #E8E0D5' }}>
-      <Typography sx={{ color: '#9A9A9A', fontSize: '0.85rem' }}>{t('common.loading_map')}</Typography>
+      <Typography sx={{ color: '#6B6B6B', fontSize: '0.85rem' }}>{t('common.loading_map')}</Typography>
     </Box>
   );
 }
@@ -46,7 +46,7 @@ export function StatChip({ value, label, color = '#3D2B1F' }) {
   return (
     <Box sx={{ flex: '1 1 120px', bgcolor: 'white', border: '1px solid #E8E0D5', borderRadius: 2, p: 2, textAlign: 'center' }}>
       <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontSize: '1.5rem', fontWeight: 700, color }}>{value}</Typography>
-      <Typography sx={{ fontSize: '0.72rem', color: '#9A9A9A', mt: 0.5 }}>{label}</Typography>
+      <Typography sx={{ fontSize: '0.72rem', color: '#6B6B6B', mt: 0.5 }}>{label}</Typography>
     </Box>
   );
 }

@@ -52,7 +52,7 @@ export default function CommunityInitiativeDetail({ unavailable, articleByLocale
       <Layout title={t('community.loading_article')}>
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 12 }}>
           <CircularProgress sx={{ color: '#C1440E', mb: 2 }} />
-          <Typography sx={{ color: '#9A9A9A', fontSize: '0.9rem' }}>{t('community.loading_article')}</Typography>
+          <Typography sx={{ color: '#6B6B6B', fontSize: '0.9rem' }}>{t('community.loading_article')}</Typography>
         </Box>
       </Layout>
     );
@@ -101,7 +101,7 @@ export default function CommunityInitiativeDetail({ unavailable, articleByLocale
           >
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center', mb: 2 }}>
               <Chip label={article.tag} size="small" sx={{ bgcolor: article.tagColor, color: 'white', fontSize: '0.68rem' }} />
-              <Typography sx={{ fontSize: '0.78rem', color: '#9A9A9A', fontFamily: '"Montserrat", sans-serif' }}>
+              <Typography sx={{ fontSize: '0.78rem', color: '#6B6B6B', fontFamily: '"Montserrat", sans-serif' }}>
                 {article.date}
               </Typography>
             </Box>
@@ -177,7 +177,7 @@ export default function CommunityInitiativeDetail({ unavailable, articleByLocale
                       <Box component="span" sx={{ minWidth: 0, flex: 1 }}>
                         {file.filename || file.label || t('common.download_document')}
                         {file.size && (
-                          <Box component="span" sx={{ display: 'block', color: '#9A9A9A', fontSize: '0.72rem', mt: 0.25 }}>
+                          <Box component="span" sx={{ display: 'block', color: '#6B6B6B', fontSize: '0.72rem', mt: 0.25 }}>
                             {file.size}
                           </Box>
                         )}

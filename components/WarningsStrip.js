@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { toStripAlert } from '../lib/wp-mappers';
 import PushSubscribeButton from './PushSubscribeButton';
 import { useT } from '../contexts/LanguageContext';
+import { badge } from '../lib/contrast';
 
 export default function WarningsStrip({ alerts: alertsProp = [], apiStale = false }) {
   const t = useT();
@@ -77,12 +78,12 @@ export default function WarningsStrip({ alerts: alertsProp = [], apiStale = fals
                 }}
               >
                 <Box sx={{ mb: 1.2 }}>
-                  <Chip label={a.level} size="small" sx={{ bgcolor: a.border, color: 'white', fontWeight: 700, fontSize: '0.65rem', letterSpacing: '0.06em' }} />
+                  <Chip label={a.level} size="small" sx={{ ...badge(a.border), fontWeight: 700, fontSize: '0.65rem', letterSpacing: '0.06em' }} />
                 </Box>
                 <Typography sx={{ fontWeight: 700, fontSize: '0.95rem', color: '#3D2B1F', mb: 0.5 }}>{a.title}</Typography>
                 <Typography sx={{ fontSize: '0.75rem', color: '#6B4226', fontWeight: 500, mb: 0.8 }}>{a.area}</Typography>
                 <Typography sx={{ fontSize: '0.8rem', color: '#5A5A5A', lineHeight: 1.55, mb: 1.2 }}>{a.desc}</Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', fontFamily: '"Montserrat", sans-serif', fontSize: '0.65rem', color: '#9A9A9A' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', fontFamily: '"Montserrat", sans-serif', fontSize: '0.65rem', color: '#6B6B6B' }}>
                   <span>{t('alerts.issued_on', { date: a.issued })}</span>
                   <span>{a.valid}</span>
                 </Box>

@@ -16,7 +16,7 @@ export default function HelpStepLink({ article, sx }) {
       href={to(`/help/${article}`)}
       target="_blank"
       rel="noopener"
-      sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, fontSize: '0.8rem', color: '#2E7BB4', textDecoration: 'none', '&:hover': { textDecoration: 'underline' }, ...sx }}
+      sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, fontSize: '0.8rem', color: '#296D9F', textDecoration: 'none', '&:hover': { textDecoration: 'underline' }, ...sx }}
     >
       <HelpOutlineIcon sx={{ fontSize: 16 }} aria-hidden />
       {t('help.step_help')}

@@ -2,8 +2,9 @@ import Link from 'next/link';
 import { Box, Typography, Button, Card, CardContent, Chip } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import { useLocalizedHomeSections } from '../contexts/LanguageContext';
+import { useLocalizedHomeSections, useT } from '../contexts/LanguageContext';
 import Picture from './Picture';
+import { badge } from '../lib/contrast';
 
 function initiativeHref(init) {
   if (init.slugPath) return `/community/${init.slugPath}`;
@@ -12,6 +13,7 @@ function initiativeHref(init) {
 
 export default function InitiativesSection({ initiatives: initiativesProp }) {
   // From Karamoja → Website pages → Home when the website reads it; the old fixed text otherwise.
+  const t = useT();
   const cms = useLocalizedHomeSections().initiatives;
   // The CMS list is already the editors' choice (up to 6); the old endpoint lists everything, so show 3.
   const initiatives = (initiativesProp || []).slice(0, cms ? 6 : 3);
@@ -72,7 +74,7 @@ export default function InitiativesSection({ initiatives: initiativesProp }) {
                       <Picture src={init.img} alt={init.title} sizes="(min-width: 900px) 33vw, (min-width: 600px) 50vw, 100vw" sx={{ height: 200 }} />
                     )}
                     <Box sx={{ position: 'absolute', top: 12, left: 12 }}>
-                      <Chip label={init.tag} size="small" sx={{ bgcolor: init.tagColor, color: 'white', fontWeight: 600, fontSize: '0.68rem' }} />
+                      <Chip label={init.tag} size="small" sx={{ ...badge(init.tagColor), fontWeight: 600, fontSize: '0.68rem' }} />
                     </Box>
                     <Box sx={{ position: 'absolute', top: 10, right: 10, width: 28, height: 28, bgcolor: 'rgba(255,255,255,0.9)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <OpenInNewIcon sx={{ fontSize: 14, color: '#3D2B1F' }} />
@@ -112,10 +114,11 @@ export default function InitiativesSection({ initiatives: initiativesProp }) {
                       component={Link}
                       href={href}
                       size="small"
+                      aria-label={`${t('common.read_more')}: ${init.title}`}
                       endIcon={<ArrowForwardIcon sx={{ fontSize: 14 }} />}
                       sx={{ mt: 2, color: '#C1440E', fontWeight: 600, p: 0, textTransform: 'none' }}
                     >
-                      Read More
+                      {t('common.read_more')}
                     </Button>
                   </CardContent>
                 </Card>

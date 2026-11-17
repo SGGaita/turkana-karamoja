@@ -37,6 +37,10 @@ What it covers (deployment guide §9):
 - **Installed app**: manifest, a 512 px icon, and Chrome's own installability check (no errors).
 - **Forms**: the contact form and its captcha are there (not sent); partner sign-in with a test account keeps the
   session in an httpOnly cookie.
+- **Accessibility** (`a11y.spec.mjs`, axe — the engine behind Lighthouse's accessibility score): every page and `/sw`,
+  WCAG 2.2 A/AA, failing on serious and critical problems — text too faint for its real background, buttons, links
+  and map dots without a name, form fields without a label, controls smaller than 24 px. Map dots are left out of the
+  tap-size rule only (neighbouring places can overlap at the starting zoom).
 - **CMS, signed out**: users list, page schema and staff help refused; `?author=` 404; XML-RPC off; no `readme.html`,
   `license.txt` or `debug.log`; *noindex* header; public content answers without contact details; active alerts are
   current; old `tk/v1` addresses marked for removal (Deprecation / Sunset / successor) or switched off; push

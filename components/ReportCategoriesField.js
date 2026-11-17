@@ -21,7 +21,7 @@ export default function ReportCategoriesField({
       <Typography sx={{ fontWeight: 600, fontSize: '0.88rem', mb: 0.5, color: '#3D2B1F' }}>
         {title}
       </Typography>
-      <Typography sx={{ fontSize: '0.75rem', color: '#9A9A9A', mb: 1.5, lineHeight: 1.5 }}>
+      <Typography sx={{ fontSize: '0.75rem', color: '#6B6B6B', mb: 1.5, lineHeight: 1.5 }}>
         {hint}
       </Typography>
 

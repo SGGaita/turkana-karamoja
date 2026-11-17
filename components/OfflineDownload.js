@@ -14,7 +14,7 @@ export default function OfflineDownload({ children, hideSavedLink = false }) {
   const t = useT();
   if (!supported) return children ? <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', alignItems: 'center' }}>{children}</Box> : null;
   const busy = Boolean(progress);
-  const muted = { fontSize: '0.7rem', color: '#9A9A9A' };
+  const muted = { fontSize: '0.7rem', color: '#6B6B6B' };
   return (
     <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1.5 }}>
       <Button

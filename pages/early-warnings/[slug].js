@@ -21,6 +21,7 @@ import { cmsStaticProps, getAlert, getPageAllLocales, inAllLocales, isPublishedP
 import { alertFromCms, pickLocale, levelLabel, validityLabel } from '../../lib/cms-alerts';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { NotTranslatedBadge } from '../../components/NotTranslated';
+import { badge } from '../../lib/contrast';
 
 const HERO_IMAGE = 'https://images.unsplash.com/photo-1504608524841-42584120d693?w=1400&q=70';
 
@@ -49,7 +50,7 @@ export default function AdvisoryDetail({ unavailable, alertByLocale, pageByLocal
       <Layout title={t('alerts.loading')}>
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 12 }}>
           <CircularProgress sx={{ color: '#C1440E', mb: 2 }} />
-          <Typography sx={{ color: '#9A9A9A', fontSize: '0.9rem' }}>{t('alerts.loading')}</Typography>
+          <Typography sx={{ color: '#6B6B6B', fontSize: '0.9rem' }}>{t('alerts.loading')}</Typography>
         </Box>
       </Layout>
     );
@@ -83,7 +84,7 @@ export default function AdvisoryDetail({ unavailable, alertByLocale, pageByLocal
           component={Link}
           href="/early-warnings"
           startIcon={<ArrowBackIcon />}
-          sx={{ color: '#2E7BB4', mb: 3, textTransform: 'none' }}
+          sx={{ color: '#296D9F', mb: 3, textTransform: 'none' }}
         >
           {t('alerts.all')}
         </Button>
@@ -112,7 +113,7 @@ export default function AdvisoryDetail({ unavailable, alertByLocale, pageByLocal
               <Chip
                 label={levelLabel(alert.level, t)}
                 size="small"
-                sx={{ bgcolor: alert.color, color: 'white', fontWeight: 700, fontSize: '0.7rem' }}
+                sx={{ ...badge(alert.color), fontWeight: 700, fontSize: '0.7rem' }}
               />
               {alert.advisoryType && (
                 <Chip
@@ -142,7 +143,7 @@ export default function AdvisoryDetail({ unavailable, alertByLocale, pageByLocal
                 <Box sx={{ display: 'flex', gap: 0.75, alignItems: 'flex-start', minWidth: 180 }}>
                   <PlaceOutlinedIcon sx={{ fontSize: 18, color: '#C1440E', mt: '2px' }} />
                   <Box>
-                    <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    <Typography sx={{ fontSize: '0.68rem', color: '#6B6B6B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                       {t('alerts.area_affected')}
                     </Typography>
                     <Typography sx={{ fontSize: '0.88rem', color: '#3D2B1F', fontWeight: 600 }}>{alert.area}</Typography>
@@ -153,10 +154,10 @@ export default function AdvisoryDetail({ unavailable, alertByLocale, pageByLocal
                 <Box sx={{ display: 'flex', gap: 0.75, alignItems: 'flex-start', minWidth: 160 }}>
                   <SourceOutlinedIcon sx={{ fontSize: 18, color: '#C1440E', mt: '2px' }} />
                   <Box>
-                    <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    <Typography sx={{ fontSize: '0.68rem', color: '#6B6B6B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                       {t('alerts.source')}
                     </Typography>
-                    <Typography sx={{ fontSize: '0.88rem', color: '#2E7BB4', fontWeight: 600 }}>{alert.source}</Typography>
+                    <Typography sx={{ fontSize: '0.88rem', color: '#296D9F', fontWeight: 600 }}>{alert.source}</Typography>
                   </Box>
                 </Box>
               )}
@@ -164,7 +165,7 @@ export default function AdvisoryDetail({ unavailable, alertByLocale, pageByLocal
                 <Box sx={{ display: 'flex', gap: 0.75, alignItems: 'flex-start', minWidth: 160 }}>
                   <ScheduleOutlinedIcon sx={{ fontSize: 18, color: '#C1440E', mt: '2px' }} />
                   <Box>
-                    <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    <Typography sx={{ fontSize: '0.68rem', color: '#6B6B6B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                       {t('alerts.validity')}
                     </Typography>
                     <Typography sx={{ fontSize: '0.85rem', color: '#3D2B1F' }}>
@@ -196,7 +197,7 @@ export default function AdvisoryDetail({ unavailable, alertByLocale, pageByLocal
                     <Link href={alert.replacedBy.path} style={{ color: '#C1440E', fontWeight: 700 }}>{alert.replacedBy.title}</Link>
                   </Typography>
                 )}
-                <Typography component={Link} href="/early-warnings" sx={{ color: '#2E7BB4', fontSize: '0.85rem' }}>
+                <Typography component={Link} href="/early-warnings" sx={{ color: '#296D9F', fontSize: '0.85rem' }}>
                   {t('alerts.see_active')}
                 </Typography>
               </Box>
@@ -214,7 +215,7 @@ export default function AdvisoryDetail({ unavailable, alertByLocale, pageByLocal
             {alert.bodyHtml ? (
               // Sanitised by Karamoja Core (strict allow-list: paragraphs, lists, emphasis, links).
               <Box
-                sx={{ fontSize: '0.95rem', color: '#3D2B1F', lineHeight: 1.8, '& p': { mt: 0, mb: 1.5 }, '& a': { color: '#2E7BB4' }, '& ul, & ol': { pl: 3 } }}
+                sx={{ fontSize: '0.95rem', color: '#3D2B1F', lineHeight: 1.8, '& p': { mt: 0, mb: 1.5 }, '& a': { color: '#296D9F' }, '& ul, & ol': { pl: 3 } }}
                 dangerouslySetInnerHTML={{ __html: alert.bodyHtml }}
               />
             ) : (
@@ -351,7 +352,7 @@ export default function AdvisoryDetail({ unavailable, alertByLocale, pageByLocal
                       <Box component="span" sx={{ minWidth: 0, flex: 1 }}>
                         {file.filename || file.label || t('common.download_document')}
                         {file.size && (
-                          <Box component="span" sx={{ display: 'block', color: '#9A9A9A', fontSize: '0.72rem', mt: 0.25 }}>
+                          <Box component="span" sx={{ display: 'block', color: '#6B6B6B', fontSize: '0.72rem', mt: 0.25 }}>
                             {file.size}
                           </Box>
                         )}
@@ -382,7 +383,7 @@ export default function AdvisoryDetail({ unavailable, alertByLocale, pageByLocal
                 </Typography>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.8 }}>
                   {keywords.map((k) => (
-                    <Chip key={k} label={k} size="small" sx={{ bgcolor: '#F0F8FF', color: '#2E7BB4', fontWeight: 600, fontSize: '0.68rem' }} />
+                    <Chip key={k} label={k} size="small" sx={{ bgcolor: '#F0F8FF', color: '#296D9F', fontWeight: 600, fontSize: '0.68rem' }} />
                   ))}
                 </Box>
               </Box>

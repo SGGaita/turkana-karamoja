@@ -56,7 +56,7 @@ export default function HelpArticle({ unavailable, articleByLocale, topicsByLoca
         )}
         <Box sx={helpRichTextSx} dangerouslySetInnerHTML={{ __html: article.content }} />
         {article.updatedAt && (
-          <Typography sx={{ fontSize: '0.78rem', color: '#9A9A9A', mt: 3 }}>{t('help.updated', { date: formatDay(article.updatedAt) })}</Typography>
+          <Typography sx={{ fontSize: '0.78rem', color: '#6B6B6B', mt: 3 }}>{t('help.updated', { date: formatDay(article.updatedAt) })}</Typography>
         )}
       </Box>
 
@@ -64,12 +64,12 @@ export default function HelpArticle({ unavailable, articleByLocale, topicsByLoca
         <Box component="nav" aria-label={topicName || t('help.guides')} sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, mt: 4, flexWrap: 'wrap' }}>
           {article.prev ? (
             <Button component={Link} href={`/help/${article.prev.slug}`} startIcon={<ArrowBackIcon />} sx={{ textTransform: 'none', color: '#3D2B1F', textAlign: 'left' }}>
-              <span><small style={{ display: 'block', color: '#9A9A9A' }}>{t('help.previous')}</small>{article.prev.title}</span>
+              <span><small style={{ display: 'block', color: '#6B6B6B' }}>{t('help.previous')}</small>{article.prev.title}</span>
             </Button>
           ) : <span />}
           {article.next && (
             <Button component={Link} href={`/help/${article.next.slug}`} endIcon={<ArrowForwardIcon />} sx={{ textTransform: 'none', color: '#3D2B1F', textAlign: 'right', ml: 'auto' }}>
-              <span><small style={{ display: 'block', color: '#9A9A9A' }}>{t('help.next')}</small>{article.next.title}</span>
+              <span><small style={{ display: 'block', color: '#6B6B6B' }}>{t('help.next')}</small>{article.next.title}</span>
             </Button>
           )}
         </Box>

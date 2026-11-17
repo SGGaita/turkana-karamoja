@@ -36,7 +36,7 @@ export default function PortalHelp({ open, onClose }) {
             <Typography sx={{ fontSize: '0.85rem' }}>{t('help.loading')}</Typography>
           </Box>
         )}
-        {failed && <Typography sx={{ fontSize: '0.85rem', color: '#9A9A9A', mb: 2 }}>{t('help.unavailable')}</Typography>}
+        {failed && <Typography sx={{ fontSize: '0.85rem', color: '#6B6B6B', mb: 2 }}>{t('help.unavailable')}</Typography>}
 
         <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0 }}>
           {(articles || []).map((a) => (
@@ -48,7 +48,7 @@ export default function PortalHelp({ open, onClose }) {
                 rel="noopener"
                 sx={{ display: 'flex', gap: 1.25, py: 1.25, textDecoration: 'none', '&:hover .t': { color: '#C1440E' } }}
               >
-                <ArticleOutlinedIcon sx={{ color: '#2E7BB4', fontSize: 20, mt: 0.25 }} />
+                <ArticleOutlinedIcon sx={{ color: '#296D9F', fontSize: 20, mt: 0.25 }} />
                 <Box>
                   <Typography className="t" sx={{ fontWeight: 700, fontSize: '0.9rem', color: '#3D2B1F' }}>{a.title}</Typography>
                   {a.excerpt && <Typography sx={{ fontSize: '0.8rem', color: '#6B6B6B' }}>{a.excerpt}</Typography>}
@@ -59,7 +59,7 @@ export default function PortalHelp({ open, onClose }) {
         </Box>
 
         <Typography sx={{ mt: 2, fontSize: '0.85rem' }}>
-          <a href="/help/partner-guide" target="_blank" rel="noopener" style={{ color: '#2E7BB4', fontWeight: 700 }}>{t('help.partner_guide')} →</a>
+          <a href="/help/partner-guide" target="_blank" rel="noopener" style={{ color: '#296D9F', fontWeight: 700 }}>{t('help.partner_guide')} →</a>
         </Typography>
       </Box>
     </Drawer>

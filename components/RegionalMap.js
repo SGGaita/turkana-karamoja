@@ -5,9 +5,10 @@ import 'leaflet/dist/leaflet.css';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { HUB_MAP_LOCATIONS } from '../lib/hub-locations';
-import { getCartoTileUrl } from '../lib/map-tiles';
+import { getCartoTileUrl, MAP_SX } from '../lib/map-tiles';
 import { useT } from '../contexts/LanguageContext';
 import LinkBehavior from './LinkBehavior';
+import { blend, ink } from '../lib/contrast';
 
 const ALERT_COLORS = {
   severe:   '#D63030',
@@ -37,10 +38,11 @@ const ALERT_RADII = { severe: 55000, moderate: 45000, watch: 35000 };
 
 function makeCommunityIcon() {
   return L.divIcon({
-    html: '<div style="width:12px;height:12px;background:#2E8B57;border:2px solid white;border-radius:50%;box-shadow:0 1px 6px rgba(0,0,0,0.25);opacity:0.85;"></div>',
+    // A 12 px dot inside a 24 px area, so it is big enough to tap (WCAG 2.2 target size).
+    html: '<div style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;"><div style="width:12px;height:12px;background:#2E8B57;border:2px solid white;border-radius:50%;box-shadow:0 1px 6px rgba(0,0,0,0.25);opacity:0.85;"></div></div>',
     className: '',
-    iconSize: [12, 12],
-    iconAnchor: [6, 6],
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
     popupAnchor: [0, -10],
   });
 }
@@ -149,17 +151,17 @@ export default function RegionalMap({ liveAdvisories = [], apiStale = false }) {
             <Typography sx={{ fontWeight: 700, color: '#3D2B1F', fontSize: '0.85rem', lineHeight: 1.25, pr: 1 }}>
               {selected.data.name}
             </Typography>
-            <Box onClick={() => setSelected(null)} sx={{ cursor: 'pointer', color: '#9A9A9A', fontSize: '1.1rem', lineHeight: 1, '&:hover': { color: '#3D2B1F' } }}>×</Box>
+            <Box onClick={() => setSelected(null)} sx={{ cursor: 'pointer', color: '#6B6B6B', fontSize: '1.1rem', lineHeight: 1, '&:hover': { color: '#3D2B1F' } }}>×</Box>
           </Box>
 
           {selected.type === 'advisory' ? (
             <>
-              <Typography sx={{ fontSize: '0.7rem', color: '#9A9A9A', mb: 1 }}>
+              <Typography sx={{ fontSize: '0.7rem', color: '#6B6B6B', mb: 1 }}>
                 {selected.data.region}
               </Typography>
               <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap', mb: 1 }}>
                 <Box sx={{ px: 1, py: 0.25, bgcolor: `${selected.data.color || '#C1440E'}18`, borderRadius: 1 }}>
-                  <Typography sx={{ fontSize: '0.67rem', fontWeight: 700, color: selected.data.color || '#C1440E' }}>
+                  <Typography sx={{ fontSize: '0.67rem', fontWeight: 700, color: ink(selected.data.color || '#C1440E', blend(selected.data.color || '#C1440E', 0x18 / 255)) }}>
                     {ALERT_LABELS[selected.data.alertLevel] || 'Advisory'}
                   </Typography>
                 </Box>
@@ -173,10 +175,10 @@ export default function RegionalMap({ liveAdvisories = [], apiStale = false }) {
                 <Typography sx={{ fontSize: '0.72rem', color: '#5A5A5A', lineHeight: 1.5, mb: 1 }}>{selected.data.summary}</Typography>
               )}
               {selected.data.valid && (
-                <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A', mb: 1 }}>Valid until: {selected.data.valid}</Typography>
+                <Typography sx={{ fontSize: '0.68rem', color: '#6B6B6B', mb: 1 }}>Valid until: {selected.data.valid}</Typography>
               )}
               {selected.data.source && (
-                <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A', mb: 1 }}>Source: {selected.data.source}</Typography>
+                <Typography sx={{ fontSize: '0.68rem', color: '#6B6B6B', mb: 1 }}>Source: {selected.data.source}</Typography>
               )}
               <Typography
                 component={LinkBehavior}
@@ -188,14 +190,14 @@ export default function RegionalMap({ liveAdvisories = [], apiStale = false }) {
             </>
           ) : selected.type === 'community' ? (
             <>
-              <Typography sx={{ fontSize: '0.7rem', color: '#9A9A9A', mb: 1 }}>
+              <Typography sx={{ fontSize: '0.7rem', color: '#6B6B6B', mb: 1 }}>
                 {selected.data.region}
               </Typography>
               <Typography sx={{ fontSize: '0.72rem', color: '#5A5A5A' }}>Reference community on the regional map.</Typography>
             </>
           ) : (
             <>
-              <Typography sx={{ fontSize: '0.7rem', color: '#9A9A9A', mb: 1.25 }}>Meteorological Station</Typography>
+              <Typography sx={{ fontSize: '0.7rem', color: '#6B6B6B', mb: 1.25 }}>Meteorological Station</Typography>
               {[
                 { label: 'Temperature', value: `${selected.data.temp}°C` },
                 { label: 'Humidity',    value: `${selected.data.humidity}%` },
@@ -203,7 +205,7 @@ export default function RegionalMap({ liveAdvisories = [], apiStale = false }) {
                 { label: 'Wind',        value: selected.data.wind },
               ].map(({ label, value }) => (
                 <Box key={label} sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.6 }}>
-                  <Typography sx={{ fontSize: '0.7rem', color: '#9A9A9A' }}>{label}</Typography>
+                  <Typography sx={{ fontSize: '0.7rem', color: '#6B6B6B' }}>{label}</Typography>
                   <Typography sx={{ fontSize: '0.7rem', fontWeight: 600, color: '#3D2B1F' }}>{value}</Typography>
                 </Box>
               ))}
@@ -212,7 +214,7 @@ export default function RegionalMap({ liveAdvisories = [], apiStale = false }) {
         </Box>
       )}
 
-      <Box sx={{ height: { xs: 380, md: 560 } }}>
+      <Box sx={{ height: { xs: 380, md: 560 }, ...MAP_SX }}>
         <MapContainer
           center={[3.0, 34.8]}
           zoom={7}
@@ -248,6 +250,8 @@ export default function RegionalMap({ liveAdvisories = [], apiStale = false }) {
               key={`live-${adv.id}`}
               position={[adv.lat, adv.lng]}
               icon={makeAdvisoryIcon(adv.color || ALERT_COLORS[adv.alertLevel])}
+              title={adv.name}
+              alt={adv.name}
               zIndexOffset={1000}
               eventHandlers={{ click: () => setSelected({ type: 'advisory', data: adv }) }}
             >
@@ -264,6 +268,8 @@ export default function RegionalMap({ liveAdvisories = [], apiStale = false }) {
               key={loc.name}
               position={[loc.lat, loc.lng]}
               icon={makeCommunityIcon()}
+              title={loc.name}
+              alt={loc.name}
               zIndexOffset={100}
               eventHandlers={{ click: () => setSelected({ type: 'community', data: loc }) }}
             >

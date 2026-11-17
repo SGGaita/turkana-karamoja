@@ -84,7 +84,7 @@ export default function LanguageSelector({ variant = 'default' }) {
         }}
       >
         <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid #E8E0D5' }}>
-          <Typography sx={{ fontSize: '0.7rem', color: '#9A9A9A', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>
+          <Typography sx={{ fontSize: '0.7rem', color: '#6B6B6B', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>
             {t('language.select')}
           </Typography>
         </Box>
@@ -115,7 +115,7 @@ export default function LanguageSelector({ variant = 'default' }) {
                     {lang.nativeName}
                   </Typography>
                   {lang.name && lang.name !== lang.nativeName && (
-                    <Typography sx={{ fontSize: '0.7rem', color: '#9A9A9A' }}>
+                    <Typography sx={{ fontSize: '0.7rem', color: '#6B6B6B' }}>
                       {lang.name}
                     </Typography>
                   )}

@@ -17,7 +17,7 @@ const RegionalMap = dynamic(() => import('./RegionalMap'), {
         border: '1px solid #E8E0D5',
       }}
     >
-      <Typography sx={{ color: '#9A9A9A', fontSize: '0.85rem' }}>Loading map…</Typography>
+      <Typography sx={{ color: '#6B6B6B', fontSize: '0.85rem' }}>Loading map…</Typography>
     </Box>
   ),
 });
@@ -93,7 +93,7 @@ export default function MapSection({
         {showFooter && (
           <Box sx={{ mt: 2.5, display: 'flex', alignItems: 'center', justifyContent: compact ? 'flex-start' : 'center', gap: 1.5 }}>
             <Box sx={{ width: 6, height: 6, bgcolor: '#2E8B57', borderRadius: '50%' }} />
-            <Typography sx={{ fontSize: '0.72rem', color: '#9A9A9A' }}>
+            <Typography sx={{ fontSize: '0.72rem', color: '#6B6B6B' }}>
               Data sourced from Kenya Meteorological Dept · Uganda Met Authority · NDMA
             </Typography>
           </Box>

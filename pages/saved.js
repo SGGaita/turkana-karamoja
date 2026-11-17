@@ -49,7 +49,7 @@ export default function Saved() {
                 <Typography sx={{ fontWeight: 700, color: '#3D2B1F' }}>
                   {f.reportPath ? <Link href={f.reportPath} style={{ color: 'inherit' }}>{f.title || f.label}</Link> : (f.title || f.label)}
                 </Typography>
-                <Typography sx={{ fontSize: '0.75rem', color: '#9A9A9A' }}>
+                <Typography sx={{ fontSize: '0.75rem', color: '#6B6B6B' }}>
                   {[f.label, size(f.size), t('offline.saved_on', { date: formatSavedAt(f.savedAt) })].filter(Boolean).join(' · ')}
                 </Typography>
               </Box>

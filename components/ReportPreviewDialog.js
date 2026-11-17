@@ -49,7 +49,7 @@ export default function ReportPreviewDialog({ report, file, open, onClose, onDow
           <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontWeight: 700, fontSize: '1rem', color: '#3D2B1F', lineHeight: 1.3 }}>
             {report.title}
           </Typography>
-          <Typography sx={{ fontSize: '0.75rem', color: '#9A9A9A', mt: 0.5 }}>
+          <Typography sx={{ fontSize: '0.75rem', color: '#6B6B6B', mt: 0.5 }}>
             {current?.label || 'Document'}{current?.size ? ` · ${current.size}` : ''}
           </Typography>
           {files.length > 1 && (
@@ -112,7 +112,7 @@ export default function ReportPreviewDialog({ report, file, open, onClose, onDow
                 ? t('reports.preview_failed')
                 : t('reports.preview_unsupported')}
             </Typography>
-            <Typography sx={{ color: '#9A9A9A', fontSize: '0.8rem' }}>
+            <Typography sx={{ color: '#6B6B6B', fontSize: '0.8rem' }}>
               {t('reports.preview_hint')}
             </Typography>
           </Box>
@@ -129,7 +129,7 @@ export default function ReportPreviewDialog({ report, file, open, onClose, onDow
               target="_blank"
               rel="noopener noreferrer"
               startIcon={<OpenInNewIcon />}
-              sx={{ color: '#2E7BB4' }}
+              sx={{ color: '#296D9F' }}
             >
               {t('common.open_new_tab')}
             </Button>

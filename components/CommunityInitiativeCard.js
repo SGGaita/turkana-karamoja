@@ -4,6 +4,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ShareLinks from './ShareLinks';
 import { useT } from '../contexts/LanguageContext';
 import Picture from './Picture';
+import { badge } from '../lib/contrast';
 
 export default function CommunityInitiativeCard({ item, compact = false }) {
   const t = useT();
@@ -30,8 +31,8 @@ export default function CommunityInitiativeCard({ item, compact = false }) {
       )}
       <CardContent sx={{ flex: 1, p: compact ? 2 : 2.5, display: 'flex', flexDirection: 'column' }}>
         <Box sx={{ display: 'flex', gap: 1, mb: 1, flexWrap: 'wrap', alignItems: 'center' }}>
-          <Chip label={item.tag} size="small" sx={{ bgcolor: item.tagColor, color: 'white', fontSize: '0.65rem', height: 20 }} />
-          <Typography sx={{ fontSize: '0.68rem', color: '#9A9A9A', fontFamily: '"Montserrat", sans-serif', ml: 'auto' }}>
+          <Chip label={item.tag} size="small" sx={{ ...badge(item.tagColor), fontSize: '0.65rem', height: 20 }} />
+          <Typography sx={{ fontSize: '0.68rem', color: '#6B6B6B', fontFamily: '"Montserrat", sans-serif', ml: 'auto' }}>
             {item.date}
           </Typography>
         </Box>
@@ -73,6 +74,7 @@ export default function CommunityInitiativeCard({ item, compact = false }) {
             component={Link}
             href={href}
             size="small"
+            aria-label={`${t('common.read_more')}: ${item.title}`}
             endIcon={<ArrowForwardIcon sx={{ fontSize: 14 }} />}
             sx={{ alignSelf: 'flex-start', color: '#C1440E', fontWeight: 600, p: 0, textTransform: 'none' }}
           >
