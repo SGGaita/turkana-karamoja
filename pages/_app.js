@@ -17,6 +17,7 @@ import { InstallProvider } from '../contexts/InstallContext';
 import AnalyticsConsent from '../components/AnalyticsConsent';
 import { useEffect } from 'react';
 import { startMonitoring } from '../lib/monitoring';
+import '../styles/maps.css';
 
 // NOTE: no getInitialProps here on purpose. A getInitialProps on _app runs on EVERY
 // client-side navigation and blocks the route change until it resolves — with a slow CMS

@@ -6,7 +6,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { WATER_POINT_STATUS_COLORS } from '../lib/community-services';
 import { useVocabLabel } from '../contexts/LanguageContext';
-import { getCartoTileUrl, MAP_SX } from '../lib/map-tiles';
+import { getCartoTileUrl } from '../lib/map-tiles';
 
 function makeMarkerIcon(color) {
   return L.divIcon({
@@ -92,7 +92,7 @@ export default function CommunityServiceMap({ markers = [], apiStale = false, em
         </Box>
       )}
 
-      <Box sx={{ height: { xs: 380, md: 520 }, ...MAP_SX }}>
+      <Box sx={{ height: { xs: 380, md: 520 } }}>
         <MapContainer center={[3.0, 34.8]} zoom={7} style={{ height: '100%', width: '100%' }} zoomControl={false} scrollWheelZoom={false}>
           <ZoomControl position="topright" />
           <TileLayer
