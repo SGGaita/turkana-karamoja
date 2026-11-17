@@ -27,7 +27,8 @@ test.describe('CMS, signed out', () => {
   });
 
   test('no WordPress files that give away versions', async ({ request }) => {
-    for (const f of ['/readme.html', '/license.txt', '/wp-content/debug.log']) {
+    // WordPress's own files, and the CMS repository's (wp-content/.htaccess blocks these, karamoja-wp#109).
+    for (const f of ['/readme.html', '/license.txt', '/wp-content/debug.log', '/wp-content/.git/HEAD', '/wp-content/ops/backup.sh', '/wp-content/docs/hosting.md', '/wp-content/composer.json']) {
       // After cut-over WordPress sends unknown front-end addresses on to the website (a redirect): that is fine.
       // Only the file itself coming back is a problem.
       const res = await request.get(`${env.cms}${f}`, { maxRedirects: 0 });

@@ -1,0 +1,54 @@
+# Broken links (WP-38): every Monday, every link on every page of SITE_URL (the pages in /sitemap.xml on production,
+# otherwise the main pages and their Kiswahili versions). Opens or updates an issue "Broken links" with the list, and
+# closes it when all links work again. Run it by hand (Actions → Broken links → Run workflow) after big content changes.
+#
+# Needs the repository variable SITE_URL (see uptime.yml). Without it the job does nothing.
+name: Broken links
+
+on:
+  schedule:
+    - cron: '17 4 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  links:
+    if: vars.SITE_URL != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - name: Pages to check
+        run: node scripts/ops/link-targets.mjs "${{ vars.SITE_URL }}" > pages.txt && wc -l < pages.txt
+      - name: Check links
+        id: lychee
+        uses: lycheeverse/lychee-action@v2
+        with:
+          fail: false
+          output: links.md
+          format: markdown
+          # Pictures and scripts under /_next/ are not links (and would make the image optimiser render every size);
+          # map tiles and phone / email links aren't checked. 403 / 429 / 999: sites that refuse robots.
+          args: >-
+            --no-progress --max-concurrency 4 --timeout 20 --max-retries 2
+            --accept '200..=299,403,429,999'
+            --exclude '^mailto:' --exclude '^tel:' --exclude '/_next/'
+            --exclude 'basemaps\.cartocdn\.com|tile\.openstreetmap\.org'
+            --files-from pages.txt
+      - name: Report
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat links.md >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ steps.lychee.outputs.exit_code }}" != 0 ]; then
+            { echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"; echo; cat links.md; } > body.md
+            bash scripts/ops/report-issue.sh fail broken-links "Broken links" body.md
+          else
+            bash scripts/ops/report-issue.sh ok broken-links "All links work again ($(date -u '+%Y-%m-%d'))."
+          fi

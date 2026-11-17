@@ -42,7 +42,7 @@ What it covers (deployment guide §9):
   and map dots without a name, form fields without a label, controls smaller than 24 px. Map dots are left out of the
   tap-size rule only (neighbouring places can overlap at the starting zoom).
 - **CMS, signed out**: users list, page schema and staff help refused; `?author=` 404; XML-RPC off; no `readme.html`,
-  `license.txt` or `debug.log`; *noindex* header; public content answers without contact details; active alerts are
+  `license.txt`, `debug.log` or repository files (`wp-content/.git`, `ops`, `docs`, `composer.json`); *noindex* header; public content answers without contact details; active alerts are
   current; old `tk/v1` addresses marked for removal (Deprecation / Sunset / successor) or switched off; push
   subscriptions need the shared secret.
 
