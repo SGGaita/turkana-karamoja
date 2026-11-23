@@ -45,7 +45,7 @@
     "@playwright/test": "^1.65.1",
     "chrome-launcher": "^1.2.3",
     "eslint": "^9.39.5",
-    "eslint-config-next": "^15.5.29",
+    "eslint-config-next": "^16.4.6",
     "lighthouse": "^12.8.2",
     "vitest": "^5.1.0"
   },
