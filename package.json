@@ -46,7 +46,7 @@
     "chrome-launcher": "^1.2.3",
     "eslint": "^9.39.5",
     "eslint-config-next": "^15.5.29",
-    "lighthouse": "^12.8.2",
+    "lighthouse": "^13.6.0",
     "vitest": "^5.1.0"
   },
   "engines": {
